@@ -1,5 +1,7 @@
 package com.cachecache.game.ui.components
 
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.Point
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
@@ -13,6 +15,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -30,6 +33,7 @@ import org.osmdroid.events.ZoomEvent
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint as OsmGeoPoint
 import org.osmdroid.views.MapView
+import kotlin.math.sin
 
 @Composable
 fun OsmMapView(
@@ -46,22 +50,33 @@ fun OsmMapView(
     var mapViewRef by remember { mutableStateOf<MapView?>(null) }
     var redrawTrigger by remember { mutableLongStateOf(0L) }
 
-    // Radar Wave Animation
-    val infiniteTransition = rememberInfiniteTransition(label = "radarTransition")
-    val radarRadiusProgress by infiniteTransition.animateFloat(
-        initialValue = 0.05f,
-        targetValue = 1.0f,
+    // 1. Pacman Chomp Animation (0° to 60°)
+    val infiniteTransition = rememberInfiniteTransition(label = "mapAnimations")
+    val mouthAngle by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 60f,
         animationSpec = infiniteRepeatable(
-            animation = tween(2200, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
+            animation = tween(280, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
         ),
-        label = "radarRadius"
+        label = "mouthAngle"
     )
 
-    // Pac-dots Phase Animation
+    // 2. Multi-Ring Radar Wave Animation
+    val waveProgress by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2400, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "waveProgress"
+    )
+
+    // 3. Pac-dots Conveyor Belt Phase Animation
     val pacDotsPhase by infiniteTransition.animateFloat(
         initialValue = 0f,
-        targetValue = 24f,
+        targetValue = 32f,
         animationSpec = infiniteRepeatable(
             animation = tween(850, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
@@ -69,18 +84,35 @@ fun OsmMapView(
         label = "pacDotsPhase"
     )
 
-    // Ghost Tremble Animation for Scared Ghosts
+    // 4. Ghost Hovering & Tremble Animation
+    val hoverPhase by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 6.283185f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1800, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "hoverPhase"
+    )
+
     val ghostTremble by infiniteTransition.animateFloat(
         initialValue = -3.5f,
         targetValue = 3.5f,
         animationSpec = infiniteRepeatable(
-            animation = tween(65, easing = LinearEasing),
+            animation = tween(70, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "ghostTremble"
     )
 
-    // CRITICAL: The map automatically pans and moves with the seeker locked in the center!
+    // Bearing smooth interpolation
+    val animatedBearing by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = seekerHeading,
+        animationSpec = androidx.compose.animation.core.spring(stiffness = androidx.compose.animation.core.Spring.StiffnessLow),
+        label = "bearingInterpolated"
+    )
+
+    // Camera continuously follows seeker centered
     LaunchedEffect(seekerLocation) {
         mapViewRef?.let { map ->
             map.controller.setCenter(OsmGeoPoint(seekerLocation.latitude, seekerLocation.longitude))
@@ -89,7 +121,7 @@ fun OsmMapView(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // 1. OSMDroid MapView (Natural crisp OpenStreetMap tiles, exactly as in the mockups)
+        // OSMDroid MapView with Dark Theme Styling
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { ctx ->
@@ -100,6 +132,17 @@ fun OsmMapView(
                     isTilesScaledToDpi = true
                     controller.setZoom(18.2)
                     controller.setCenter(OsmGeoPoint(seekerLocation.latitude, seekerLocation.longitude))
+
+                    // Dark Theme Filter (Slate blue buildings, dark navy streets, muted parks)
+                    val darkMatrix = ColorMatrix(
+                        floatArrayOf(
+                            0.28f, 0f, 0f, 0f, 12f,
+                            0f, 0.32f, 0f, 0f, 22f,
+                            0f, 0f, 0.44f, 0f, 40f,
+                            0f, 0f, 0f, 1f, 0f
+                        )
+                    )
+                    overlayManager.tilesOverlay.setColorFilter(ColorMatrixColorFilter(darkMatrix))
 
                     addMapListener(object : MapListener {
                         override fun onScroll(event: ScrollEvent?): Boolean {
@@ -121,7 +164,7 @@ fun OsmMapView(
             }
         )
 
-        // 2. High-performance Compose Vector Overlay
+        // 60fps Vector Overlay
         Canvas(
             modifier = Modifier
                 .fillMaxSize()
@@ -130,7 +173,7 @@ fun OsmMapView(
                         val map = mapViewRef ?: return@detectTapGestures
                         val proj = map.projection ?: return@detectTapGestures
 
-                        // Hit test on ghost markers
+                        // Ghost touch hit test
                         val tempPoint = Point()
                         var tappedPlayer: HiddenPlayer? = null
                         for (player in hiddenPlayers) {
@@ -139,7 +182,7 @@ fun OsmMapView(
                             proj.toPixels(osmPoint, tempPoint)
                             val dx = tapOffset.x - tempPoint.x
                             val dy = tapOffset.y - tempPoint.y
-                            if (dx * dx + dy * dy < 2000f) { // ~45dp touch target
+                            if (dx * dx + dy * dy < 2000f) {
                                 tappedPlayer = player
                                 break
                             }
@@ -154,13 +197,13 @@ fun OsmMapView(
                     }
                 }
         ) {
-            val trigger = redrawTrigger // Ensure redraw on scroll/zoom
+            val trigger = redrawTrigger
             val map = mapViewRef ?: return@Canvas
             val proj = map.projection ?: return@Canvas
 
             val pt = Point()
 
-            // 1. Draw Suspect Zone Polygon (Translucent blue polygon with dashed border)
+            // 1. Suspect Zone Polygon with Animated Dashed Outline
             suspectZone?.let { zone ->
                 if (zone.polygon.size >= 3) {
                     val polyPath = Path()
@@ -171,14 +214,12 @@ fun OsmMapView(
                     }
                     polyPath.close()
 
-                    // Translucent blue fill
                     drawPath(
                         path = polyPath,
-                        color = ScaredBlue.copy(alpha = 0.25f),
+                        color = ScaredBlue.copy(alpha = 0.20f),
                         style = Fill
                     )
 
-                    // Dashed outline
                     drawPath(
                         path = polyPath,
                         color = ScaredBlue,
@@ -190,7 +231,7 @@ fun OsmMapView(
                 }
             }
 
-            // 2. Draw Pac-dots Path (Animated glowing yellow dots leading to suspect zone)
+            // 2. Animated Pac-Dots Route (Treadmill Conveyor Effect)
             if (pacDotsRoute.size >= 2) {
                 val screenPoints = pacDotsRoute.map { geo ->
                     val p = Point()
@@ -212,13 +253,11 @@ fun OsmMapView(
                         val dotX = p1.x + dx * fraction
                         val dotY = p1.y + fraction * dy
 
-                        // Outer soft glow
                         drawCircle(
                             color = PacmanYellow.copy(alpha = 0.4f),
                             radius = 7.dp.toPx(),
                             center = Offset(dotX, dotY)
                         )
-                        // Inner bright dot
                         drawCircle(
                             color = PacmanYellow,
                             radius = 4.5.dp.toPx(),
@@ -229,69 +268,57 @@ fun OsmMapView(
                 }
             }
 
-            // 3. Seeker center point (Projected or directly at screen center since map is centered)
+            // 3. Seeker Center Point
             proj.toPixels(OsmGeoPoint(seekerLocation.latitude, seekerLocation.longitude), pt)
             val seekerCenter = Offset(pt.x.toFloat(), pt.y.toFloat())
 
-            // Draw Radar Pulsing Rings around Seeker
-            val maxRadarRadius = 150.dp.toPx()
-            val currentRadius = maxRadarRadius * radarRadiusProgress
-            val radarAlpha = (1f - radarRadiusProgress).coerceIn(0f, 1f) * 0.45f
+            // 3-Ring Concentric Radar Wave (Radii 10dp to 70dp, Alpha 0.4f to 0f)
+            val minR = 10.dp.toPx()
+            val maxR = 70.dp.toPx()
 
-            // Radar Wave 1 (Soft fill + stroke)
-            drawCircle(
-                color = ScaredBlue.copy(alpha = radarAlpha * 0.5f),
-                radius = currentRadius,
-                center = seekerCenter
-            )
-            drawCircle(
-                color = ScaredBlue.copy(alpha = radarAlpha * 1.6f),
-                radius = currentRadius,
-                center = seekerCenter,
-                style = Stroke(width = 2.5.dp.toPx())
-            )
+            for (ring in 0 until 3) {
+                val ringProgress = (waveProgress + ring * 0.33f) % 1f
+                val ringRadius = minR + (maxR - minR) * ringProgress
+                val ringAlpha = (1f - ringProgress).coerceIn(0f, 1f) * 0.4f
 
-            // Radar Wave 2 (Concentric scan)
-            val wave2Progress = (radarRadiusProgress + 0.5f) % 1.0f
-            val radius2 = maxRadarRadius * wave2Progress
-            val alpha2 = (1f - wave2Progress).coerceIn(0f, 1f) * 0.35f
-            drawCircle(
-                color = ScaredBlue.copy(alpha = alpha2 * 0.4f),
-                radius = radius2,
-                center = seekerCenter
-            )
-            drawCircle(
-                color = ScaredBlue.copy(alpha = alpha2 * 1.4f),
-                radius = radius2,
-                center = seekerCenter,
-                style = Stroke(width = 2.dp.toPx())
-            )
+                drawCircle(
+                    color = ScaredBlue.copy(alpha = ringAlpha * 0.4f),
+                    radius = ringRadius,
+                    center = seekerCenter
+                )
+                drawCircle(
+                    color = ScaredBlue.copy(alpha = ringAlpha),
+                    radius = ringRadius,
+                    center = seekerCenter,
+                    style = Stroke(width = 2.dp.toPx())
+                )
+            }
 
-            // 4. Draw Hidden Players (Ghosts Pins)
+            // 4. Hidden Ghosts with Hovering and Wavy Skirt
+            val ghostHoverOffset = sin(hoverPhase) * 5.dp.toPx()
+
             for (player in hiddenPlayers) {
                 if (player.isFound) continue
 
                 proj.toPixels(OsmGeoPoint(player.location.latitude, player.location.longitude), pt)
                 val ghostSize = 36.dp.toPx()
-                val ghostCenter = Offset(pt.x.toFloat(), pt.y.toFloat())
+                val ghostCenter = Offset(pt.x.toFloat(), pt.y.toFloat() + ghostHoverOffset)
 
-                // Ground drop shadow
+                // Ground shadow
                 drawOval(
-                    color = Color.Black.copy(alpha = 0.3f),
-                    topLeft = Offset(ghostCenter.x - ghostSize * 0.4f, ghostCenter.y + ghostSize * 0.35f),
-                    size = Size(ghostSize * 0.8f, ghostSize * 0.22f)
+                    color = Color.Black.copy(alpha = 0.4f),
+                    topLeft = Offset(ghostCenter.x - ghostSize * 0.4f, pt.y + ghostSize * 0.32f),
+                    size = Size(ghostSize * 0.8f, ghostSize * 0.20f)
                 )
 
-                // Warning aura if scared
                 if (player.isScared) {
                     drawCircle(
-                        color = ScaredBlue.copy(alpha = 0.4f),
+                        color = ScaredBlue.copy(alpha = 0.35f),
                         radius = ghostSize * 0.95f,
                         center = ghostCenter
                     )
                 }
 
-                // Tremble displacement in scared mode
                 val ghostOffsetX = if (player.isScared) ghostTremble else 0f
                 val topLeft = Offset(ghostCenter.x - ghostSize / 2f + ghostOffsetX, ghostCenter.y - ghostSize / 2f)
 
@@ -303,21 +330,22 @@ fun OsmMapView(
                 )
             }
 
-            // 5. Draw Pacman Marker in Center with Rotation and 3D Outline
+            // 5. Pacman Seeker Marker with Chomp Cycle and Interpolated Bearing
             val pacmanSize = 42.dp.toPx()
             val pacmanTopLeft = Offset(seekerCenter.x - pacmanSize / 2f, seekerCenter.y - pacmanSize / 2f)
 
             // Ground shadow
             drawOval(
-                color = Color.Black.copy(alpha = 0.35f),
+                color = Color.Black.copy(alpha = 0.45f),
                 topLeft = Offset(seekerCenter.x - pacmanSize * 0.45f, seekerCenter.y + pacmanSize * 0.35f),
                 size = Size(pacmanSize * 0.9f, pacmanSize * 0.25f)
             )
 
-            rotate(seekerHeading, seekerCenter) {
-                drawGlossyPacman(
+            rotate(animatedBearing, seekerCenter) {
+                drawChompPacman(
                     topLeft = pacmanTopLeft,
                     size = Size(pacmanSize, pacmanSize),
+                    mouthAngle = mouthAngle,
                     color = PacmanYellow
                 )
             }
@@ -325,19 +353,23 @@ fun OsmMapView(
     }
 }
 
-private fun DrawScope.drawGlossyPacman(
+private fun DrawScope.drawChompPacman(
     topLeft: Offset,
     size: Size,
+    mouthAngle: Float,
     color: Color
 ) {
     val radius = size.minDimension / 2f
     val center = Offset(topLeft.x + size.width / 2f, topLeft.y + size.height / 2f)
 
-    // Dark outline stroke for crisp contrast against map
+    val startAngle = mouthAngle / 2f
+    val sweepAngle = 360f - mouthAngle
+
+    // Dark outline
     drawArc(
         color = DarkContrast,
-        startAngle = 28f,
-        sweepAngle = 304f,
+        startAngle = startAngle,
+        sweepAngle = sweepAngle,
         useCenter = true,
         topLeft = topLeft,
         size = size,
@@ -347,16 +379,16 @@ private fun DrawScope.drawGlossyPacman(
     // Body fill
     drawArc(
         color = color,
-        startAngle = 28f,
-        sweepAngle = 304f,
+        startAngle = startAngle,
+        sweepAngle = sweepAngle,
         useCenter = true,
         topLeft = topLeft,
         size = size
     )
 
     // Eye
-    val eyeRadius = radius * 0.14f
-    val eyeX = center.x + radius * 0.18f
+    val eyeRadius = radius * 0.13f
+    val eyeX = center.x + radius * 0.16f
     val eyeY = center.y - radius * 0.46f
     drawCircle(
         color = DarkContrast,
@@ -395,9 +427,7 @@ private fun DrawScope.drawGlossyGhost(
         close()
     }
 
-    // Crisp dark border outline
     drawPath(path = path, color = DarkContrast, style = Stroke(width = 2.5.dp.toPx()))
-    // Body fill
     drawPath(path = path, color = color)
 
     // Eyes and mouth
@@ -423,7 +453,6 @@ private fun DrawScope.drawGlossyGhost(
         drawCircle(color = DarkContrast, radius = pupilRadius, center = leftEyeCenter)
         drawCircle(color = DarkContrast, radius = pupilRadius, center = rightEyeCenter)
     } else {
-        // Scared Eyes & Zigzag Mouth
         val eyeRadius = w * 0.09f
         val leftEyeCenter = Offset(topLeft.x + w * 0.32f, topLeft.y + h * 0.35f)
         val rightEyeCenter = Offset(topLeft.x + w * 0.68f, topLeft.y + h * 0.35f)
@@ -452,7 +481,7 @@ private fun DrawScope.drawGlossyGhost(
         drawPath(
             path = mouthPath,
             color = TextPrimary,
-            style = Stroke(width = w * 0.07f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+            style = Stroke(width = w * 0.07f, cap = StrokeCap.Round)
         )
     }
 }

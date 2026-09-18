@@ -2,14 +2,17 @@ package com.cachecache.game.ui.components
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -25,10 +28,11 @@ fun PacmanComposable(
     isAnimated: Boolean = true,
     rotationAngle: Float = 0f
 ) {
-    val infiniteTransition = rememberInfiniteTransition(label = "pacmanMouth")
+    // Chomp cycle: mouth angle oscillates from 0° (closed) to 60° (wide open) every 280ms
+    val infiniteTransition = rememberInfiniteTransition(label = "pacmanChomp")
     val mouthAngle by if (isAnimated) {
         infiniteTransition.animateFloat(
-            initialValue = 10f,
+            initialValue = 0f,
             targetValue = 60f,
             animationSpec = infiniteRepeatable(
                 animation = tween(280, easing = FastOutSlowInEasing),
@@ -37,7 +41,7 @@ fun PacmanComposable(
             label = "mouthAngle"
         )
     } else {
-        rememberInfiniteTransition(label = "staticMouth").animateFloat(
+        rememberInfiniteTransition(label = "staticChomp").animateFloat(
             initialValue = 35f,
             targetValue = 35f,
             animationSpec = infiniteRepeatable(tween(1000)),
@@ -55,6 +59,76 @@ fun PacmanComposable(
     }
 }
 
+/**
+ * Researcher Marker on Map with:
+ * - 0° to 60° chomp mouth animation
+ * - Fluid bearing rotation via spring interpolation
+ * - 3 concentric expanding radar rings (radii 10dp to 70dp, alpha 0.4f to 0f)
+ */
+@Composable
+fun ResearcherMarker(
+    modifier: Modifier = Modifier,
+    targetBearing: Float = 0f,
+    size: Dp = 46.dp
+) {
+    // Bearing rotation smoothly interpolated with spring
+    val animatedBearing by animateFloatAsState(
+        targetValue = targetBearing,
+        animationSpec = spring(stiffness = Spring.StiffnessLow),
+        label = "bearingAnim"
+    )
+
+    // Multi-ring radar wave animation
+    val infiniteTransition = rememberInfiniteTransition(label = "radarRings")
+    val waveProgress by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2400, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "waveProgress"
+    )
+
+    Box(
+        modifier = modifier.size(size * 3.2f),
+        contentAlignment = Alignment.Center
+    ) {
+        // 3 concentric expanding radar circles
+        Canvas(modifier = Modifier.matchParentSize()) {
+            val center = Offset(this.size.width / 2f, this.size.height / 2f)
+            val minRadius = 10.dp.toPx()
+            val maxRadius = 70.dp.toPx()
+
+            for (ring in 0 until 3) {
+                val ringProgress = (waveProgress + ring * 0.33f) % 1f
+                val ringRadius = minRadius + (maxRadius - minRadius) * ringProgress
+                val ringAlpha = (1f - ringProgress).coerceIn(0f, 1f) * 0.4f
+
+                drawCircle(
+                    color = ScaredBlue.copy(alpha = ringAlpha * 0.4f),
+                    radius = ringRadius,
+                    center = center
+                )
+                drawCircle(
+                    color = ScaredBlue.copy(alpha = ringAlpha),
+                    radius = ringRadius,
+                    center = center,
+                    style = Stroke(width = 2.dp.toPx())
+                )
+            }
+        }
+
+        // Animated Pacman in center
+        PacmanComposable(
+            size = size,
+            color = PacmanYellow,
+            isAnimated = true,
+            rotationAngle = animatedBearing
+        )
+    }
+}
+
 fun DrawScope.drawPacman(
     color: Color = PacmanYellow,
     mouthSweep: Float = 40f
@@ -62,11 +136,11 @@ fun DrawScope.drawPacman(
     val radius = size.minDimension / 2f
     val center = Offset(size.width / 2f, size.height / 2f)
 
-    // Draw Pacman body with mouth slice cut out
+    // Mouth slice cut out from 0° to 60°
     val startAngle = mouthSweep / 2f
     val sweepAngle = 360f - mouthSweep
 
-    // Outline for crisp contrast
+    // Outer dark stroke for 3D outline
     drawArc(
         color = DarkContrast,
         startAngle = startAngle,
@@ -74,9 +148,10 @@ fun DrawScope.drawPacman(
         useCenter = true,
         topLeft = Offset(center.x - radius, center.y - radius),
         size = Size(radius * 2f, radius * 2f),
-        style = androidx.compose.ui.graphics.drawscope.Stroke(width = 3.dp.toPx())
+        style = Stroke(width = 3.dp.toPx())
     )
 
+    // Body fill
     drawArc(
         color = color,
         startAngle = startAngle,
@@ -86,7 +161,7 @@ fun DrawScope.drawPacman(
         size = Size(radius * 2f, radius * 2f)
     )
 
-    // Eye position (above mouth opening)
+    // Eye
     val eyeRadius = radius * 0.13f
     val eyeX = center.x + radius * 0.16f
     val eyeY = center.y - radius * 0.46f
@@ -100,7 +175,6 @@ fun DrawScope.drawPacman(
 
 /**
  * Festive Pacman surrounded by a radial burst of colorful confetti particles
- * as seen on Screen 5 of the mockup ("Tu as trouvé un caché !")
  */
 @Composable
 fun FestivePacmanComposable(
@@ -133,7 +207,7 @@ fun FestivePacmanComposable(
         val h = this.size.height
         val center = Offset(w / 2f, h / 2f)
 
-        // 1. Draw explosive radial confetti
+        // Radial confetti explosion
         val confettiColors = listOf(GhostRed, GhostPink, GhostOrange, GhostCyan, PacmanYellow, ScaredBlue, GhostPurple)
         val confettiCount = 26
 
@@ -146,21 +220,18 @@ fun FestivePacmanComposable(
 
             rotate(degrees = (i * 35).toFloat(), pivot = Offset(cx, cy)) {
                 if (i % 3 == 0) {
-                    // Confetti rectangle
                     drawRect(
                         color = color,
                         topLeft = Offset(cx - 3.5.dp.toPx(), cy - 7.dp.toPx()),
                         size = Size(7.dp.toPx(), 14.dp.toPx())
                     )
                 } else if (i % 3 == 1) {
-                    // Confetti dot
                     drawCircle(
                         color = color,
                         radius = 4.dp.toPx(),
                         center = Offset(cx, cy)
                     )
                 } else {
-                    // Confetti ribbon
                     drawLine(
                         color = color,
                         start = Offset(cx - 5.dp.toPx(), cy - 5.dp.toPx()),
@@ -171,7 +242,7 @@ fun FestivePacmanComposable(
             }
         }
 
-        // 2. Glowing yellow Pacman in Center
+        // Glowing yellow Pacman in Center
         val pacmanRadius = w * 0.24f
         val pacCenter = Offset(center.x, center.y + bounceOffset)
 
@@ -191,7 +262,7 @@ fun FestivePacmanComposable(
                 useCenter = true,
                 topLeft = Offset(pacCenter.x - pacmanRadius, pacCenter.y - pacmanRadius),
                 size = Size(pacmanRadius * 2f, pacmanRadius * 2f),
-                style = androidx.compose.ui.graphics.drawscope.Stroke(width = 4.dp.toPx())
+                style = Stroke(width = 4.dp.toPx())
             )
 
             // Body

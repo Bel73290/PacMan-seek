@@ -115,74 +115,75 @@ fun SplashScreen(
                 }
             }
 
-            // 3D "Cache Cache" Title with Pacman Icon on the Right (100% Vector)
+            // 3D "Cache Cache" Title with Pacman Icon at the end of the 2nd line
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(top = 2.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        // 3D Blue Extrusion Layer
-                        Column {
+                Box(contentAlignment = Alignment.Center) {
+                    // Underlayer 3D extrusion shadow
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Cache",
+                            fontSize = 46.sp,
+                            lineHeight = 44.sp,
+                            fontWeight = FontWeight.Black,
+                            fontFamily = FontFamily.SansSerif,
+                            color = Color(0xFF0C1B33),
+                            modifier = Modifier.offset(x = 3.dp, y = 4.dp)
+                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 text = "Cache",
-                                fontSize = 48.sp,
-                                lineHeight = 46.sp,
+                                fontSize = 46.sp,
+                                lineHeight = 44.sp,
                                 fontWeight = FontWeight.Black,
                                 fontFamily = FontFamily.SansSerif,
-                                color = Color(0xFF0F264A),
+                                color = Color(0xFF0C1B33),
                                 modifier = Modifier.offset(x = 3.dp, y = 4.dp)
                             )
-                            Text(
-                                text = "Cache",
-                                fontSize = 48.sp,
-                                lineHeight = 46.sp,
-                                fontWeight = FontWeight.Black,
-                                fontFamily = FontFamily.SansSerif,
-                                color = Color(0xFF0F264A),
-                                modifier = Modifier.offset(x = 3.dp, y = 4.dp)
-                            )
-                        }
-                        // Yellow Foreground Layer
-                        Column {
-                            Text(
-                                text = "Cache",
-                                fontSize = 48.sp,
-                                lineHeight = 46.sp,
-                                fontWeight = FontWeight.Black,
-                                fontFamily = FontFamily.SansSerif,
-                                color = PacmanYellow
-                            )
-                            Text(
-                                text = "Cache",
-                                fontSize = 48.sp,
-                                lineHeight = 46.sp,
-                                fontWeight = FontWeight.Black,
-                                fontFamily = FontFamily.SansSerif,
-                                color = PacmanYellow
-                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            // Placeholder offset for shadow
+                            Spacer(modifier = Modifier.size(46.dp))
                         }
                     }
 
-                    Spacer(modifier = Modifier.width(10.dp))
-
-                    // Pacman biting logo icon on the right
-                    PacmanComposable(
-                        size = 54.dp,
-                        color = PacmanYellow,
-                        isAnimated = true,
-                        rotationAngle = 180f
-                    )
+                    // Foreground Yellow Layer
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Cache",
+                            fontSize = 46.sp,
+                            lineHeight = 44.sp,
+                            fontWeight = FontWeight.Black,
+                            fontFamily = FontFamily.SansSerif,
+                            color = PacmanYellow
+                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "Cache",
+                                fontSize = 46.sp,
+                                lineHeight = 44.sp,
+                                fontWeight = FontWeight.Black,
+                                fontFamily = FontFamily.SansSerif,
+                                color = PacmanYellow
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            // Pacman head chomping to the left at the end of line 2
+                            PacmanComposable(
+                                size = 46.dp,
+                                color = PacmanYellow,
+                                isAnimated = true,
+                                rotationAngle = 180f
+                            )
+                        }
+                    }
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 Text(
                     text = "Explore la carte, trouve les cachés !",
-                    color = TextPrimary,
+                    color = Color(0xFFD1D8E0),
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.Center

@@ -353,6 +353,34 @@ fun GameScreen(
 
             Spacer(modifier = Modifier.height(4.dp))
 
+            // Capsule d'information flottante (Écran 2 & 3)
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp)),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = CardSurface)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 14.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    PacmanComposable(size = 22.dp, color = PacmanYellow, isAnimated = true)
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = "Explore les zones indiquées pour trouver les cachés !",
+                        color = TextPrimary,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
             // Fixed Bottom Navigation Bar
             BottomNavigationBar(
                 currentScreen = Screen.GAME,
