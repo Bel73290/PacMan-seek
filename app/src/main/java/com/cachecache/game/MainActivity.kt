@@ -37,6 +37,7 @@ class MainActivity : ComponentActivity() {
                             Screen.GAME -> viewModel.setScreen(Screen.SPLASH)
                             Screen.STREET_VIEW -> viewModel.closeStreetView()
                             Screen.LEADERBOARD -> viewModel.setScreen(Screen.SPLASH)
+                            Screen.SHOP -> viewModel.setScreen(Screen.SPLASH)
                             Screen.RADAR_FILTERS -> viewModel.setScreen(Screen.GAME)
                             Screen.GUIDE -> viewModel.setScreen(Screen.SPLASH)
                             Screen.PROFILE -> viewModel.setScreen(Screen.SPLASH)
@@ -114,6 +115,15 @@ class MainActivity : ComponentActivity() {
                                 onNavigate = { screen -> viewModel.setScreen(screen) },
                                 onOpenSettings = { viewModel.openSettingsDialog(true) },
                                 onSelectBadge = { badge -> viewModel.selectBadge(badge) }
+                            )
+                        }
+                        Screen.SHOP -> {
+                            ShopScreen(
+                                state = state,
+                                onBack = { viewModel.setScreen(Screen.SPLASH) },
+                                onNavigate = { screen -> viewModel.setScreen(screen) },
+                                onEquipAvatar = { avatarId -> viewModel.equipAvatar(avatarId) },
+                                onUnlockAvatar = { avatar -> viewModel.unlockAndEquipAvatar(avatar) }
                             )
                         }
                     }

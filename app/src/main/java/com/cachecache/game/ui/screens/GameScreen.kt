@@ -319,7 +319,7 @@ fun GameScreen(
                     }
                 } ?: Spacer(modifier = Modifier.weight(1f))
 
-                // Right: Mini Street View Inset Card (Écran 3) OR Recenter GPS
+                // Right: Mini Street View Inset Card (Écran 3)
                 if (isNearGhost && state.isStreetViewMiniVisible) {
                     // Floating Mini Street View Card
                     StreetViewComposable(
@@ -330,59 +330,10 @@ fun GameScreen(
                         timerText = "02:18",
                         onExpand = onOpenStreetView
                     )
-                } else {
-                    // Recenter GPS Button
-                    IconButton(
-                        onClick = onRecenter,
-                        modifier = Modifier
-                            .size(50.dp)
-                            .shadow(8.dp, CircleShape)
-                            .clip(CircleShape)
-                            .background(NavyIntermediate)
-                            .border(1.dp, BorderSubtle, CircleShape)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.MyLocation,
-                            contentDescription = "Recentrer",
-                            tint = PacmanYellow,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
-
-            // Capsule d'information flottante (Écran 2 & 3)
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp)
-                    .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp)),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = CardSurface)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 14.dp, vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    PacmanComposable(
-                        size = 28.dp,
-                        isAnimated = true
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = "Explore les zones indiquées pour trouver les cachés !",
-                        color = TextPrimary,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             // Fixed Bottom Navigation Bar
             BottomNavigationBar(

@@ -143,4 +143,90 @@ object MockData {
         HistoryItem("hist_2", "10/04", "2e place", 80, "ranking"),
         HistoryItem("hist_3", "08/04", "Victoire", 200, "trophy")
     )
+
+    val AvatarItemsCatalog = listOf(
+        // Category 1: Pac-Mans
+        AvatarItem(
+            id = "pacman_classic",
+            name = "Pac-Man Classique",
+            category = AvatarCategory.PACMANS,
+            description = "Le héros légendaire avec sa célèbre mastication d'arcade.",
+            price = 0,
+            isAnimatedPacman = true
+        ),
+        AvatarItem(
+            id = "pacman_hero",
+            name = "Pac-Man Vitesse",
+            category = AvatarCategory.PACMANS,
+            description = "En pleine course avec ses traînées supersoniques néon.",
+            price = 300,
+            drawableResId = com.cachecache.game.R.drawable.pacman_hero
+        ),
+        AvatarItem(
+            id = "pacman_giant",
+            name = "Pac-Man Géant",
+            category = AvatarCategory.PACMANS,
+            description = "Tête géante en relief 3D, le style maître du jeu.",
+            price = 600,
+            drawableResId = com.cachecache.game.R.drawable.pacman_giant
+        ),
+        AvatarItem(
+            id = "pacman_starburst",
+            name = "Pac-Man Starburst",
+            category = AvatarCategory.PACMANS,
+            description = "Étincelles dorées et lueurs stellaires de champion.",
+            price = 1000,
+            drawableResId = com.cachecache.game.R.drawable.pacman_starburst
+        ),
+
+        // Category 2: Fantômes
+        AvatarItem(
+            id = "ghost_blinky",
+            name = "Blinky (Rouge)",
+            category = AvatarCategory.GHOSTS,
+            description = "L'ombre rouge tenace qui ne lâche jamais sa proie.",
+            price = 0,
+            ghostColor = GhostRed
+        ),
+        AvatarItem(
+            id = "ghost_pinky",
+            name = "Pinky (Rose)",
+            category = AvatarCategory.GHOSTS,
+            description = "La complice rapide experte en embuscades surprises.",
+            price = 0,
+            ghostColor = GhostPink
+        ),
+        AvatarItem(
+            id = "ghost_inky",
+            name = "Inky (Cyan)",
+            category = AvatarCategory.GHOSTS,
+            description = "Le fantôme bleu turquoise aux trajectoires imprévisibles.",
+            price = 400,
+            ghostColor = GhostCyan
+        ),
+        AvatarItem(
+            id = "ghost_clyde",
+            name = "Clyde (Orange)",
+            category = AvatarCategory.GHOSTS,
+            description = "L'électron libre qui adore errer hors des sentiers battus.",
+            price = 400,
+            ghostColor = GhostOrange
+        ),
+        AvatarItem(
+            id = "ghost_purple",
+            name = "Sue (Violette)",
+            category = AvatarCategory.GHOSTS,
+            description = "La maîtresse du mystère aux reflets améthyste.",
+            price = 600,
+            ghostColor = GhostPurple
+        ),
+        AvatarItem(
+            id = "ghost_scared",
+            name = "Fantôme Apeuré (Bleu)",
+            category = AvatarCategory.GHOSTS,
+            description = "Frissonnant de panique avec son zigzag emblématique.",
+            price = 800,
+            ghostColor = ScaredBlue
+        )
+    )
 }

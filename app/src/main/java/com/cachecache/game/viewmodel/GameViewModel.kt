@@ -283,6 +283,26 @@ class GameViewModel : ViewModel() {
         recalculateDistances(startLoc)
     }
 
+    fun equipAvatar(avatarId: String) {
+        _uiState.update { it.copy(equippedAvatarId = avatarId) }
+    }
+
+    fun unlockAndEquipAvatar(avatar: AvatarItem) {
+        _uiState.update { state ->
+            if (state.unlockedAvatarIds.contains(avatar.id)) {
+                state.copy(equippedAvatarId = avatar.id)
+            } else if (state.userScore >= avatar.price) {
+                state.copy(
+                    userScore = state.userScore - avatar.price,
+                    unlockedAvatarIds = state.unlockedAvatarIds + avatar.id,
+                    equippedAvatarId = avatar.id
+                )
+            } else {
+                state
+            }
+        }
+    }
+
     companion object {
         // Haversine formula returning distance in meters
         fun calculateDistanceMeters(p1: GeoPoint, p2: GeoPoint): Double {

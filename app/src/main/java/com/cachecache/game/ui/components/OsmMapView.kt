@@ -36,9 +36,21 @@ import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.util.GeoPoint as OsmGeoPoint
 import org.osmdroid.views.MapView
 import kotlin.math.sin
+
+val MinimalistDarkNoLabels = XYTileSource(
+    "CartoDarkNoLabels",
+    0, 20, 256, ".png",
+    arrayOf(
+        "https://a.basemaps.cartocdn.com/rastertiles/dark_nolabels/",
+        "https://b.basemaps.cartocdn.com/rastertiles/dark_nolabels/",
+        "https://c.basemaps.cartocdn.com/rastertiles/dark_nolabels/",
+        "https://d.basemaps.cartocdn.com/rastertiles/dark_nolabels/"
+    )
+)
 
 @Composable
 fun OsmMapView(
@@ -128,13 +140,13 @@ fun OsmMapView(
 
     val infiniteTransition = rememberInfiniteTransition(label = "mapAnimations")
 
-    // 1. Pacman Chomp Frame Index (cycles through 16 frames in ~400ms)
+    // 1. Pacman Chomp Frame Index (slow, authentic arcade cycle ~720ms)
     val pacmanFrameIndex by infiniteTransition.animateValue(
         initialValue = 0,
         targetValue = 15,
         typeConverter = Int.VectorConverter,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 400, easing = LinearEasing),
+            animation = tween(durationMillis = 720, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
         label = "pacmanFrameIndex"
@@ -185,13 +197,6 @@ fun OsmMapView(
         label = "pacDotsPhase"
     )
 
-    // Bearing smooth interpolation
-    val animatedBearing by androidx.compose.animation.core.animateFloatAsState(
-        targetValue = seekerHeading,
-        animationSpec = androidx.compose.animation.core.spring(stiffness = androidx.compose.animation.core.Spring.StiffnessLow),
-        label = "bearingInterpolated"
-    )
-
     // Camera continuously follows seeker centered
     LaunchedEffect(seekerLocation) {
         mapViewRef?.let { map ->
@@ -201,13 +206,13 @@ fun OsmMapView(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // OSMDroid MapView with Dark Theme Styling
+        // OSMDroid MapView with Minimalist No-Labels Tile Source
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { ctx ->
                 Configuration.getInstance().userAgentValue = ctx.packageName
                 MapView(ctx).apply {
-                    setTileSource(TileSourceFactory.MAPNIK)
+                    setTileSource(MinimalistDarkNoLabels)
                     setMultiTouchControls(true)
                     isTilesScaledToDpi = true
                     controller.setZoom(18.2)
@@ -456,7 +461,7 @@ fun OsmMapView(
                 }
             }
 
-            // 5. Pacman Seeker Marker with Authentic Chomp Cycle and Bearing
+            // 5. Pacman Seeker Marker with Authentic Chomp Cycle (ALWAYS Facing Right)
             val pacmanSize = 44.dp.toPx()
             val pacmanTopLeft = Offset(seekerCenter.x - pacmanSize / 2f, seekerCenter.y - pacmanSize / 2f)
 
@@ -469,23 +474,22 @@ fun OsmMapView(
 
             val chompBmp = pacmanChompBitmaps.getOrNull(pacmanFrameIndex.coerceIn(0, pacmanChompBitmaps.size - 1))
 
-            rotate(animatedBearing, seekerCenter) {
-                if (chompBmp != null) {
-                    val pW = pacmanSize
-                    val pH = pW * (chompBmp.height.toFloat() / chompBmp.width.toFloat())
-                    drawImage(
-                        image = chompBmp,
-                        dstOffset = IntOffset((seekerCenter.x - pW / 2f).toInt(), (seekerCenter.y - pH / 2f).toInt()),
-                        dstSize = IntSize(pW.toInt(), pH.toInt())
-                    )
-                } else {
-                    drawChompPacman(
-                        topLeft = pacmanTopLeft,
-                        size = Size(pacmanSize, pacmanSize),
-                        mouthAngle = 35f,
-                        color = PacmanYellow
-                    )
-                }
+            // Pacman strictly facing right (0 degrees)
+            if (chompBmp != null) {
+                val pW = pacmanSize
+                val pH = pW * (chompBmp.height.toFloat() / chompBmp.width.toFloat())
+                drawImage(
+                    image = chompBmp,
+                    dstOffset = IntOffset((seekerCenter.x - pW / 2f).toInt(), (seekerCenter.y - pH / 2f).toInt()),
+                    dstSize = IntSize(pW.toInt(), pH.toInt())
+                )
+            } else {
+                drawChompPacman(
+                    topLeft = pacmanTopLeft,
+                    size = Size(pacmanSize, pacmanSize),
+                    mouthAngle = 35f,
+                    color = PacmanYellow
+                )
             }
         }
     }

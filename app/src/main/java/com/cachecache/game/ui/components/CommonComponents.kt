@@ -47,6 +47,14 @@ fun BottomNavigationBar(
                 onClick = { onNavigate(Screen.GAME) }
             )
 
+            val isShopSelected = currentScreen == Screen.SHOP
+            BottomNavItem(
+                label = "Boutique",
+                icon = Icons.Default.Palette,
+                isSelected = isShopSelected,
+                onClick = { onNavigate(Screen.SHOP) }
+            )
+
             val isLeaderboardSelected = currentScreen == Screen.LEADERBOARD
             BottomNavItem(
                 label = "Classement",

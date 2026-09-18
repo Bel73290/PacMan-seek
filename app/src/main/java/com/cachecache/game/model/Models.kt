@@ -82,8 +82,25 @@ enum class Screen {
     LEADERBOARD,
     RADAR_FILTERS,
     GUIDE,
-    PROFILE
+    PROFILE,
+    SHOP
 }
+
+enum class AvatarCategory(val label: String) {
+    PACMANS("Pac-Mans"),
+    GHOSTS("Fantômes")
+}
+
+data class AvatarItem(
+    val id: String,
+    val name: String,
+    val category: AvatarCategory,
+    val description: String,
+    val price: Int = 0, // 0 = gratuit
+    val ghostColor: Color? = null,
+    val isAnimatedPacman: Boolean = false,
+    val drawableResId: Int? = null
+)
 
 data class GameSettings(
     val seekerDurationMinutes: Int = 3,
@@ -112,6 +129,8 @@ data class GameState(
     val maxXp: Int = 500,
     val totalGamesPlayed: Int = 12,
     val totalVictories: Int = 7,
+    val equippedAvatarId: String = "pacman_classic",
+    val unlockedAvatarIds: Set<String> = setOf("pacman_classic", "ghost_blinky", "ghost_pinky"),
     val isGhostProximityAlertVisible: Boolean = true,
     val isStreetViewMiniVisible: Boolean = true,
     val isStreetViewRadarOpen: Boolean = true,

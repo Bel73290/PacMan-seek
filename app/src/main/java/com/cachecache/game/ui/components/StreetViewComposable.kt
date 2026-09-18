@@ -117,7 +117,7 @@ fun StreetViewComposable(
             PacmanComposable(
                 size = if (isMini) 22.dp else 48.dp,
                 isAnimated = true,
-                rotationAngle = 15f
+                rotationAngle = 0f
             )
         }
 

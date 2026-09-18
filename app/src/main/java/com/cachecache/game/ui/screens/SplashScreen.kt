@@ -100,22 +100,7 @@ fun SplashScreen(
                 }
             }
 
-            // Subtitle positioned directly below the 3D Logo in the background
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(bottom = 60.dp)
-            ) {
-                Text(
-                    text = "Explore la carte,\ntrouve les cachés !",
-                    color = Color.White,
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    lineHeight = 22.sp,
-                    modifier = Modifier
-                        .shadow(8.dp)
-                )
-            }
+            Spacer(modifier = Modifier.weight(1f))
 
             // 3. Action Buttons matching the official mockup
             Column(

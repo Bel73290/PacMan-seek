@@ -141,7 +141,10 @@ fun LeaderboardScreen(
                 contentPadding = PaddingValues(bottom = 20.dp)
             ) {
                 items(entries) { entry ->
-                    LeaderboardRow(entry = entry)
+                    LeaderboardRow(
+                        entry = entry,
+                        equippedAvatarId = state.equippedAvatarId
+                    )
                 }
             }
         }
@@ -149,7 +152,10 @@ fun LeaderboardScreen(
 }
 
 @Composable
-private fun LeaderboardRow(entry: LeaderboardEntry) {
+private fun LeaderboardRow(
+    entry: LeaderboardEntry,
+    equippedAvatarId: String = "pacman_classic"
+) {
     val numberFormat = NumberFormat.getNumberInstance(Locale.FRANCE)
     val formattedScore = "${numberFormat.format(entry.score)} pts"
 
@@ -197,7 +203,9 @@ private fun LeaderboardRow(entry: LeaderboardEntry) {
                 contentAlignment = Alignment.Center
             ) {
                 if (entry.isCurrentUser) {
-                    PacmanComposable(size = 28.dp, color = PacmanYellow, isAnimated = true)
+                    val equippedAvatar = MockData.AvatarItemsCatalog.firstOrNull { it.id == equippedAvatarId }
+                        ?: MockData.AvatarItemsCatalog.first()
+                    AvatarVisual(avatar = equippedAvatar, size = 30.dp)
                 } else {
                     GhostComposable(size = 28.dp, baseColor = entry.avatarColor, isScared = false)
                 }

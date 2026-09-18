@@ -62,7 +62,7 @@ fun PacmanComposable(
             targetValue = chompFrames.size - 1,
             typeConverter = Int.VectorConverter,
             animationSpec = infiniteRepeatable(
-                animation = tween(durationMillis = 400, easing = LinearEasing),
+                animation = tween(durationMillis = 720, easing = LinearEasing),
                 repeatMode = RepeatMode.Restart
             ),
             label = "frameIndex"
@@ -83,8 +83,8 @@ fun PacmanComposable(
 
 /**
  * Researcher Marker on Map with:
- * - 0° to 60° chomp mouth animation
- * - Fluid bearing rotation via spring interpolation
+ * - Authentic chomp mouth animation (0° closed to 80° open)
+ * - Always facing right
  * - 3 concentric expanding radar rings (radii 10dp to 70dp, alpha 0.4f to 0f)
  */
 @Composable
@@ -93,13 +93,6 @@ fun ResearcherMarker(
     targetBearing: Float = 0f,
     size: Dp = 46.dp
 ) {
-    // Bearing rotation smoothly interpolated with spring
-    val animatedBearing by animateFloatAsState(
-        targetValue = targetBearing,
-        animationSpec = spring(stiffness = Spring.StiffnessLow),
-        label = "bearingAnim"
-    )
-
     // Multi-ring radar wave animation
     val infiniteTransition = rememberInfiniteTransition(label = "radarRings")
     val waveProgress by infiniteTransition.animateFloat(
@@ -141,12 +134,12 @@ fun ResearcherMarker(
             }
         }
 
-        // Animated Pacman in center
+        // Animated Pacman in center: ALWAYS facing strictly to the right (rotation = 0f)
         PacmanComposable(
             size = size,
             color = PacmanYellow,
             isAnimated = true,
-            rotationAngle = animatedBearing
+            rotationAngle = 0f
         )
     }
 }
