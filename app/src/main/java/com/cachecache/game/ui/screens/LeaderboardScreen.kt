@@ -197,7 +197,7 @@ private fun LeaderboardRow(entry: LeaderboardEntry) {
                 contentAlignment = Alignment.Center
             ) {
                 if (entry.isCurrentUser) {
-                    PacmanComposable(size = 28.dp, color = PacmanYellow, isAnimated = false)
+                    PacmanComposable(size = 28.dp, color = PacmanYellow, isAnimated = true)
                 } else {
                     GhostComposable(size = 28.dp, baseColor = entry.avatarColor, isScared = false)
                 }

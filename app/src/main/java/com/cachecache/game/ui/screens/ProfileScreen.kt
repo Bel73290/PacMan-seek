@@ -109,11 +109,9 @@ fun ProfileScreen(
                         .border(3.dp, PacmanYellow, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.pacman_giant),
-                        contentDescription = "Avatar",
-                        modifier = Modifier.size(56.dp),
-                        contentScale = ContentScale.Fit
+                    PacmanComposable(
+                        size = 56.dp,
+                        isAnimated = true
                     )
                 }
 

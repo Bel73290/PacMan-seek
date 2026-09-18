@@ -40,26 +40,27 @@ fun StreetViewComposable(
     timerText: String = "02:18",
     onExpand: () -> Unit = {}
 ) {
-    // Hovering & jump animation for the scared ghost in the street
+    // Panicked horizontal tremble & walking skirt animation for the scared ghost in the street (NO vertical bounce)
     val infiniteTransition = rememberInfiniteTransition(label = "streetGhostTransition")
-    val ghostBounce by infiniteTransition.animateFloat(
-        initialValue = -6f,
-        targetValue = 6f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(550, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "ghostBounce"
-    )
-
     val ghostTremble by infiniteTransition.animateFloat(
-        initialValue = -3f,
-        targetValue = 3f,
+        initialValue = -3.5f,
+        targetValue = 3.5f,
         animationSpec = infiniteRepeatable(
-            animation = tween(75, easing = LinearEasing),
+            animation = tween(70, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "ghostTremble"
+    )
+
+    val walkFrame by infiniteTransition.animateValue(
+        initialValue = 0,
+        targetValue = 1,
+        typeConverter = Int.VectorConverter,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 360, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "walkFrame"
     )
 
     // Animated dots conveyor phase
@@ -104,7 +105,7 @@ fun StreetViewComposable(
             )
         }
 
-        // 3. Official Pacman Hero in the background down the road
+        // 3. Simple Round Pacman with Chomp Animation in the background down the road
         Box(
             modifier = Modifier
                 .align(Alignment.TopStart)
@@ -113,15 +114,14 @@ fun StreetViewComposable(
                     top = if (isMini) 52.dp else 240.dp
                 )
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.pacman_hero),
-                contentDescription = "Pacman au loin",
-                modifier = Modifier.size(if (isMini) 22.dp else 48.dp),
-                contentScale = ContentScale.Fit
+            PacmanComposable(
+                size = if (isMini) 22.dp else 48.dp,
+                isAnimated = true,
+                rotationAngle = 15f
             )
         }
 
-        // 4. Large Animated Official Scared Blue Ghost in the Foreground
+        // 4. Large Animated Official Scared Blue Ghost in the Foreground (Horizontal tremble only, no up/down)
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -130,12 +130,13 @@ fun StreetViewComposable(
                     bottom = if (isMini) 14.dp else 120.dp
                 )
                 .graphicsLayer {
-                    translationY = ghostBounce * (if (isMini) 1.2f else 3.2f)
                     translationX = ghostTremble * (if (isMini) 1.2f else 3.2f)
                 }
         ) {
             Image(
-                painter = painterResource(id = R.drawable.ghost_scared_blue),
+                painter = painterResource(
+                    id = if (walkFrame == 0) R.drawable.ghost_scared_blue_0 else R.drawable.ghost_scared_blue_1
+                ),
                 contentDescription = "Fantôme apeuré",
                 modifier = Modifier.size(if (isMini) 48.dp else 135.dp),
                 contentScale = ContentScale.Fit

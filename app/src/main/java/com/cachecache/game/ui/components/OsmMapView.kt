@@ -54,30 +54,116 @@ fun OsmMapView(
     val context = LocalContext.current
     var mapViewRef by remember { mutableStateOf<MapView?>(null) }
 
-    // Load official artwork bitmaps
-    val pinkGhostBmp = remember { BitmapFactory.decodeResource(context.resources, R.drawable.ghost_pink)?.asImageBitmap() }
-    val cyanGhostBmp = remember { BitmapFactory.decodeResource(context.resources, R.drawable.ghost_cyan)?.asImageBitmap() }
-    val orangeGhostBmp = remember { BitmapFactory.decodeResource(context.resources, R.drawable.ghost_orange)?.asImageBitmap() }
-    val redGhostBmp = remember { BitmapFactory.decodeResource(context.resources, R.drawable.ghost_red)?.asImageBitmap() }
-    val purpleGhostBmp = remember { BitmapFactory.decodeResource(context.resources, R.drawable.ghost_purple)?.asImageBitmap() }
-    val scaredGhostBmp = remember { BitmapFactory.decodeResource(context.resources, R.drawable.ghost_scared_blue)?.asImageBitmap() }
-    val pacmanHeroBmp = remember { BitmapFactory.decodeResource(context.resources, R.drawable.pacman_hero)?.asImageBitmap() }
+    // Preload directional ghost bitmaps and pacman chomp frames
+    val ghostBitmaps = remember {
+        val ids = mapOf(
+            "red_front_0" to R.drawable.ghost_red_front_0,
+            "red_front_1" to R.drawable.ghost_red_front_1,
+            "red_left_0" to R.drawable.ghost_red_left_0,
+            "red_left_1" to R.drawable.ghost_red_left_1,
+            "red_right_0" to R.drawable.ghost_red_right_0,
+            "red_right_1" to R.drawable.ghost_red_right_1,
+
+            "pink_front_0" to R.drawable.ghost_pink_front_0,
+            "pink_front_1" to R.drawable.ghost_pink_front_1,
+            "pink_left_0" to R.drawable.ghost_pink_left_0,
+            "pink_left_1" to R.drawable.ghost_pink_left_1,
+            "pink_right_0" to R.drawable.ghost_pink_right_0,
+            "pink_right_1" to R.drawable.ghost_pink_right_1,
+
+            "cyan_front_0" to R.drawable.ghost_cyan_front_0,
+            "cyan_front_1" to R.drawable.ghost_cyan_front_1,
+            "cyan_left_0" to R.drawable.ghost_cyan_left_0,
+            "cyan_left_1" to R.drawable.ghost_cyan_left_1,
+            "cyan_right_0" to R.drawable.ghost_cyan_right_0,
+            "cyan_right_1" to R.drawable.ghost_cyan_right_1,
+
+            "orange_front_0" to R.drawable.ghost_orange_front_0,
+            "orange_front_1" to R.drawable.ghost_orange_front_1,
+            "orange_left_0" to R.drawable.ghost_orange_left_0,
+            "orange_left_1" to R.drawable.ghost_orange_left_1,
+            "orange_right_0" to R.drawable.ghost_orange_right_0,
+            "orange_right_1" to R.drawable.ghost_orange_right_1,
+
+            "purple_front_0" to R.drawable.ghost_purple_front_0,
+            "purple_front_1" to R.drawable.ghost_purple_front_1,
+            "purple_left_0" to R.drawable.ghost_purple_left_0,
+            "purple_left_1" to R.drawable.ghost_purple_left_1,
+            "purple_right_0" to R.drawable.ghost_purple_right_0,
+            "purple_right_1" to R.drawable.ghost_purple_right_1,
+
+            "scared_0" to R.drawable.ghost_scared_blue_0,
+            "scared_1" to R.drawable.ghost_scared_blue_1
+        )
+        ids.mapValues { (_, resId) ->
+            BitmapFactory.decodeResource(context.resources, resId)?.asImageBitmap()
+        }
+    }
+
+    val pacmanChompBitmaps = remember {
+        listOf(
+            R.drawable.pacman_chomp_0,
+            R.drawable.pacman_chomp_1,
+            R.drawable.pacman_chomp_2,
+            R.drawable.pacman_chomp_3,
+            R.drawable.pacman_chomp_4,
+            R.drawable.pacman_chomp_5,
+            R.drawable.pacman_chomp_6,
+            R.drawable.pacman_chomp_7,
+            R.drawable.pacman_chomp_8,
+            R.drawable.pacman_chomp_7,
+            R.drawable.pacman_chomp_6,
+            R.drawable.pacman_chomp_5,
+            R.drawable.pacman_chomp_4,
+            R.drawable.pacman_chomp_3,
+            R.drawable.pacman_chomp_2,
+            R.drawable.pacman_chomp_1
+        ).mapNotNull { id ->
+            BitmapFactory.decodeResource(context.resources, id)?.asImageBitmap()
+        }
+    }
+
     val mapPinBmp = remember { BitmapFactory.decodeResource(context.resources, R.drawable.map_pin_red)?.asImageBitmap() }
     var redrawTrigger by remember { mutableLongStateOf(0L) }
 
-    // 1. Pacman Chomp Animation (0° to 60°)
     val infiniteTransition = rememberInfiniteTransition(label = "mapAnimations")
-    val mouthAngle by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 60f,
+
+    // 1. Pacman Chomp Frame Index (cycles through 16 frames in ~400ms)
+    val pacmanFrameIndex by infiniteTransition.animateValue(
+        initialValue = 0,
+        targetValue = 15,
+        typeConverter = Int.VectorConverter,
         animationSpec = infiniteRepeatable(
-            animation = tween(280, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
+            animation = tween(durationMillis = 400, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
         ),
-        label = "mouthAngle"
+        label = "pacmanFrameIndex"
     )
 
-    // 2. Multi-Ring Radar Wave Animation
+    // 2. Ghost authentic walk feet frame (toggles between 0 and 1 every 180ms)
+    val walkFrame by infiniteTransition.animateValue(
+        initialValue = 0,
+        targetValue = 1,
+        typeConverter = Int.VectorConverter,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 360, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "walkFrame"
+    )
+
+    // 3. Scared Ghost panicked horizontal left-right trembling on the spot (NO vertical bounce)
+    val scaredTrembleX by infiniteTransition.animateFloat(
+        initialValue = -3.5f,
+        targetValue = 3.5f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(70, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "scaredTrembleX"
+    )
+
+    // 4. Multi-Ring Radar Wave Animation
     val waveProgress by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
@@ -88,7 +174,7 @@ fun OsmMapView(
         label = "waveProgress"
     )
 
-    // 3. Pac-dots Conveyor Belt Phase Animation
+    // 5. Pac-dots Conveyor Belt Phase Animation
     val pacDotsPhase by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 32f,
@@ -97,27 +183,6 @@ fun OsmMapView(
             repeatMode = RepeatMode.Restart
         ),
         label = "pacDotsPhase"
-    )
-
-    // 4. Ghost Hovering & Tremble Animation
-    val hoverPhase by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 6.283185f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1800, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "hoverPhase"
-    )
-
-    val ghostTremble by infiniteTransition.animateFloat(
-        initialValue = -3.5f,
-        targetValue = 3.5f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(70, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "ghostTremble"
     )
 
     // Bearing smooth interpolation
@@ -321,42 +386,57 @@ fun OsmMapView(
                 )
             }
 
-            // 4. Hidden Ghosts with Hovering and Official Bitmaps
-            val ghostHoverOffset = sin(hoverPhase) * 5.dp.toPx()
-
+            // 4. Hidden Ghosts with Directional Gaze Tracking Pacman & Scared Horizontal Tremble
             for (player in hiddenPlayers) {
                 if (player.isFound) continue
 
                 proj.toPixels(OsmGeoPoint(player.location.latitude, player.location.longitude), pt)
-                val ghostSize = 38.dp.toPx()
-                val ghostCenter = Offset(pt.x.toFloat(), pt.y.toFloat() + ghostHoverOffset)
+                val ghostSize = 40.dp.toPx()
+                // Strictly NO vertical bobbing (up/down) - fixed on ground level
+                val ghostCenter = Offset(pt.x.toFloat(), pt.y.toFloat())
 
                 // Ground shadow
                 drawOval(
-                    color = Color.Black.copy(alpha = 0.45f),
-                    topLeft = Offset(ghostCenter.x - ghostSize * 0.4f, pt.y + ghostSize * 0.32f),
+                    color = Color.Black.copy(alpha = 0.40f),
+                    topLeft = Offset(ghostCenter.x - ghostSize * 0.4f, ghostCenter.y + ghostSize * 0.32f),
                     size = Size(ghostSize * 0.8f, ghostSize * 0.20f)
                 )
 
                 if (player.isScared) {
                     drawCircle(
-                        color = ScaredBlue.copy(alpha = 0.35f),
-                        radius = ghostSize * 0.95f,
+                        color = ScaredBlue.copy(alpha = 0.30f),
+                        radius = ghostSize * 0.90f,
                         center = ghostCenter
                     )
                 }
 
-                val ghostOffsetX = if (player.isScared) ghostTremble else 0f
-                val topLeft = Offset(ghostCenter.x - ghostSize / 2f + ghostOffsetX, ghostCenter.y - ghostSize / 2f)
-
-                val ghostBmp = when {
-                    player.isScared -> scaredGhostBmp
-                    player.name == "Inky" -> cyanGhostBmp
-                    player.name == "Pinky" -> pinkGhostBmp
-                    player.name == "Clyde" -> orangeGhostBmp
-                    player.name == "Blinky" -> redGhostBmp
-                    else -> purpleGhostBmp
+                // Calculate relative horizontal position: Ghost looks towards Pacman!
+                val deltaX = seekerCenter.x - ghostCenter.x
+                val dir = when {
+                    deltaX < -15f -> "left"
+                    deltaX > 15f -> "right"
+                    else -> "front"
                 }
+
+                val colorPrefix = when (player.name) {
+                    "Pinky" -> "pink"
+                    "Inky" -> "cyan"
+                    "Clyde" -> "orange"
+                    "Blinky" -> "red"
+                    else -> "purple"
+                }
+
+                val spriteKey = if (player.isScared) {
+                    "scared_$walkFrame"
+                } else {
+                    "${colorPrefix}_${dir}_$walkFrame"
+                }
+
+                val ghostBmp = ghostBitmaps[spriteKey]
+
+                // Tremble on the spot: purely horizontal (translationX), translationY is strictly 0!
+                val offsetX = if (player.isScared) scaredTrembleX else 0f
+                val topLeft = Offset(ghostCenter.x - ghostSize / 2f + offsetX, ghostCenter.y - ghostSize / 2f)
 
                 if (ghostBmp != null) {
                     val bmpW = ghostSize
@@ -376,23 +456,25 @@ fun OsmMapView(
                 }
             }
 
-            // 5. Pacman Seeker Marker with Chomp Animation and Bearing
+            // 5. Pacman Seeker Marker with Authentic Chomp Cycle and Bearing
             val pacmanSize = 44.dp.toPx()
             val pacmanTopLeft = Offset(seekerCenter.x - pacmanSize / 2f, seekerCenter.y - pacmanSize / 2f)
 
             // Ground shadow
             drawOval(
-                color = Color.Black.copy(alpha = 0.45f),
+                color = Color.Black.copy(alpha = 0.40f),
                 topLeft = Offset(seekerCenter.x - pacmanSize * 0.45f, seekerCenter.y + pacmanSize * 0.35f),
                 size = Size(pacmanSize * 0.9f, pacmanSize * 0.25f)
             )
 
+            val chompBmp = pacmanChompBitmaps.getOrNull(pacmanFrameIndex.coerceIn(0, pacmanChompBitmaps.size - 1))
+
             rotate(animatedBearing, seekerCenter) {
-                if (pacmanHeroBmp != null) {
-                    val pW = pacmanSize * 1.15f
-                    val pH = pW * (pacmanHeroBmp.height.toFloat() / pacmanHeroBmp.width.toFloat())
+                if (chompBmp != null) {
+                    val pW = pacmanSize
+                    val pH = pW * (chompBmp.height.toFloat() / chompBmp.width.toFloat())
                     drawImage(
-                        image = pacmanHeroBmp,
+                        image = chompBmp,
                         dstOffset = IntOffset((seekerCenter.x - pW / 2f).toInt(), (seekerCenter.y - pH / 2f).toInt()),
                         dstSize = IntSize(pW.toInt(), pH.toInt())
                     )
@@ -400,7 +482,7 @@ fun OsmMapView(
                     drawChompPacman(
                         topLeft = pacmanTopLeft,
                         size = Size(pacmanSize, pacmanSize),
-                        mouthAngle = mouthAngle,
+                        mouthAngle = 35f,
                         color = PacmanYellow
                     )
                 }

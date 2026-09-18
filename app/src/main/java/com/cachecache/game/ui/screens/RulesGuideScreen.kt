@@ -118,7 +118,7 @@ fun RulesGuideScreen(
                             .border(1.dp, BorderSubtle, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        PacmanComposable(size = 36.dp, color = PacmanYellow, isAnimated = false)
+                        PacmanComposable(size = 36.dp, color = PacmanYellow, isAnimated = true)
                     }
                 }
             )

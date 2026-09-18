@@ -162,11 +162,10 @@ fun GameScreen(
                             .padding(horizontal = 14.dp, vertical = 10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Official Scared Blue Ghost in Capsule
-                        Image(
-                            painter = painterResource(id = R.drawable.ghost_scared_blue),
-                            contentDescription = "Fantôme apeuré",
-                            modifier = Modifier.size(34.dp)
+                        // Scared Blue Ghost with horizontal trembling in Capsule
+                        GhostComposable(
+                            size = 34.dp,
+                            isScared = true
                         )
 
                         Spacer(modifier = Modifier.width(12.dp))
@@ -304,18 +303,10 @@ fun GameScreen(
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Image(
-                                painter = painterResource(
-                                    when (nearest.name) {
-                                        "Inky" -> R.drawable.ghost_cyan
-                                        "Pinky" -> R.drawable.ghost_pink
-                                        "Clyde" -> R.drawable.ghost_orange
-                                        "Blinky" -> R.drawable.ghost_red
-                                        else -> R.drawable.ghost_purple
-                                    }
-                                ),
-                                contentDescription = nearest.name,
-                                modifier = Modifier.size(20.dp)
+                            GhostComposable(
+                                size = 22.dp,
+                                baseColor = nearest.color,
+                                isScared = nearest.isScared
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
@@ -377,10 +368,9 @@ fun GameScreen(
                         .padding(horizontal = 14.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.pacman_hero),
-                        contentDescription = "Pacman",
-                        modifier = Modifier.size(28.dp)
+                    PacmanComposable(
+                        size = 28.dp,
+                        isAnimated = true
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(

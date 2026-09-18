@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.cachecache.game.R
 import com.cachecache.game.model.HiddenPlayer
+import com.cachecache.game.ui.components.GhostComposable
 import com.cachecache.game.ui.theme.*
 import com.cachecache.game.viewmodel.GameViewModel
 
@@ -132,20 +133,12 @@ fun CaptureSuccessDialog(
                             )
                         }
 
-                        // 2. Icône fantôme officiel + "Caché trouvé : #3"
+                        // 2. Icône fantôme animé + "Caché trouvé : #3"
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Image(
-                                painter = painterResource(
-                                    when (player.name) {
-                                        "Inky" -> R.drawable.ghost_cyan
-                                        "Pinky" -> R.drawable.ghost_pink
-                                        "Clyde" -> R.drawable.ghost_orange
-                                        "Blinky" -> R.drawable.ghost_red
-                                        else -> R.drawable.ghost_purple
-                                    }
-                                ),
-                                contentDescription = player.name,
-                                modifier = Modifier.size(22.dp)
+                            GhostComposable(
+                                size = 22.dp,
+                                baseColor = player.color,
+                                isScared = false
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(

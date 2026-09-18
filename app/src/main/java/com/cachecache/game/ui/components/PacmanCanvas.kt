@@ -204,15 +204,6 @@ fun FestivePacmanComposable(
     size: Dp = 150.dp
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "festiveTransition")
-    val bounceOffset by infiniteTransition.animateFloat(
-        initialValue = -8f,
-        targetValue = 8f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(600, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "festiveBounce"
-    )
 
     val rotationAngle by infiniteTransition.animateFloat(
         initialValue = -5f,
@@ -266,7 +257,7 @@ fun FestivePacmanComposable(
 
         // Glowing yellow Pacman in Center
         val pacmanRadius = w * 0.24f
-        val pacCenter = Offset(center.x, center.y + bounceOffset)
+        val pacCenter = Offset(center.x, center.y)
 
         rotate(degrees = -18f + rotationAngle, pivot = pacCenter) {
             // Soft glow
