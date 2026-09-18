@@ -21,12 +21,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -34,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cachecache.game.R
 import com.cachecache.game.ui.theme.*
-import kotlin.math.sin
 
 @Composable
 fun StreetViewComposable(
@@ -46,8 +43,8 @@ fun StreetViewComposable(
     // Hovering & jump animation for the scared ghost in the street
     val infiniteTransition = rememberInfiniteTransition(label = "streetGhostTransition")
     val ghostBounce by infiniteTransition.animateFloat(
-        initialValue = -7f,
-        targetValue = 7f,
+        initialValue = -6f,
+        targetValue = 6f,
         animationSpec = infiniteRepeatable(
             animation = tween(550, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
@@ -56,8 +53,8 @@ fun StreetViewComposable(
     )
 
     val ghostTremble by infiniteTransition.animateFloat(
-        initialValue = -3.5f,
-        targetValue = 3.5f,
+        initialValue = -3f,
+        targetValue = 3f,
         animationSpec = infiniteRepeatable(
             animation = tween(75, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
@@ -98,18 +95,54 @@ fun StreetViewComposable(
             modifier = Modifier.fillMaxSize()
         )
 
-        // 2. AR Game Elements (Reticule, Pac-dots, Pacman, Scared Ghost)
+        // 2. AR Game Elements (Reticule, Conveyor Pac-dots)
         Canvas(modifier = Modifier.fillMaxSize()) {
             drawStreetAROverlay(
                 pacDotsPhase = pacDotsAnim,
-                ghostBounce = ghostBounce,
-                ghostTremble = ghostTremble,
                 reticuleScale = reticuleScale,
                 isMini = isMini
             )
         }
 
-        // 3. Overlays for Mini Card Mode
+        // 3. Official Pacman Hero in the background down the road
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(
+                    start = if (isMini) 62.dp else 125.dp,
+                    top = if (isMini) 52.dp else 240.dp
+                )
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.pacman_hero),
+                contentDescription = "Pacman au loin",
+                modifier = Modifier.size(if (isMini) 22.dp else 48.dp),
+                contentScale = ContentScale.Fit
+            )
+        }
+
+        // 4. Large Animated Official Scared Blue Ghost in the Foreground
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(
+                    end = if (isMini) 16.dp else 42.dp,
+                    bottom = if (isMini) 14.dp else 120.dp
+                )
+                .graphicsLayer {
+                    translationY = ghostBounce * (if (isMini) 1.2f else 3.2f)
+                    translationX = ghostTremble * (if (isMini) 1.2f else 3.2f)
+                }
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.ghost_scared_blue),
+                contentDescription = "Fantôme apeuré",
+                modifier = Modifier.size(if (isMini) 48.dp else 135.dp),
+                contentScale = ContentScale.Fit
+            )
+        }
+
+        // 5. Overlays for Mini Card Mode
         if (isMini) {
             Row(
                 modifier = Modifier
@@ -186,8 +219,6 @@ fun StreetViewComposable(
 
 private fun DrawScope.drawStreetAROverlay(
     pacDotsPhase: Float,
-    ghostBounce: Float,
-    ghostTremble: Float,
     reticuleScale: Float,
     isMini: Boolean
 ) {
@@ -231,110 +262,4 @@ private fun DrawScope.drawStreetAROverlay(
             center = Offset(x, y)
         )
     }
-
-    // 3. Small Pacman in the background down the road
-    val pacX = vanishX - w * 0.04f
-    val pacY = vanishY + h * 0.08f
-    val pacSize = if (isMini) 16.dp.toPx() else 26.dp.toPx()
-
-    drawArc(
-        color = PacmanYellow,
-        startAngle = 200f,
-        sweepAngle = 300f,
-        useCenter = true,
-        topLeft = Offset(pacX - pacSize / 2f, pacY - pacSize / 2f),
-        size = Size(pacSize, pacSize)
-    )
-
-    // 4. Large Animated Scared Blue Ghost in the Foreground
-    val ghostBaseX = w * 0.62f + ghostTremble
-    val ghostBaseY = h * 0.66f + ghostBounce
-    val ghostW = if (isMini) w * 0.30f else w * 0.40f
-    val ghostH = ghostW * 1.18f
-    val ghostTopLeft = Offset(ghostBaseX - ghostW / 2f, ghostBaseY - ghostH / 2f)
-
-    // Ground shadow
-    drawOval(
-        color = Color.Black.copy(alpha = 0.55f),
-        topLeft = Offset(ghostBaseX - ghostW * 0.45f, ghostBaseY + ghostH * 0.46f),
-        size = Size(ghostW * 0.9f, ghostH * 0.22f)
-    )
-
-    // Ghost body path with wavy ruffles
-    val ghostPath = Path().apply {
-        val r = ghostW / 2f
-        moveTo(ghostTopLeft.x, ghostTopLeft.y + r)
-        cubicTo(
-            ghostTopLeft.x, ghostTopLeft.y,
-            ghostTopLeft.x + ghostW, ghostTopLeft.y,
-            ghostTopLeft.x + ghostW, ghostTopLeft.y + r
-        )
-        lineTo(ghostTopLeft.x + ghostW, ghostTopLeft.y + ghostH * 0.84f)
-
-        val waveW = ghostW / 3f
-        val botY = ghostTopLeft.y + ghostH
-        val inY = ghostTopLeft.y + ghostH * 0.80f
-
-        quadraticTo(ghostTopLeft.x + ghostW - waveW * 0.5f, botY, ghostTopLeft.x + ghostW - waveW, inY)
-        quadraticTo(ghostTopLeft.x + ghostW - waveW * 1.5f, botY, ghostTopLeft.x + ghostW - waveW * 2f, inY)
-        quadraticTo(ghostTopLeft.x + ghostW - waveW * 2.5f, botY, ghostTopLeft.x, inY)
-        lineTo(ghostTopLeft.x, ghostTopLeft.y + r)
-        close()
-    }
-
-    drawPath(path = ghostPath, color = DarkContrast, style = Stroke(width = 3.5.dp.toPx()))
-    drawPath(path = ghostPath, color = ScaredBlue)
-
-    // Scared worried eyes
-    val eyeW = ghostW * 0.24f
-    val eyeH = ghostH * 0.28f
-    val leftEyeCenter = Offset(ghostTopLeft.x + ghostW * 0.32f, ghostTopLeft.y + ghostH * 0.38f)
-    val rightEyeCenter = Offset(ghostTopLeft.x + ghostW * 0.68f, ghostTopLeft.y + ghostH * 0.38f)
-
-    drawOval(
-        color = TextPrimary,
-        topLeft = Offset(leftEyeCenter.x - eyeW / 2f, leftEyeCenter.y - eyeH / 2f),
-        size = Size(eyeW, eyeH)
-    )
-    drawOval(
-        color = TextPrimary,
-        topLeft = Offset(rightEyeCenter.x - eyeW / 2f, rightEyeCenter.y - eyeH / 2f),
-        size = Size(eyeW, eyeH)
-    )
-
-    // Pupils looking back at Pacman
-    drawCircle(color = DarkContrast, radius = eyeW * 0.34f, center = Offset(leftEyeCenter.x - 2f, leftEyeCenter.y - 2f))
-    drawCircle(color = DarkContrast, radius = eyeW * 0.34f, center = Offset(rightEyeCenter.x - 2f, rightEyeCenter.y - 2f))
-
-    // Wavy mouth
-    val mouthPath = Path().apply {
-        val startX = ghostTopLeft.x + ghostW * 0.22f
-        val endX = ghostTopLeft.x + ghostW * 0.78f
-        val mouthY = ghostTopLeft.y + ghostH * 0.66f
-        val segW = (endX - startX) / 6f
-        val waveAmp = ghostH * 0.05f
-
-        moveTo(startX, mouthY)
-        var currX = startX
-        var up = true
-        for (i in 0 until 6) {
-            val nextX = currX + segW
-            val targetY = if (up) mouthY - waveAmp else mouthY + waveAmp
-            lineTo(nextX, targetY)
-            currX = nextX
-            up = !up
-        }
-    }
-    drawPath(
-        path = mouthPath,
-        color = TextPrimary,
-        style = Stroke(width = ghostW * 0.065f, cap = StrokeCap.Round)
-    )
-
-    // Panic sweat drops
-    val sweat1 = Offset(ghostTopLeft.x + ghostW * 0.88f, ghostTopLeft.y + ghostH * 0.12f)
-    val sweat2 = Offset(ghostTopLeft.x + ghostW * 0.98f, ghostTopLeft.y + ghostH * 0.24f)
-    drawCircle(color = ScaredBlue, radius = 4.5.dp.toPx(), center = sweat1)
-    drawCircle(color = TextPrimary, radius = 2.dp.toPx(), center = Offset(sweat1.x - 1f, sweat1.y - 1f))
-    drawCircle(color = ScaredBlue, radius = 3.5.dp.toPx(), center = sweat2)
 }

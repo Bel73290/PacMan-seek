@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,10 +21,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cachecache.game.R
 import com.cachecache.game.model.*
 import com.cachecache.game.ui.components.*
 import com.cachecache.game.ui.theme.*
@@ -159,16 +162,12 @@ fun GameScreen(
                             .padding(horizontal = 14.dp, vertical = 10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Blue Ghost Icon in Capsule
-                        Box(
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                                .background(DarkContrast),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            GhostComposable(size = 22.dp, baseColor = ScaredBlue, isScared = true)
-                        }
+                        // Official Scared Blue Ghost in Capsule
+                        Image(
+                            painter = painterResource(id = R.drawable.ghost_scared_blue),
+                            contentDescription = "Fantôme apeuré",
+                            modifier = Modifier.size(34.dp)
+                        )
 
                         Spacer(modifier = Modifier.width(12.dp))
 
@@ -305,9 +304,19 @@ fun GameScreen(
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Box(modifier = Modifier.size(16.dp), contentAlignment = Alignment.Center) {
-                                GhostComposable(size = 16.dp, baseColor = nearest.color, isScared = nearest.distanceMeters <= 25.0)
-                            }
+                            Image(
+                                painter = painterResource(
+                                    when (nearest.name) {
+                                        "Inky" -> R.drawable.ghost_cyan
+                                        "Pinky" -> R.drawable.ghost_pink
+                                        "Clyde" -> R.drawable.ghost_orange
+                                        "Blinky" -> R.drawable.ghost_red
+                                        else -> R.drawable.ghost_purple
+                                    }
+                                ),
+                                contentDescription = nearest.name,
+                                modifier = Modifier.size(20.dp)
+                            )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "${nearest.name} : ${"%.1f".format(nearest.distanceMeters)}m",
@@ -368,7 +377,11 @@ fun GameScreen(
                         .padding(horizontal = 14.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    PacmanComposable(size = 22.dp, color = PacmanYellow, isAnimated = true)
+                    Image(
+                        painter = painterResource(id = R.drawable.pacman_hero),
+                        contentDescription = "Pacman",
+                        modifier = Modifier.size(28.dp)
+                    )
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
                         text = "Explore les zones indiquées pour trouver les cachés !",

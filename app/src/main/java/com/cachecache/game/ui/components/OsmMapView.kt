@@ -1,5 +1,6 @@
 package com.cachecache.game.ui.components
 
+import android.graphics.BitmapFactory
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.Point
@@ -16,14 +17,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.cachecache.game.R
 import com.cachecache.game.model.*
 import com.cachecache.game.ui.theme.*
 import org.osmdroid.config.Configuration
@@ -48,6 +53,16 @@ fun OsmMapView(
 ) {
     val context = LocalContext.current
     var mapViewRef by remember { mutableStateOf<MapView?>(null) }
+
+    // Load official artwork bitmaps
+    val pinkGhostBmp = remember { BitmapFactory.decodeResource(context.resources, R.drawable.ghost_pink)?.asImageBitmap() }
+    val cyanGhostBmp = remember { BitmapFactory.decodeResource(context.resources, R.drawable.ghost_cyan)?.asImageBitmap() }
+    val orangeGhostBmp = remember { BitmapFactory.decodeResource(context.resources, R.drawable.ghost_orange)?.asImageBitmap() }
+    val redGhostBmp = remember { BitmapFactory.decodeResource(context.resources, R.drawable.ghost_red)?.asImageBitmap() }
+    val purpleGhostBmp = remember { BitmapFactory.decodeResource(context.resources, R.drawable.ghost_purple)?.asImageBitmap() }
+    val scaredGhostBmp = remember { BitmapFactory.decodeResource(context.resources, R.drawable.ghost_scared_blue)?.asImageBitmap() }
+    val pacmanHeroBmp = remember { BitmapFactory.decodeResource(context.resources, R.drawable.pacman_hero)?.asImageBitmap() }
+    val mapPinBmp = remember { BitmapFactory.decodeResource(context.resources, R.drawable.map_pin_red)?.asImageBitmap() }
     var redrawTrigger by remember { mutableLongStateOf(0L) }
 
     // 1. Pacman Chomp Animation (0° to 60°)
@@ -228,6 +243,18 @@ fun OsmMapView(
                             pathEffect = PathEffect.dashPathEffect(floatArrayOf(18f, 12f), 0f)
                         )
                     )
+
+                    // Pin Marker on Suspect Zone
+                    proj.toPixels(OsmGeoPoint(zone.center.latitude, zone.center.longitude), pt)
+                    if (mapPinBmp != null) {
+                        val pinW = 28.dp.toPx()
+                        val pinH = pinW * (mapPinBmp.height.toFloat() / mapPinBmp.width.toFloat())
+                        drawImage(
+                            image = mapPinBmp,
+                            dstOffset = IntOffset((pt.x - pinW / 2f).toInt(), (pt.y - pinH).toInt()),
+                            dstSize = IntSize(pinW.toInt(), pinH.toInt())
+                        )
+                    }
                 }
             }
 
@@ -294,19 +321,19 @@ fun OsmMapView(
                 )
             }
 
-            // 4. Hidden Ghosts with Hovering and Wavy Skirt
+            // 4. Hidden Ghosts with Hovering and Official Bitmaps
             val ghostHoverOffset = sin(hoverPhase) * 5.dp.toPx()
 
             for (player in hiddenPlayers) {
                 if (player.isFound) continue
 
                 proj.toPixels(OsmGeoPoint(player.location.latitude, player.location.longitude), pt)
-                val ghostSize = 36.dp.toPx()
+                val ghostSize = 38.dp.toPx()
                 val ghostCenter = Offset(pt.x.toFloat(), pt.y.toFloat() + ghostHoverOffset)
 
                 // Ground shadow
                 drawOval(
-                    color = Color.Black.copy(alpha = 0.4f),
+                    color = Color.Black.copy(alpha = 0.45f),
                     topLeft = Offset(ghostCenter.x - ghostSize * 0.4f, pt.y + ghostSize * 0.32f),
                     size = Size(ghostSize * 0.8f, ghostSize * 0.20f)
                 )
@@ -322,16 +349,35 @@ fun OsmMapView(
                 val ghostOffsetX = if (player.isScared) ghostTremble else 0f
                 val topLeft = Offset(ghostCenter.x - ghostSize / 2f + ghostOffsetX, ghostCenter.y - ghostSize / 2f)
 
-                drawGlossyGhost(
-                    topLeft = topLeft,
-                    size = Size(ghostSize, ghostSize),
-                    color = if (player.isScared) ScaredBlue else player.color,
-                    isScared = player.isScared
-                )
+                val ghostBmp = when {
+                    player.isScared -> scaredGhostBmp
+                    player.name == "Inky" -> cyanGhostBmp
+                    player.name == "Pinky" -> pinkGhostBmp
+                    player.name == "Clyde" -> orangeGhostBmp
+                    player.name == "Blinky" -> redGhostBmp
+                    else -> purpleGhostBmp
+                }
+
+                if (ghostBmp != null) {
+                    val bmpW = ghostSize
+                    val bmpH = bmpW * (ghostBmp.height.toFloat() / ghostBmp.width.toFloat())
+                    drawImage(
+                        image = ghostBmp,
+                        dstOffset = IntOffset(topLeft.x.toInt(), (topLeft.y - (bmpH - bmpW) / 2f).toInt()),
+                        dstSize = IntSize(bmpW.toInt(), bmpH.toInt())
+                    )
+                } else {
+                    drawGlossyGhost(
+                        topLeft = topLeft,
+                        size = Size(ghostSize, ghostSize),
+                        color = if (player.isScared) ScaredBlue else player.color,
+                        isScared = player.isScared
+                    )
+                }
             }
 
-            // 5. Pacman Seeker Marker with Chomp Cycle and Interpolated Bearing
-            val pacmanSize = 42.dp.toPx()
+            // 5. Pacman Seeker Marker with Chomp Animation and Bearing
+            val pacmanSize = 44.dp.toPx()
             val pacmanTopLeft = Offset(seekerCenter.x - pacmanSize / 2f, seekerCenter.y - pacmanSize / 2f)
 
             // Ground shadow
@@ -342,12 +388,22 @@ fun OsmMapView(
             )
 
             rotate(animatedBearing, seekerCenter) {
-                drawChompPacman(
-                    topLeft = pacmanTopLeft,
-                    size = Size(pacmanSize, pacmanSize),
-                    mouthAngle = mouthAngle,
-                    color = PacmanYellow
-                )
+                if (pacmanHeroBmp != null) {
+                    val pW = pacmanSize * 1.15f
+                    val pH = pW * (pacmanHeroBmp.height.toFloat() / pacmanHeroBmp.width.toFloat())
+                    drawImage(
+                        image = pacmanHeroBmp,
+                        dstOffset = IntOffset((seekerCenter.x - pW / 2f).toInt(), (seekerCenter.y - pH / 2f).toInt()),
+                        dstSize = IntSize(pW.toInt(), pH.toInt())
+                    )
+                } else {
+                    drawChompPacman(
+                        topLeft = pacmanTopLeft,
+                        size = Size(pacmanSize, pacmanSize),
+                        mouthAngle = mouthAngle,
+                        color = PacmanYellow
+                    )
+                }
             }
         }
     }

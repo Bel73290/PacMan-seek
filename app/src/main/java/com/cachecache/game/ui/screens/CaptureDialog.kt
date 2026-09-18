@@ -1,32 +1,28 @@
 package com.cachecache.game.ui.screens
 
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.cachecache.game.R
 import com.cachecache.game.model.HiddenPlayer
-import com.cachecache.game.ui.components.GhostComposable
 import com.cachecache.game.ui.theme.*
 import com.cachecache.game.viewmodel.GameViewModel
-import kotlin.math.cos
-import kotlin.math.sin
 
 @Composable
 fun CaptureSuccessDialog(
@@ -37,7 +33,7 @@ fun CaptureSuccessDialog(
     var animStarted by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { animStarted = true }
 
-    // Bouncy scale animation (spring damping ratio medium bouncy)
+    // Bouncy scale animation
     val scale by animateFloatAsState(
         targetValue = if (animStarted) 1f else 0.4f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
@@ -63,39 +59,40 @@ fun CaptureSuccessDialog(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(24.dp),
+                    .padding(22.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Titre festif
                 Text(
                     text = "Tu as trouvé un caché !",
                     color = TextPrimary,
-                    fontSize = 22.sp,
+                    fontSize = 21.sp,
                     fontWeight = FontWeight.ExtraBold,
                     textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
-                // Grand Fantôme Bleu Apeuré au centre avec onde de particules dorées
+                // Visuel officiel de célébration : Grand Pacman sautant dans les confettis
                 Box(
-                    modifier = Modifier.size(160.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(130.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Canvas(modifier = Modifier.fillMaxSize()) {
-                        drawRadiatingGoldenParticles()
-                    }
-
-                    GhostComposable(
-                        size = 88.dp,
-                        baseColor = ScaredBlue,
-                        isScared = true
+                    Image(
+                        painter = painterResource(id = R.drawable.capture_celebration),
+                        contentDescription = "Célébration capture",
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .wrapContentWidth(),
+                        contentScale = ContentScale.Fit
                     )
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
-                // Score géant rebondissant : "+ 50 points"
+                // Score géant : "+ 50 points"
                 Text(
                     text = "+ $scoreAnim points",
                     color = PacmanYellow,
@@ -104,9 +101,9 @@ fun CaptureSuccessDialog(
                     textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(18.dp))
 
-                // Fiche récapitulative élégante (fond plus sombre)
+                // Fiche récapitulative élégante (Écran 5)
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(18.dp),
@@ -118,13 +115,13 @@ fun CaptureSuccessDialog(
                             .padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        // 1. Icône horloge + "Temps restant (chercheur) : 01:20"
+                        // 1. Icône chrono + "Temps restant (chercheur) : 01:42"
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = Icons.Default.Schedule,
                                 contentDescription = "Chrono",
                                 tint = PacmanYellow,
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier.size(22.dp)
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
@@ -135,14 +132,21 @@ fun CaptureSuccessDialog(
                             )
                         }
 
-                        // 2. Icône fantôme + "Caché trouvé : #2"
+                        // 2. Icône fantôme officiel + "Caché trouvé : #3"
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier.size(20.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                GhostComposable(size = 18.dp, baseColor = player.color, isScared = false)
-                            }
+                            Image(
+                                painter = painterResource(
+                                    when (player.name) {
+                                        "Inky" -> R.drawable.ghost_cyan
+                                        "Pinky" -> R.drawable.ghost_pink
+                                        "Clyde" -> R.drawable.ghost_orange
+                                        "Blinky" -> R.drawable.ghost_red
+                                        else -> R.drawable.ghost_purple
+                                    }
+                                ),
+                                contentDescription = player.name,
+                                modifier = Modifier.size(22.dp)
+                            )
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
                                 text = "Caché trouvé : #${player.id}",
@@ -152,13 +156,12 @@ fun CaptureSuccessDialog(
                             )
                         }
 
-                        // 3. Icône épingle de carte + "Position : Parc des Lilas" (ou campus)
+                        // 3. Icône épingle de localisation officielle + "Position : ..."
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.LocationOn,
+                            Image(
+                                painter = painterResource(id = R.drawable.map_pin_red),
                                 contentDescription = "Position",
-                                tint = ScaredBlue,
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier.size(22.dp)
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
@@ -171,15 +174,15 @@ fun CaptureSuccessDialog(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-                // Large bouton pilule jaune "Continuer"
+                // Bouton pilule jaune "Continuer"
                 Button(
                     onClick = onDismiss,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(54.dp),
-                    shape = RoundedCornerShape(30.dp),
+                        .height(52.dp),
+                    shape = RoundedCornerShape(26.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = PacmanYellow,
                         contentColor = DarkContrast
@@ -193,37 +196,5 @@ fun CaptureSuccessDialog(
                 }
             }
         }
-    }
-}
-
-private fun DrawScope.drawRadiatingGoldenParticles() {
-    val center = Offset(size.width / 2f, size.height / 2f)
-    val particleCount = 18
-    val innerR = size.width * 0.35f
-    val outerR = size.width * 0.48f
-
-    val colors = listOf(PacmanYellow, GoldTrophy, ScaredBlue, GhostOrange, TextPrimary)
-
-    for (i in 0 until particleCount) {
-        val angle = Math.toRadians((i * (360.0 / particleCount) + 10).toDouble())
-        val x1 = (center.x + innerR * cos(angle)).toFloat()
-        val y1 = (center.y + innerR * sin(angle)).toFloat()
-        val x2 = (center.x + outerR * cos(angle)).toFloat()
-        val y2 = (center.y + outerR * sin(angle)).toFloat()
-
-        val color = colors[i % colors.size]
-        drawLine(
-            color = color,
-            start = Offset(x1, y1),
-            end = Offset(x2, y2),
-            strokeWidth = 3.dp.toPx(),
-            cap = androidx.compose.ui.graphics.StrokeCap.Round
-        )
-
-        // Floating sparkle dots
-        val dotR = outerR + 6.dp.toPx()
-        val dotX = (center.x + dotR * cos(angle)).toFloat()
-        val dotY = (center.y + dotR * sin(angle)).toFloat()
-        drawCircle(color = color, radius = 2.5.dp.toPx(), center = Offset(dotX, dotY))
     }
 }

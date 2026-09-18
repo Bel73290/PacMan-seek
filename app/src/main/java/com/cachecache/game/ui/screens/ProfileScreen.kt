@@ -1,5 +1,6 @@
 package com.cachecache.game.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,10 +17,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cachecache.game.R
 import com.cachecache.game.data.MockData
 import com.cachecache.game.model.BadgeItem
 import com.cachecache.game.model.GameState
@@ -105,7 +109,12 @@ fun ProfileScreen(
                         .border(3.dp, PacmanYellow, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    PacmanComposable(size = 48.dp, color = PacmanYellow, isAnimated = true)
+                    Image(
+                        painter = painterResource(id = R.drawable.pacman_hero),
+                        contentDescription = "Avatar",
+                        modifier = Modifier.size(54.dp),
+                        contentScale = ContentScale.Fit
+                    )
                 }
 
                 Spacer(modifier = Modifier.width(16.dp))
