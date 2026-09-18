@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntOffset
@@ -44,6 +45,7 @@ import kotlin.math.sin
 fun OsmMapView(
     seekerLocation: GeoPoint,
     seekerHeading: Float,
+    isFacingRight: Boolean = true,
     hiddenPlayers: List<HiddenPlayer>,
     suspectZone: SuspectZone?,
     pacDotsRoute: List<GeoPoint>,
@@ -134,6 +136,17 @@ fun OsmMapView(
     }
 
     var redrawTrigger by remember { mutableLongStateOf(0L) }
+
+    val smoothLat by animateFloatAsState(
+        targetValue = seekerLocation.latitude.toFloat(),
+        animationSpec = tween(durationMillis = 35, easing = LinearEasing),
+        label = "smoothLat"
+    )
+    val smoothLon by animateFloatAsState(
+        targetValue = seekerLocation.longitude.toFloat(),
+        animationSpec = tween(durationMillis = 35, easing = LinearEasing),
+        label = "smoothLon"
+    )
 
     val infiniteTransition = rememberInfiniteTransition(label = "mapAnimations")
 
@@ -350,8 +363,8 @@ fun OsmMapView(
                 }
             }
 
-            // 3. Seeker Center Point
-            proj.toPixels(OsmGeoPoint(seekerLocation.latitude, seekerLocation.longitude), pt)
+            // 3. Seeker Center Point (smooth 60fps interpolation)
+            proj.toPixels(OsmGeoPoint(smoothLat.toDouble(), smoothLon.toDouble()), pt)
             val seekerCenter = Offset(pt.x.toFloat(), pt.y.toFloat())
 
             // 3-Ring Concentric Radar Wave (Radii 10dp to 70dp, Alpha 0.4f to 0f)
@@ -466,22 +479,24 @@ fun OsmMapView(
 
             val chompBmp = pacmanChompBitmaps.getOrNull(pacmanFrameIndex.coerceIn(0, pacmanChompBitmaps.size - 1))
 
-            // Pacman strictly facing right (0 degrees)
-            if (chompBmp != null) {
-                val pW = pacmanSize
-                val pH = pW * (chompBmp.height.toFloat() / chompBmp.width.toFloat())
-                drawImage(
-                    image = chompBmp,
-                    dstOffset = IntOffset((seekerCenter.x - pW / 2f).toInt(), (seekerCenter.y - pH / 2f).toInt()),
-                    dstSize = IntSize(pW.toInt(), pH.toInt())
-                )
-            } else {
-                drawChompPacman(
-                    topLeft = pacmanTopLeft,
-                    size = Size(pacmanSize, pacmanSize),
-                    mouthAngle = 35f,
-                    color = PacmanYellow
-                )
+            // Pacman strictly facing right or left (horizontal mirror based on movement)
+            scale(scaleX = if (isFacingRight) 1f else -1f, scaleY = 1f, pivot = seekerCenter) {
+                if (chompBmp != null) {
+                    val pW = pacmanSize
+                    val pH = pW * (chompBmp.height.toFloat() / chompBmp.width.toFloat())
+                    drawImage(
+                        image = chompBmp,
+                        dstOffset = IntOffset((seekerCenter.x - pW / 2f).toInt(), (seekerCenter.y - pH / 2f).toInt()),
+                        dstSize = IntSize(pW.toInt(), pH.toInt())
+                    )
+                } else {
+                    drawChompPacman(
+                        topLeft = pacmanTopLeft,
+                        size = Size(pacmanSize, pacmanSize),
+                        mouthAngle = 35f,
+                        color = PacmanYellow
+                    )
+                }
             }
         }
     }

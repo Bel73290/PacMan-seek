@@ -65,6 +65,7 @@ fun GameScreen(
         OsmMapView(
             seekerLocation = state.seekerLocation,
             seekerHeading = state.seekerHeading,
+            isFacingRight = state.isFacingRight,
             hiddenPlayers = state.hiddenPlayers,
             suspectZone = state.suspectZone,
             pacDotsRoute = if (state.suspectZone?.isTargeted == true || state.suspectZone?.isModalVisible == true) state.pacDotsRoute else emptyList(),

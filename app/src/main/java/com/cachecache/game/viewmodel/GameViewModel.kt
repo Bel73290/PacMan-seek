@@ -177,7 +177,11 @@ class GameViewModel : ViewModel() {
         walkSimulationJob = viewModelScope.launch {
             _uiState.update { it.copy(isSimulationWalking = true) }
             for (wp in route) {
-                stepTowardsPoint(wp, stepCount = 8, delayMs = 120)
+                val start = _uiState.value.seekerLocation
+                val dist = calculateDistanceMeters(start, wp)
+                val durationMs = (dist * 300).toLong().coerceIn(400L, 2500L)
+                val steps = (durationMs / 25L).toInt().coerceAtLeast(10)
+                stepTowardsPoint(wp, stepCount = steps, delayMs = 25L)
             }
             _uiState.update { it.copy(isSimulationWalking = false) }
         }
@@ -187,7 +191,11 @@ class GameViewModel : ViewModel() {
         walkSimulationJob?.cancel()
         walkSimulationJob = viewModelScope.launch {
             _uiState.update { it.copy(isSimulationWalking = true) }
-            stepTowardsPoint(target, stepCount = 15, delayMs = 100)
+            val start = _uiState.value.seekerLocation
+            val dist = calculateDistanceMeters(start, target)
+            val durationMs = (dist * 350).toLong().coerceIn(600L, 3500L)
+            val steps = (durationMs / 25L).toInt().coerceAtLeast(15)
+            stepTowardsPoint(target, stepCount = steps, delayMs = 25L)
             _uiState.update { it.copy(isSimulationWalking = false) }
         }
     }
@@ -200,6 +208,13 @@ class GameViewModel : ViewModel() {
         // Calculate heading in degrees
         val heading = (Math.toDegrees(atan2(deltaLon, deltaLat)) + 360) % 360
 
+        // Strict Left / Right orientation based on horizontal displacement
+        val newFacingRight = when {
+            deltaLon > 0.0000001 -> true
+            deltaLon < -0.0000001 -> false
+            else -> _uiState.value.isFacingRight
+        }
+
         for (i in 1..stepCount) {
             delay(delayMs)
             val nextLat = start.latitude + deltaLat * i
@@ -209,7 +224,8 @@ class GameViewModel : ViewModel() {
             _uiState.update {
                 it.copy(
                     seekerLocation = nextLoc,
-                    seekerHeading = heading.toFloat()
+                    seekerHeading = heading.toFloat(),
+                    isFacingRight = newFacingRight
                 )
             }
             recalculateDistances(nextLoc)

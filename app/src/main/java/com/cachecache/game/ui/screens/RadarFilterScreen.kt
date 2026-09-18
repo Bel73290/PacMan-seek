@@ -54,6 +54,7 @@ fun RadarFilterScreen(
         OsmMapView(
             seekerLocation = state.seekerLocation,
             seekerHeading = state.seekerHeading,
+            isFacingRight = state.isFacingRight,
             hiddenPlayers = filteredPlayers,
             suspectZone = state.suspectZone,
             pacDotsRoute = emptyList(),

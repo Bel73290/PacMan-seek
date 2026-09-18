@@ -155,28 +155,132 @@ object MockData {
             isAnimatedPacman = true
         ),
         AvatarItem(
-            id = "pacman_hero",
-            name = "Pac-Man Vitesse",
+            id = "pacman_crown",
+            name = "Pac-Man Roi",
             category = AvatarCategory.PACMANS,
-            description = "En pleine course avec ses traînées supersoniques néon.",
+            description = "Couronne d'or impériale, le souverain du labyrinthe.",
+            price = 250,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_crown
+        ),
+        AvatarItem(
+            id = "pacman_cap_red",
+            name = "Pac-Man Casquette Rouge",
+            category = AvatarCategory.PACMANS,
+            description = "Style sportif streetwear avec sa casquette rouge vive.",
+            price = 250,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_cap_red
+        ),
+        AvatarItem(
+            id = "pacman_cap_blue",
+            name = "Pac-Man Casquette Bleue",
+            category = AvatarCategory.PACMANS,
+            description = "Look casual branché avec sa casquette bleu cobalt.",
+            price = 250,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_cap_blue
+        ),
+        AvatarItem(
+            id = "pacman_cap_white",
+            name = "Pac-Man Casquette Rétro",
+            category = AvatarCategory.PACMANS,
+            description = "Casquette baseball vintage rouge et blanche des années 80.",
             price = 300,
-            drawableResId = com.cachecache.game.R.drawable.pacman_hero
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_cap_white
         ),
         AvatarItem(
-            id = "pacman_giant",
-            name = "Pac-Man Géant",
+            id = "pacman_cowboy",
+            name = "Pac-Man Cowboy",
             category = AvatarCategory.PACMANS,
-            description = "Tête géante en relief 3D, le style maître du jeu.",
+            description = "Chapeau de cuir de shérif prêt à traquer les fugitifs.",
+            price = 350,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_cowboy
+        ),
+        AvatarItem(
+            id = "pacman_biker",
+            name = "Pac-Man Motard",
+            category = AvatarCategory.PACMANS,
+            description = "Bandana biker et lunettes de soleil noires ultra cools.",
+            price = 400,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_biker
+        ),
+        AvatarItem(
+            id = "pacman_love",
+            name = "Pac-Man Amoureux",
+            category = AvatarCategory.PACMANS,
+            description = "Regard attendri avec des cœurs étincelants d'émotion.",
+            price = 450,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_love
+        ),
+        AvatarItem(
+            id = "pacman_halo",
+            name = "Pac-Man Ange",
+            category = AvatarCategory.PACMANS,
+            description = "Auréole sacrée flottante et pureté céleste.",
+            price = 500,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_halo
+        ),
+        AvatarItem(
+            id = "pacman_flower",
+            name = "Pac-Man Fleuri",
+            category = AvatarCategory.PACMANS,
+            description = "Orné d'une délicate fleur rose printanière.",
+            price = 500,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_flower
+        ),
+        AvatarItem(
+            id = "pacman_gamer",
+            name = "Pac-Man Gamer",
+            category = AvatarCategory.PACMANS,
+            description = "Casque gamer pro circum-aural pour entendre les fantômes.",
+            price = 550,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_gamer
+        ),
+        AvatarItem(
+            id = "pacman_pirate",
+            name = "Pac-Man Pirate",
+            category = AvatarCategory.PACMANS,
+            description = "Tricorne de flibustier avec tête de mort des mers.",
             price = 600,
-            drawableResId = com.cachecache.game.R.drawable.pacman_giant
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_pirate
         ),
         AvatarItem(
-            id = "pacman_starburst",
-            name = "Pac-Man Starburst",
+            id = "pacman_devil",
+            name = "Pac-Man Diablotin",
             category = AvatarCategory.PACMANS,
-            description = "Étincelles dorées et lueurs stellaires de champion.",
-            price = 1000,
-            drawableResId = com.cachecache.game.R.drawable.pacman_starburst
+            description = "Cornes démoniaques et moustache de fripouille.",
+            price = 650,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_devil
+        ),
+        AvatarItem(
+            id = "pacman_glasses",
+            name = "Pac-Man Intello",
+            category = AvatarCategory.PACMANS,
+            description = "Grosses lunettes d'érudit pour repérer tous les secrets.",
+            price = 700,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_glasses
+        ),
+        AvatarItem(
+            id = "pacman_3d",
+            name = "Pac-Man Cinéma 3D",
+            category = AvatarCategory.PACMANS,
+            description = "Lunettes anaglyphes rétro cyan et rouge stéréoscopiques.",
+            price = 750,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_3d
+        ),
+        AvatarItem(
+            id = "pacman_wizard",
+            name = "Pac-Man Magicien",
+            category = AvatarCategory.PACMANS,
+            description = "Chapeau pointu étoilé infusé d'enchantements mystiques.",
+            price = 800,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_wizard
+        ),
+        AvatarItem(
+            id = "pacman_neon",
+            name = "Pac-Man Néon Cyan",
+            category = AvatarCategory.PACMANS,
+            description = "Aura énergétique incandescente pulsant d'électricité pure.",
+            price = 1200,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_neon
         ),
 
         // Category 2: Fantômes
@@ -201,7 +305,7 @@ object MockData {
             name = "Inky (Cyan)",
             category = AvatarCategory.GHOSTS,
             description = "Le fantôme bleu turquoise aux trajectoires imprévisibles.",
-            price = 400,
+            price = 200,
             ghostColor = GhostCyan
         ),
         AvatarItem(
@@ -209,24 +313,120 @@ object MockData {
             name = "Clyde (Orange)",
             category = AvatarCategory.GHOSTS,
             description = "L'électron libre qui adore errer hors des sentiers battus.",
-            price = 400,
+            price = 200,
             ghostColor = GhostOrange
         ),
         AvatarItem(
-            id = "ghost_purple",
-            name = "Sue (Violette)",
+            id = "ghost_sunglasses",
+            name = "Fantôme Lunettes Noires",
             category = AvatarCategory.GHOSTS,
-            description = "La maîtresse du mystère aux reflets améthyste.",
-            price = 600,
-            ghostColor = GhostPurple
+            description = "Lunettes de soleil ultra stylées, impassible en toute situation.",
+            price = 300,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_sunglasses
         ),
         AvatarItem(
-            id = "ghost_scared",
-            name = "Fantôme Apeuré (Bleu)",
+            id = "ghost_crown",
+            name = "Fantôme Roi",
             category = AvatarCategory.GHOSTS,
-            description = "Frissonnant de panique avec son zigzag emblématique.",
+            description = "Couronné roi des ectoplasmes et des spectres errants.",
+            price = 350,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_crown
+        ),
+        AvatarItem(
+            id = "ghost_cap",
+            name = "Fantôme Casquette",
+            category = AvatarCategory.GHOSTS,
+            description = "Casquette bleue sportive portée fièrement sur la tête.",
+            price = 400,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_cap
+        ),
+        AvatarItem(
+            id = "ghost_halo",
+            name = "Fantôme Ange",
+            category = AvatarCategory.GHOSTS,
+            description = "Une auréole bienveillante pour un esprit pacifique.",
+            price = 450,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_halo
+        ),
+        AvatarItem(
+            id = "ghost_headphones",
+            name = "Fantôme DJ",
+            category = AvatarCategory.GHOSTS,
+            description = "Casque vissé sur la tête pour mixer des beats électro.",
+            price = 500,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_headphones
+        ),
+        AvatarItem(
+            id = "ghost_pirate",
+            name = "Fantôme Pirate",
+            category = AvatarCategory.GHOSTS,
+            description = "Capitaine légendaire à l'abordage des power-pellets.",
+            price = 550,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_pirate
+        ),
+        AvatarItem(
+            id = "ghost_devil",
+            name = "Fantôme Diablotin",
+            category = AvatarCategory.GHOSTS,
+            description = "Cornes écarlates et malice infernale.",
+            price = 600,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_devil
+        ),
+        AvatarItem(
+            id = "ghost_mustache",
+            name = "Fantôme Gentleman",
+            category = AvatarCategory.GHOSTS,
+            description = "Élégance avec sa moustache impeccablement taillée.",
+            price = 650,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_mustache
+        ),
+        AvatarItem(
+            id = "ghost_3d",
+            name = "Fantôme 3D",
+            category = AvatarCategory.GHOSTS,
+            description = "Prêt pour la séance de cinéma en trois dimensions.",
+            price = 700,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_3d
+        ),
+        AvatarItem(
+            id = "ghost_santa",
+            name = "Fantôme Père Noël",
+            category = AvatarCategory.GHOSTS,
+            description = "Bonnet pompon rouge et barbe soyeuse de fin d'année.",
+            price = 750,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_santa
+        ),
+        AvatarItem(
+            id = "ghost_wizard",
+            name = "Fantôme Sorcier",
+            category = AvatarCategory.GHOSTS,
+            description = "Maître des incantations et des disparitions furtives.",
             price = 800,
-            ghostColor = ScaredBlue
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_wizard
+        ),
+        AvatarItem(
+            id = "ghost_snorkel",
+            name = "Fantôme Plongée",
+            category = AvatarCategory.GHOSTS,
+            description = "Masque sous-marin et tuba prêt pour les abysses.",
+            price = 850,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_snorkel
+        ),
+        AvatarItem(
+            id = "ghost_cowboy",
+            name = "Fantôme Cowboy",
+            category = AvatarCategory.GHOSTS,
+            description = "Chapeau western avec étoile dorée du shérif.",
+            price = 900,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_cowboy
+        ),
+        AvatarItem(
+            id = "ghost_dark_blue",
+            name = "Fantôme Sombre",
+            category = AvatarCategory.GHOSTS,
+            description = "Éclipse nocturne avec sa couronne royale d'outre-tombe.",
+            price = 1000,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_dark_blue
         )
     )
 }

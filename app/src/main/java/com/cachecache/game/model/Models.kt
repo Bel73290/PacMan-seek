@@ -118,6 +118,7 @@ data class GameState(
     val isSimulationWalking: Boolean = false,
     val seekerLocation: GeoPoint = GeoPoint(45.6415, 5.8680),
     val seekerHeading: Float = 45f,
+    val isFacingRight: Boolean = true,
     val hiddenPlayers: List<HiddenPlayer> = emptyList(),
     val suspectZone: SuspectZone? = null,
     val pacDotsRoute: List<GeoPoint> = emptyList(),
