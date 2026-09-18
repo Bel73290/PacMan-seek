@@ -1,8 +1,7 @@
 package com.cachecache.game.ui.screens
 
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,21 +12,20 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.cachecache.game.R
 import com.cachecache.game.model.HiddenPlayer
 import com.cachecache.game.ui.components.GhostComposable
 import com.cachecache.game.ui.theme.*
 import com.cachecache.game.viewmodel.GameViewModel
-import kotlin.math.cos
-import kotlin.math.sin
 
 @Composable
 fun CaptureSuccessDialog(
@@ -35,7 +33,6 @@ fun CaptureSuccessDialog(
     seekerRemainingSeconds: Int,
     onDismiss: () -> Unit
 ) {
-    // Spring bounce animation on appearance
     var animStarted by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { animStarted = true }
 
@@ -45,7 +42,6 @@ fun CaptureSuccessDialog(
         label = "dialogScale"
     )
 
-    // Animated score increment
     val scoreAnim by animateIntAsState(
         targetValue = if (animStarted) 50 else 0,
         animationSpec = tween(700, easing = FastOutSlowInEasing),
@@ -57,7 +53,7 @@ fun CaptureSuccessDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .scale(scale)
-                .border(1.dp, BorderSubtle, RoundedCornerShape(28.dp)),
+                .border(1.5.dp, BorderSubtle, RoundedCornerShape(28.dp)),
             shape = RoundedCornerShape(28.dp),
             colors = CardDefaults.cardColors(containerColor = NavyIntermediate)
         ) {
@@ -67,7 +63,7 @@ fun CaptureSuccessDialog(
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Festive Header Title
+                // Title
                 Text(
                     text = "Tu as trouvé un caché !",
                     color = TextPrimary,
@@ -76,39 +72,37 @@ fun CaptureSuccessDialog(
                     textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                // Ghost with radiating festive sparks
+                // High-Res Celebration Burst with Cute Jumping Ghost
                 Box(
-                    modifier = Modifier.size(160.dp),
+                    modifier = Modifier
+                        .size(175.dp)
+                        .clip(RoundedCornerShape(20.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Canvas(modifier = Modifier.fillMaxSize()) {
-                        drawRadiatingSparks()
-                    }
-
-                    // Large Animated Scared Ghost
-                    GhostComposable(
-                        size = 86.dp,
-                        baseColor = player.color,
-                        isScared = true
+                    Image(
+                        painter = painterResource(id = R.drawable.img_capture_burst),
+                        contentDescription = "Célébration capture",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Big Score Label: "+ 50 points"
+                // Score + 50 points
                 Text(
                     text = "+ $scoreAnim points",
                     color = PacmanYellow,
-                    fontSize = 28.sp,
+                    fontSize = 30.sp,
                     fontWeight = FontWeight.Black,
                     textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.height(22.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-                // Summary Card with 3 info rows
+                // 3 Info Rows
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(18.dp),
@@ -137,7 +131,7 @@ fun CaptureSuccessDialog(
                             )
                         }
 
-                        // Row 2: Hidden Player
+                        // Row 2: Ghost info
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(
                                 modifier = Modifier.size(20.dp),
@@ -154,11 +148,11 @@ fun CaptureSuccessDialog(
                             )
                         }
 
-                        // Row 3: Campus Position
+                        // Row 3: Position on campus
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = Icons.Default.LocationOn,
-                                contentDescription = "Localisation",
+                                contentDescription = "Position",
                                 tint = ScaredBlue,
                                 modifier = Modifier.size(20.dp)
                             )
@@ -175,7 +169,7 @@ fun CaptureSuccessDialog(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Yellow Continue Button
+                // "Continuer" Button
                 Button(
                     onClick = onDismiss,
                     modifier = Modifier
@@ -195,31 +189,5 @@ fun CaptureSuccessDialog(
                 }
             }
         }
-    }
-}
-
-private fun DrawScope.drawRadiatingSparks() {
-    val center = Offset(size.width / 2f, size.height / 2f)
-    val sparkCount = 14
-    val innerR = size.width * 0.38f
-    val outerR = size.width * 0.48f
-
-    val sparkColors = listOf(GhostRed, GhostPink, GhostOrange, GhostCyan, PacmanYellow, ScaredBlue)
-
-    for (i in 0 until sparkCount) {
-        val angle = Math.toRadians((i * (360.0 / sparkCount)).toDouble())
-        val x1 = (center.x + innerR * cos(angle)).toFloat()
-        val y1 = (center.y + innerR * sin(angle)).toFloat()
-        val x2 = (center.x + outerR * cos(angle)).toFloat()
-        val y2 = (center.y + outerR * sin(angle)).toFloat()
-
-        val color = sparkColors[i % sparkColors.size]
-        drawLine(
-            color = color,
-            start = Offset(x1, y1),
-            end = Offset(x2, y2),
-            strokeWidth = 3.dp.toPx(),
-            cap = androidx.compose.ui.graphics.StrokeCap.Round
-        )
     }
 }
