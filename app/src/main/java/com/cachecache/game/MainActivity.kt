@@ -35,6 +35,7 @@ class MainActivity : ComponentActivity() {
                     BackHandler(enabled = state.currentScreen != Screen.SPLASH) {
                         when (state.currentScreen) {
                             Screen.GAME -> viewModel.setScreen(Screen.SPLASH)
+                            Screen.STREET_VIEW -> viewModel.closeStreetView()
                             Screen.LEADERBOARD -> viewModel.setScreen(Screen.SPLASH)
                             Screen.RADAR_FILTERS -> viewModel.setScreen(Screen.GAME)
                             Screen.GUIDE -> viewModel.setScreen(Screen.SPLASH)
@@ -43,7 +44,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    // Screen Router
+                    // Screen Router for All 8 Screens
                     when (state.currentScreen) {
                         Screen.SPLASH -> {
                             SplashScreen(
@@ -63,13 +64,22 @@ class MainActivity : ComponentActivity() {
                                 state = state,
                                 onBackToHome = { viewModel.setScreen(Screen.SPLASH) },
                                 onNavigate = { screen -> viewModel.setScreen(screen) },
+                                onOpenStreetView = { viewModel.openStreetView() },
                                 onGoToSuspectZone = { viewModel.goToSuspectZone() },
                                 onDismissSuspectZoneModal = { viewModel.dismissSuspectZoneModal() },
+                                onDismissProximityAlert = { viewModel.dismissProximityAlert() },
                                 onMapTap = { geo -> viewModel.onMapTapped(geo) },
                                 onPlayerTap = { player -> viewModel.onPlayerTapped(player) },
                                 onRecenter = { viewModel.recenterOnCampus() },
                                 onDismissCaptureDialog = { viewModel.dismissCaptureDialog() },
                                 onTestInstantCapture = { viewModel.triggerSimulatedCaptureTest() }
+                            )
+                        }
+                        Screen.STREET_VIEW -> {
+                            StreetViewScreen(
+                                state = state,
+                                onBack = { viewModel.closeStreetView() },
+                                onCaptureTrigger = { viewModel.triggerSimulatedCaptureTest() }
                             )
                         }
                         Screen.LEADERBOARD -> {
@@ -102,6 +112,7 @@ class MainActivity : ComponentActivity() {
                             ProfileScreen(
                                 state = state,
                                 onNavigate = { screen -> viewModel.setScreen(screen) },
+                                onOpenSettings = { viewModel.openSettingsDialog(true) },
                                 onSelectBadge = { badge -> viewModel.selectBadge(badge) }
                             )
                         }

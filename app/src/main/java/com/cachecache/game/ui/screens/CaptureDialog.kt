@@ -1,7 +1,6 @@
 package com.cachecache.game.ui.screens
 
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,17 +11,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.cachecache.game.R
 import com.cachecache.game.model.HiddenPlayer
+import com.cachecache.game.ui.components.FestivePacmanComposable
 import com.cachecache.game.ui.components.GhostComposable
 import com.cachecache.game.ui.theme.*
 import com.cachecache.game.viewmodel.GameViewModel
@@ -63,7 +59,7 @@ fun CaptureSuccessDialog(
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Title
+                // Festive Title
                 Text(
                     text = "Tu as trouvé un caché !",
                     color = TextPrimary,
@@ -74,22 +70,12 @@ fun CaptureSuccessDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // High-Res Celebration Burst with Cute Jumping Ghost
-                Box(
-                    modifier = Modifier
-                        .size(175.dp)
-                        .clip(RoundedCornerShape(20.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.img_capture_burst),
-                        contentDescription = "Célébration capture",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
+                // Festive Jumping Pacman with Exploding Colorful Confetti (100% Vector)
+                FestivePacmanComposable(
+                    modifier = Modifier.size(160.dp)
+                )
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 // Score + 50 points
                 Text(
@@ -102,7 +88,7 @@ fun CaptureSuccessDialog(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // 3 Info Rows
+                // Summary Card with 3 info rows matching Screen 5
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(18.dp),
@@ -141,7 +127,7 @@ fun CaptureSuccessDialog(
                             }
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
-                                text = "Caché trouvé : #${player.id} (${player.name})",
+                                text = "Caché trouvé : #${player.id}",
                                 color = TextPrimary,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Medium
@@ -169,7 +155,7 @@ fun CaptureSuccessDialog(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // "Continuer" Button
+                // Yellow Continue Button
                 Button(
                     onClick = onDismiss,
                     modifier = Modifier

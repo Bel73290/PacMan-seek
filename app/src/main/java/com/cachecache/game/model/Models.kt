@@ -78,6 +78,7 @@ enum class LeaderboardTab(val label: String) {
 enum class Screen {
     SPLASH,
     GAME,
+    STREET_VIEW,
     LEADERBOARD,
     RADAR_FILTERS,
     GUIDE,
@@ -93,8 +94,9 @@ data class GameSettings(
 data class GameState(
     val currentScreen: Screen = Screen.SPLASH,
     val settings: GameSettings = GameSettings(),
-    val seekerRemainingSeconds: Int = 3 * 60,
-    val hidingRemainingSeconds: Int = 10 * 60,
+    val seekerRemainingSeconds: Int = 2 * 60 + 45, // 02:45
+    val hidingRemainingSeconds: Int = 9 * 60 + 32, // 09:32
+    val streetViewRemainingSeconds: Int = 2 * 60 + 18, // 02:18
     val isGameRunning: Boolean = false,
     val isSimulationWalking: Boolean = false,
     val seekerLocation: GeoPoint = GeoPoint(45.6415, 5.8680),
@@ -110,6 +112,9 @@ data class GameState(
     val maxXp: Int = 500,
     val totalGamesPlayed: Int = 12,
     val totalVictories: Int = 7,
+    val isGhostProximityAlertVisible: Boolean = true,
+    val isStreetViewMiniVisible: Boolean = true,
+    val isStreetViewRadarOpen: Boolean = true,
     val capturedDialogPlayer: HiddenPlayer? = null,
     val selectedBadgeDetail: BadgeItem? = null,
     val showSettingsDialog: Boolean = false,

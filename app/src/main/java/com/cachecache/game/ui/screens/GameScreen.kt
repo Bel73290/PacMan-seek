@@ -34,8 +34,10 @@ fun GameScreen(
     state: GameState,
     onBackToHome: () -> Unit,
     onNavigate: (Screen) -> Unit,
+    onOpenStreetView: () -> Unit,
     onGoToSuspectZone: () -> Unit,
     onDismissSuspectZoneModal: () -> Unit,
+    onDismissProximityAlert: () -> Unit,
     onMapTap: (GeoPoint) -> Unit,
     onPlayerTap: (HiddenPlayer) -> Unit,
     onRecenter: () -> Unit,
@@ -48,19 +50,22 @@ fun GameScreen(
             .minByOrNull { it.distanceMeters }
     }
 
+    // Is within 30m of a hidden ghost?
+    val isNearGhost = nearestPlayer != null && nearestPlayer.distanceMeters <= 30.0
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(DeepNavy)
     ) {
-        // 1. Fullscreen Interactive OSM Map
+        // 1. Fullscreen Natural OpenStreetMap with Camera Centered on Pacman
         OsmMapView(
             seekerLocation = state.seekerLocation,
             seekerHeading = state.seekerHeading,
             hiddenPlayers = state.hiddenPlayers,
             suspectZone = state.suspectZone,
             pacDotsRoute = if (state.suspectZone?.isTargeted == true || state.suspectZone?.isModalVisible == true) state.pacDotsRoute else emptyList(),
-            isRadarScanning = false,
+            isRadarScanning = isNearGhost,
             onMapTap = onMapTap,
             onPlayerTap = onPlayerTap
         )
@@ -70,7 +75,7 @@ fun GameScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .statusBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(horizontal = 16.dp, vertical = 6.dp)
         ) {
             // Header Bar
             Row(
@@ -82,7 +87,7 @@ fun GameScreen(
                     modifier = Modifier
                         .size(42.dp)
                         .clip(CircleShape)
-                        .background(NavyIntermediate.copy(alpha = 0.9f))
+                        .background(NavyIntermediate.copy(alpha = 0.95f))
                         .border(1.dp, BorderSubtle, CircleShape)
                 ) {
                     Icon(
@@ -100,13 +105,12 @@ fun GameScreen(
                     textAlign = TextAlign.Center
                 )
 
-                // Spacer to balance the back button
                 Spacer(modifier = Modifier.size(42.dp))
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            // Dual Horizontal Timer Counters
+            // Dual Horizontal Timer Counters (Écran 2)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -134,11 +138,72 @@ fun GameScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
-            // Screen 3: Suspect Zone Modal (if visible)
+            // Écran 3 : Bannière Flottante "Proche d'un fantôme !" (moins de 30 mètres)
             AnimatedVisibility(
-                visible = state.suspectZone?.isModalVisible == true,
+                visible = isNearGhost && state.isGhostProximityAlertVisible,
+                enter = slideInVertically() + fadeIn(),
+                exit = slideOutVertically() + fadeOut()
+            ) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.2.dp, BorderSubtle, RoundedCornerShape(18.dp)),
+                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(containerColor = NavyIntermediate.copy(alpha = 0.95f))
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 14.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Blue Ghost Icon in Capsule
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(DarkContrast),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            GhostComposable(size = 22.dp, baseColor = ScaredBlue, isScared = true)
+                        }
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Proche d'un fantôme !",
+                                color = TextPrimary,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
+                            )
+                            Text(
+                                text = "Il est à moins de 30 mètres...",
+                                color = TextSecondary,
+                                fontSize = 12.sp
+                            )
+                        }
+
+                        IconButton(
+                            onClick = onDismissProximityAlert,
+                            modifier = Modifier.size(28.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Fermer",
+                                tint = TextSecondary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Écran 7 : Bannière "Zone suspecte"
+            AnimatedVisibility(
+                visible = !isNearGhost && state.suspectZone?.isModalVisible == true,
                 enter = slideInVertically() + fadeIn(),
                 exit = slideOutVertically() + fadeOut()
             ) {
@@ -156,21 +221,12 @@ fun GameScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.Warning,
-                                        contentDescription = "Zone suspecte",
-                                        tint = ScaredBlue,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        text = zone.title,
-                                        color = TextPrimary,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 16.sp
-                                    )
-                                }
+                                Text(
+                                    text = zone.title,
+                                    color = TextPrimary,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp
+                                )
 
                                 IconButton(
                                     onClick = onDismissSuspectZoneModal,
@@ -185,7 +241,7 @@ fun GameScreen(
                                 }
                             }
 
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
 
                             Text(
                                 text = zone.description,
@@ -218,7 +274,7 @@ fun GameScreen(
             }
         }
 
-        // 3. Bottom Overlay Controls & Floating Guidance Banner
+        // 3. Floating Bottom Controls: Mini Street View Inset Card & Recenter GPS
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -226,21 +282,20 @@ fun GameScreen(
                 .navigationBarsPadding(),
             horizontalAlignment = Alignment.End
         ) {
-            // Interactive Proximity & Recenter Buttons Row
+            // Row with Proximity badge + Mini Street View Inset / Recenter button
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(horizontal = 16.dp, vertical = 6.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Bottom
             ) {
-                // Real-time Proximity Badge (<25m panic, <=0.30m capture)
+                // Left: Contact / Proximity indicator
                 nearestPlayer?.let { nearest ->
-                    val isPanic = nearest.distanceMeters <= 25.0
                     Card(
                         shape = RoundedCornerShape(16.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = if (isPanic) GhostRed.copy(alpha = 0.85f) else NavyIntermediate.copy(alpha = 0.9f)
+                            containerColor = if (nearest.distanceMeters <= 25.0) GhostRed.copy(alpha = 0.9f) else NavyIntermediate.copy(alpha = 0.9f)
                         ),
                         modifier = Modifier
                             .border(1.dp, BorderSubtle, RoundedCornerShape(16.dp))
@@ -251,7 +306,7 @@ fun GameScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Box(modifier = Modifier.size(16.dp), contentAlignment = Alignment.Center) {
-                                GhostComposable(size = 16.dp, baseColor = nearest.color, isScared = isPanic)
+                                GhostComposable(size = 16.dp, baseColor = nearest.color, isScared = nearest.distanceMeters <= 25.0)
                             }
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
@@ -260,62 +315,43 @@ fun GameScreen(
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold
                             )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = if (nearest.distanceMeters <= 0.30) "(Touche !)" else if (isPanic) "(Panique !)" else "",
-                                color = PacmanYellow,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold
-                            )
                         }
                     }
                 } ?: Spacer(modifier = Modifier.weight(1f))
 
-                // Floating GPS Recenter Button
-                IconButton(
-                    onClick = onRecenter,
-                    modifier = Modifier
-                        .size(50.dp)
-                        .shadow(8.dp, CircleShape)
-                        .clip(CircleShape)
-                        .background(NavyIntermediate)
-                        .border(1.dp, BorderSubtle, CircleShape)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.MyLocation,
-                        contentDescription = "Recentrer campus",
-                        tint = PacmanYellow,
-                        modifier = Modifier.size(24.dp)
+                // Right: Mini Street View Inset Card (Écran 3) OR Recenter GPS
+                if (isNearGhost && state.isStreetViewMiniVisible) {
+                    // Floating Mini Street View Card
+                    StreetViewComposable(
+                        modifier = Modifier
+                            .size(width = 175.dp, height = 135.dp)
+                            .shadow(12.dp, RoundedCornerShape(16.dp)),
+                        isMini = true,
+                        timerText = "02:18",
+                        onExpand = onOpenStreetView
                     )
+                } else {
+                    // Recenter GPS Button
+                    IconButton(
+                        onClick = onRecenter,
+                        modifier = Modifier
+                            .size(50.dp)
+                            .shadow(8.dp, CircleShape)
+                            .clip(CircleShape)
+                            .background(NavyIntermediate)
+                            .border(1.dp, BorderSubtle, CircleShape)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MyLocation,
+                            contentDescription = "Recentrer",
+                            tint = PacmanYellow,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
             }
 
-            // Bottom Floating Guidance Banner
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 6.dp)
-                    .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp)),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = NavyIntermediate.copy(alpha = 0.95f))
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    PacmanComposable(size = 32.dp, color = PacmanYellow, isAnimated = true)
-                    Spacer(modifier = Modifier.width(14.dp))
-                    Text(
-                        text = "Explore les zones indiquées pour trouver les cachés !",
-                        color = TextPrimary,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium,
-                        lineHeight = 18.sp
-                    )
-                }
-            }
+            Spacer(modifier = Modifier.height(4.dp))
 
             // Fixed Bottom Navigation Bar
             BottomNavigationBar(
@@ -324,7 +360,7 @@ fun GameScreen(
             )
         }
 
-        // Screen 4: Capture Dialog Overlay (triggers at <= 0.30m)
+        // Screen 5: Capture Dialog Overlay (triggered at <= 0.30m)
         state.capturedDialogPlayer?.let { capturedPlayer ->
             CaptureSuccessDialog(
                 player = capturedPlayer,
@@ -344,8 +380,7 @@ private fun TimerCard(
     iconComposable: @Composable () -> Unit
 ) {
     Card(
-        modifier = modifier
-            .border(1.dp, BorderSubtle, RoundedCornerShape(18.dp)),
+        modifier = modifier.border(1.dp, BorderSubtle, RoundedCornerShape(18.dp)),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = NavyIntermediate.copy(alpha = 0.95f))
     ) {

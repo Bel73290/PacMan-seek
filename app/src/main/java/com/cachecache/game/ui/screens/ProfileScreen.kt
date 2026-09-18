@@ -8,6 +8,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,6 +34,7 @@ import java.util.Locale
 fun ProfileScreen(
     state: GameState,
     onNavigate: (Screen) -> Unit,
+    onOpenSettings: () -> Unit,
     onSelectBadge: (BadgeItem?) -> Unit
 ) {
     val numberFormat = NumberFormat.getNumberInstance(Locale.FRANCE)
@@ -50,25 +54,58 @@ fun ProfileScreen(
                 .padding(paddingValues)
                 .statusBarsPadding()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 12.dp)
+                .padding(horizontal = 20.dp, vertical = 10.dp)
         ) {
-            // 1. Player Identity Card
+            // Header: "Mon profil" on left + Gear Settings Icon on right
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Mon profil",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = TextPrimary,
+                    fontWeight = FontWeight.Bold
+                )
+
+                IconButton(
+                    onClick = onOpenSettings,
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(CircleShape)
+                        .background(NavyIntermediate)
+                        .border(1.dp, BorderSubtle, CircleShape)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = "Réglages",
+                        tint = PacmanYellow
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // 1. Player Identity Card
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Large Round Avatar Pacman
                 Box(
                     modifier = Modifier
-                        .size(68.dp)
+                        .size(72.dp)
                         .clip(CircleShape)
                         .background(NavyIntermediate)
                         .border(3.dp, PacmanYellow, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    PacmanComposable(size = 46.dp, color = PacmanYellow, isAnimated = true)
+                    PacmanComposable(size = 48.dp, color = PacmanYellow, isAnimated = true)
                 }
 
                 Spacer(modifier = Modifier.width(16.dp))
@@ -116,12 +153,12 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(18.dp))
 
-            // 2. Three Key Metrics Grid
+            // 2. Three Key Metrics Grid (Points with Star, Parties with Gamepad, Victoires with Trophy)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Points
+                // Points (Star)
                 StatCard(
                     modifier = Modifier.weight(1f),
                     value = numberFormat.format(state.userScore),
@@ -129,15 +166,22 @@ fun ProfileScreen(
                     iconContent = { StarComposable(size = 24.dp, color = PacmanYellow) }
                 )
 
-                // Parties
+                // Parties (Gamepad Icon in Purple)
                 StatCard(
                     modifier = Modifier.weight(1f),
                     value = state.totalGamesPlayed.toString(),
                     label = "Parties",
-                    iconContent = { GhostComposable(size = 22.dp, baseColor = GhostPurple, isScared = false) }
+                    iconContent = {
+                        Icon(
+                            imageVector = Icons.Default.SportsEsports,
+                            contentDescription = "Parties",
+                            tint = GhostPurple,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 )
 
-                // Victoires
+                // Victoires (Trophy)
                 StatCard(
                     modifier = Modifier.weight(1f),
                     value = state.totalVictories.toString(),
@@ -272,7 +316,6 @@ private fun HistoryRow(item: HistoryItem) {
                 .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Icon
             Box(
                 modifier = Modifier
                     .size(36.dp)
@@ -290,7 +333,6 @@ private fun HistoryRow(item: HistoryItem) {
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            // Details
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "${item.date} ${item.title}",
@@ -300,7 +342,6 @@ private fun HistoryRow(item: HistoryItem) {
                 )
             }
 
-            // Delta points
             Text(
                 text = "+${item.deltaScore} pts",
                 color = PacmanYellow,

@@ -111,6 +111,18 @@ class GameViewModel : ViewModel() {
         _uiState.update { it.copy(selectedBadgeDetail = badge) }
     }
 
+    fun dismissProximityAlert() {
+        _uiState.update { it.copy(isGhostProximityAlertVisible = false) }
+    }
+
+    fun openStreetView() {
+        _uiState.update { it.copy(currentScreen = Screen.STREET_VIEW) }
+    }
+
+    fun closeStreetView() {
+        _uiState.update { it.copy(currentScreen = Screen.GAME) }
+    }
+
     fun dismissCaptureDialog() {
         _uiState.update { it.copy(capturedDialogPlayer = null) }
     }
