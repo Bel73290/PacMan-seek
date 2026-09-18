@@ -36,21 +36,9 @@ import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
-import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.util.GeoPoint as OsmGeoPoint
 import org.osmdroid.views.MapView
 import kotlin.math.sin
-
-val MinimalistDarkNoLabels = XYTileSource(
-    "CartoDarkNoLabels",
-    0, 20, 256, ".png",
-    arrayOf(
-        "https://a.basemaps.cartocdn.com/rastertiles/dark_nolabels/",
-        "https://b.basemaps.cartocdn.com/rastertiles/dark_nolabels/",
-        "https://c.basemaps.cartocdn.com/rastertiles/dark_nolabels/",
-        "https://d.basemaps.cartocdn.com/rastertiles/dark_nolabels/"
-    )
-)
 
 @Composable
 fun OsmMapView(
@@ -75,6 +63,8 @@ fun OsmMapView(
             "red_left_1" to R.drawable.ghost_red_left_1,
             "red_right_0" to R.drawable.ghost_red_right_0,
             "red_right_1" to R.drawable.ghost_red_right_1,
+            "red_back_0" to R.drawable.ghost_red_back_0,
+            "red_back_1" to R.drawable.ghost_red_back_1,
 
             "pink_front_0" to R.drawable.ghost_pink_front_0,
             "pink_front_1" to R.drawable.ghost_pink_front_1,
@@ -82,6 +72,8 @@ fun OsmMapView(
             "pink_left_1" to R.drawable.ghost_pink_left_1,
             "pink_right_0" to R.drawable.ghost_pink_right_0,
             "pink_right_1" to R.drawable.ghost_pink_right_1,
+            "pink_back_0" to R.drawable.ghost_pink_back_0,
+            "pink_back_1" to R.drawable.ghost_pink_back_1,
 
             "cyan_front_0" to R.drawable.ghost_cyan_front_0,
             "cyan_front_1" to R.drawable.ghost_cyan_front_1,
@@ -89,6 +81,8 @@ fun OsmMapView(
             "cyan_left_1" to R.drawable.ghost_cyan_left_1,
             "cyan_right_0" to R.drawable.ghost_cyan_right_0,
             "cyan_right_1" to R.drawable.ghost_cyan_right_1,
+            "cyan_back_0" to R.drawable.ghost_cyan_back_0,
+            "cyan_back_1" to R.drawable.ghost_cyan_back_1,
 
             "orange_front_0" to R.drawable.ghost_orange_front_0,
             "orange_front_1" to R.drawable.ghost_orange_front_1,
@@ -96,6 +90,8 @@ fun OsmMapView(
             "orange_left_1" to R.drawable.ghost_orange_left_1,
             "orange_right_0" to R.drawable.ghost_orange_right_0,
             "orange_right_1" to R.drawable.ghost_orange_right_1,
+            "orange_back_0" to R.drawable.ghost_orange_back_0,
+            "orange_back_1" to R.drawable.ghost_orange_back_1,
 
             "purple_front_0" to R.drawable.ghost_purple_front_0,
             "purple_front_1" to R.drawable.ghost_purple_front_1,
@@ -103,6 +99,8 @@ fun OsmMapView(
             "purple_left_1" to R.drawable.ghost_purple_left_1,
             "purple_right_0" to R.drawable.ghost_purple_right_0,
             "purple_right_1" to R.drawable.ghost_purple_right_1,
+            "purple_back_0" to R.drawable.ghost_purple_back_0,
+            "purple_back_1" to R.drawable.ghost_purple_back_1,
 
             "scared_0" to R.drawable.ghost_scared_blue_0,
             "scared_1" to R.drawable.ghost_scared_blue_1
@@ -135,7 +133,6 @@ fun OsmMapView(
         }
     }
 
-    val mapPinBmp = remember { BitmapFactory.decodeResource(context.resources, R.drawable.map_pin_red)?.asImageBitmap() }
     var redrawTrigger by remember { mutableLongStateOf(0L) }
 
     val infiniteTransition = rememberInfiniteTransition(label = "mapAnimations")
@@ -212,7 +209,7 @@ fun OsmMapView(
             factory = { ctx ->
                 Configuration.getInstance().userAgentValue = ctx.packageName
                 MapView(ctx).apply {
-                    setTileSource(MinimalistDarkNoLabels)
+                    setTileSource(TileSourceFactory.MAPNIK)
                     setMultiTouchControls(true)
                     isTilesScaledToDpi = true
                     controller.setZoom(18.2)
@@ -313,18 +310,6 @@ fun OsmMapView(
                             pathEffect = PathEffect.dashPathEffect(floatArrayOf(18f, 12f), 0f)
                         )
                     )
-
-                    // Pin Marker on Suspect Zone
-                    proj.toPixels(OsmGeoPoint(zone.center.latitude, zone.center.longitude), pt)
-                    if (mapPinBmp != null) {
-                        val pinW = 28.dp.toPx()
-                        val pinH = pinW * (mapPinBmp.height.toFloat() / mapPinBmp.width.toFloat())
-                        drawImage(
-                            image = mapPinBmp,
-                            dstOffset = IntOffset((pt.x - pinW / 2f).toInt(), (pt.y - pinH).toInt()),
-                            dstSize = IntSize(pinW.toInt(), pinH.toInt())
-                        )
-                    }
                 }
             }
 
@@ -415,12 +400,19 @@ fun OsmMapView(
                     )
                 }
 
-                // Calculate relative horizontal position: Ghost looks towards Pacman!
+                // Calculate relative position: Ghost turns towards Pacman (including back view when Pacman is behind)!
                 val deltaX = seekerCenter.x - ghostCenter.x
+                val deltaY = seekerCenter.y - ghostCenter.y
+                val absX = kotlin.math.abs(deltaX)
+                val absY = kotlin.math.abs(deltaY)
+
                 val dir = when {
-                    deltaX < -15f -> "left"
-                    deltaX > 15f -> "right"
-                    else -> "front"
+                    absY >= absX && deltaY < -15f -> "back"
+                    absY >= absX && deltaY > 15f  -> "front"
+                    deltaX < -15f                 -> "left"
+                    deltaX > 15f                  -> "right"
+                    deltaY < -15f                 -> "back"
+                    else                          -> "front"
                 }
 
                 val colorPrefix = when (player.name) {

@@ -53,6 +53,7 @@ fun GhostComposable(
         baseColor = baseColor,
         isScared = isScared,
         lookDirX = lookDirection.x,
+        lookDirY = lookDirection.y,
         walkFrame = walkFrame
     )
 
@@ -69,7 +70,13 @@ fun GhostComposable(
     )
 }
 
-fun getGhostDrawableId(baseColor: Color, isScared: Boolean, lookDirX: Float, walkFrame: Int): Int {
+fun getGhostDrawableId(
+    baseColor: Color,
+    isScared: Boolean,
+    lookDirX: Float,
+    lookDirY: Float = 0f,
+    walkFrame: Int
+): Int {
     val frameSuffix = if (walkFrame == 0) "0" else "1"
 
     if (isScared) {
@@ -84,10 +91,16 @@ fun getGhostDrawableId(baseColor: Color, isScared: Boolean, lookDirX: Float, wal
         else -> "red"
     }
 
+    val absX = kotlin.math.abs(lookDirX)
+    val absY = kotlin.math.abs(lookDirY)
+
     val dir = when {
-        lookDirX < -0.15f -> "left"
-        lookDirX > 0.15f -> "right"
-        else -> "front"
+        absY > absX && lookDirY < -0.15f -> "back"
+        absY > absX && lookDirY > 0.15f  -> "front"
+        lookDirX < -0.15f                -> "left"
+        lookDirX > 0.15f                 -> "right"
+        lookDirY < -0.15f                -> "back"
+        else                             -> "front"
     }
 
     return when ("${colorPrefix}_${dir}_$frameSuffix") {
@@ -97,6 +110,8 @@ fun getGhostDrawableId(baseColor: Color, isScared: Boolean, lookDirX: Float, wal
         "red_left_1" -> R.drawable.ghost_red_left_1
         "red_right_0" -> R.drawable.ghost_red_right_0
         "red_right_1" -> R.drawable.ghost_red_right_1
+        "red_back_0" -> R.drawable.ghost_red_back_0
+        "red_back_1" -> R.drawable.ghost_red_back_1
 
         "pink_front_0" -> R.drawable.ghost_pink_front_0
         "pink_front_1" -> R.drawable.ghost_pink_front_1
@@ -104,6 +119,8 @@ fun getGhostDrawableId(baseColor: Color, isScared: Boolean, lookDirX: Float, wal
         "pink_left_1" -> R.drawable.ghost_pink_left_1
         "pink_right_0" -> R.drawable.ghost_pink_right_0
         "pink_right_1" -> R.drawable.ghost_pink_right_1
+        "pink_back_0" -> R.drawable.ghost_pink_back_0
+        "pink_back_1" -> R.drawable.ghost_pink_back_1
 
         "cyan_front_0" -> R.drawable.ghost_cyan_front_0
         "cyan_front_1" -> R.drawable.ghost_cyan_front_1
@@ -111,6 +128,8 @@ fun getGhostDrawableId(baseColor: Color, isScared: Boolean, lookDirX: Float, wal
         "cyan_left_1" -> R.drawable.ghost_cyan_left_1
         "cyan_right_0" -> R.drawable.ghost_cyan_right_0
         "cyan_right_1" -> R.drawable.ghost_cyan_right_1
+        "cyan_back_0" -> R.drawable.ghost_cyan_back_0
+        "cyan_back_1" -> R.drawable.ghost_cyan_back_1
 
         "orange_front_0" -> R.drawable.ghost_orange_front_0
         "orange_front_1" -> R.drawable.ghost_orange_front_1
@@ -118,6 +137,8 @@ fun getGhostDrawableId(baseColor: Color, isScared: Boolean, lookDirX: Float, wal
         "orange_left_1" -> R.drawable.ghost_orange_left_1
         "orange_right_0" -> R.drawable.ghost_orange_right_0
         "orange_right_1" -> R.drawable.ghost_orange_right_1
+        "orange_back_0" -> R.drawable.ghost_orange_back_0
+        "orange_back_1" -> R.drawable.ghost_orange_back_1
 
         "purple_front_0" -> R.drawable.ghost_purple_front_0
         "purple_front_1" -> R.drawable.ghost_purple_front_1
@@ -125,6 +146,8 @@ fun getGhostDrawableId(baseColor: Color, isScared: Boolean, lookDirX: Float, wal
         "purple_left_1" -> R.drawable.ghost_purple_left_1
         "purple_right_0" -> R.drawable.ghost_purple_right_0
         "purple_right_1" -> R.drawable.ghost_purple_right_1
+        "purple_back_0" -> R.drawable.ghost_purple_back_0
+        "purple_back_1" -> R.drawable.ghost_purple_back_1
 
         else -> R.drawable.ghost_red_front_0
     }
