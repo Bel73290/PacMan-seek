@@ -73,7 +73,8 @@ class MainActivity : ComponentActivity() {
                                 onPlayerTap = { player -> viewModel.onPlayerTapped(player) },
                                 onRecenter = { viewModel.recenterOnCampus() },
                                 onDismissCaptureDialog = { viewModel.dismissCaptureDialog() },
-                                onTestInstantCapture = { viewModel.triggerSimulatedCaptureTest() }
+                                onTestInstantCapture = { viewModel.triggerSimulatedCaptureTest() },
+                                onReplay = { viewModel.restartGame() }
                             )
                         }
                         Screen.STREET_VIEW -> {

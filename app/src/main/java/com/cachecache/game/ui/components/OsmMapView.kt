@@ -46,6 +46,7 @@ fun OsmMapView(
     seekerLocation: GeoPoint,
     seekerHeading: Float,
     isFacingRight: Boolean = true,
+    isFrozen: Boolean = false,
     capturingGhost: HiddenPlayer? = null,
     hiddenPlayers: List<HiddenPlayer>,
     suspectZone: SuspectZone?,
@@ -447,18 +448,15 @@ fun OsmMapView(
                 // Calculate relative position: Ghost turns towards Pacman (including back, true front, slight left, slight right, full left, full right)
                 val deltaX = seekerCenter.x - ghostCenter.x
                 val deltaY = seekerCenter.y - ghostCenter.y
-                val absX = kotlin.math.abs(deltaX)
-                val absY = kotlin.math.abs(deltaY)
+                val angleDeg = Math.toDegrees(kotlin.math.atan2(deltaX.toDouble(), deltaY.toDouble()))
 
                 val dir = when {
-                    absY >= absX && deltaY < -15f -> "back"
-                    deltaY > 15f && absX <= 14f -> "true_front"
-                    deltaY > 15f && deltaX in -45f..-14f -> "slight_left"
-                    deltaY > 15f && deltaX in 14f..45f -> "slight_right"
-                    deltaX < -15f -> "left"
-                    deltaX > 15f -> "right"
-                    deltaY < -15f -> "back"
-                    else -> "true_front"
+                    kotlin.math.abs(angleDeg) <= 20.0 -> "true_front"
+                    angleDeg in 20.0..70.0 -> "slight_right"
+                    angleDeg in -70.0..-20.0 -> "slight_left"
+                    angleDeg in 70.0..115.0 -> "right"
+                    angleDeg in -115.0..-70.0 -> "left"
+                    else -> "back"
                 }
 
                 val colorPrefix = when (player.name) {
@@ -499,7 +497,7 @@ fun OsmMapView(
                 }
             }
 
-            // 5. Pacman Seeker Marker with Authentic Chomp Cycle (ALWAYS Facing Right)
+            // 5. Pacman Seeker Marker with Authentic Chomp Cycle
             val pacmanSize = 44.dp.toPx()
             val pacmanTopLeft = Offset(seekerCenter.x - pacmanSize / 2f, seekerCenter.y - pacmanSize / 2f)
 
@@ -509,6 +507,16 @@ fun OsmMapView(
                 topLeft = Offset(seekerCenter.x - pacmanSize * 0.45f, seekerCenter.y + pacmanSize * 0.35f),
                 size = Size(pacmanSize * 0.9f, pacmanSize * 0.25f)
             )
+
+            // Immobilized halo if in 30s freeze phase
+            if (isFrozen) {
+                drawCircle(
+                    color = ScaredBlue.copy(alpha = 0.50f),
+                    radius = pacmanSize * 0.65f,
+                    center = seekerCenter,
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.5f.dp.toPx())
+                )
+            }
 
             val chompBmp = pacmanChompBitmaps.getOrNull(pacmanFrameIndex.coerceIn(0, pacmanChompBitmaps.size - 1))
 

@@ -91,18 +91,18 @@ fun getGhostDrawableId(
         else -> "red"
     }
 
-    val absX = kotlin.math.abs(lookDirX)
-    val absY = kotlin.math.abs(lookDirY)
-
-    val dir = when {
-        absY > absX && lookDirY < -0.15f -> "back"
-        lookDirY > 0.15f && absX <= 0.15f -> "true_front"
-        lookDirY > 0.15f && lookDirX in -0.45f..-0.15f -> "slight_left"
-        lookDirY > 0.15f && lookDirX in 0.15f..0.45f -> "slight_right"
-        lookDirX < -0.15f -> "left"
-        lookDirX > 0.15f -> "right"
-        lookDirY < -0.15f -> "back"
-        else -> "true_front"
+    val dir = if (kotlin.math.abs(lookDirX) < 0.05f && kotlin.math.abs(lookDirY) < 0.05f) {
+        "true_front"
+    } else {
+        val angleDeg = Math.toDegrees(kotlin.math.atan2(lookDirX.toDouble(), lookDirY.toDouble()))
+        when {
+            kotlin.math.abs(angleDeg) <= 20.0 -> "true_front"
+            angleDeg in 20.0..70.0 -> "slight_right"
+            angleDeg in -70.0..-20.0 -> "slight_left"
+            angleDeg in 70.0..115.0 -> "right"
+            angleDeg in -115.0..-70.0 -> "left"
+            else -> "back"
+        }
     }
 
     return when ("${colorPrefix}_${dir}_$frameSuffix") {

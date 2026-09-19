@@ -45,7 +45,7 @@ fun StreetViewScreen(
         StreetViewComposable(
             modifier = Modifier.fillMaxSize(),
             isMini = false,
-            timerText = GameViewModel.formatSeconds(state.seekerRemainingSeconds),
+            timerText = GameViewModel.formatSeconds(state.searchRemainingSeconds),
             onExpand = {}
         )
 
@@ -91,7 +91,7 @@ fun StreetViewScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = GameViewModel.formatSeconds(state.seekerRemainingSeconds),
+                    text = GameViewModel.formatSeconds(state.searchRemainingSeconds),
                     color = TextPrimary,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Black

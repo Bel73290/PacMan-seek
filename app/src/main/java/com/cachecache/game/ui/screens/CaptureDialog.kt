@@ -126,7 +126,7 @@ fun CaptureSuccessDialog(
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
-                                text = "Temps restant (chercheur) : ${GameViewModel.formatSeconds(seekerRemainingSeconds)}",
+                                text = "Temps restant : ${GameViewModel.formatSeconds(seekerRemainingSeconds)}",
                                 color = TextPrimary,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Medium

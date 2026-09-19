@@ -45,7 +45,8 @@ fun GameScreen(
     onPlayerTap: (HiddenPlayer) -> Unit,
     onRecenter: () -> Unit,
     onDismissCaptureDialog: () -> Unit,
-    onTestInstantCapture: () -> Unit
+    onTestInstantCapture: () -> Unit = {},
+    onReplay: () -> Unit = {}
 ) {
     val nearestPlayer = remember(state.hiddenPlayers, state.seekerLocation) {
         state.hiddenPlayers
@@ -66,6 +67,7 @@ fun GameScreen(
             seekerLocation = state.seekerLocation,
             seekerHeading = state.seekerHeading,
             isFacingRight = state.isFacingRight,
+            isFrozen = state.gamePhase == GamePhase.FREEZE,
             capturingGhost = state.capturingGhost,
             hiddenPlayers = state.hiddenPlayers,
             suspectZone = state.suspectZone,
@@ -115,32 +117,86 @@ fun GameScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Dual Horizontal Timer Counters (Écran 2)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            // Single Dynamic Game Timer (30s Freeze Preparation -> 10min Hunt)
+            val isFreeze = state.gamePhase == GamePhase.FREEZE
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(
+                        1.2.dp,
+                        if (isFreeze) GhostCyan else PacmanYellow.copy(alpha = 0.8f),
+                        RoundedCornerShape(20.dp)
+                    ),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = NavyIntermediate.copy(alpha = 0.96f)
+                )
             ) {
-                // Seeker Timer (Left)
-                TimerCard(
-                    modifier = Modifier.weight(1f),
-                    title = "Chercheur",
-                    timeText = GameViewModel.formatSeconds(state.seekerRemainingSeconds),
-                    subText = "(${state.settings.seekerDurationMinutes} min)",
-                    iconComposable = {
-                        PacmanComposable(size = 24.dp, color = PacmanYellow, isAnimated = false)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (isFreeze) {
+                        Surface(
+                            shape = CircleShape,
+                            color = GhostCyan.copy(alpha = 0.20f),
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Default.Lock,
+                                    contentDescription = "Immobilisé",
+                                    tint = GhostCyan,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                    } else {
+                        PacmanComposable(
+                            size = 36.dp,
+                            color = PacmanYellow,
+                            isAnimated = true,
+                            rotationAngle = 0f
+                        )
                     }
-                )
 
-                // Hiding Timer (Right)
-                TimerCard(
-                    modifier = Modifier.weight(1f),
-                    title = "Cachés",
-                    timeText = GameViewModel.formatSeconds(state.hidingRemainingSeconds),
-                    subText = "(${state.settings.hidingDurationMinutes} min)",
-                    iconComposable = {
-                        GhostComposable(size = 24.dp, baseColor = GhostPurple, isScared = false)
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = if (isFreeze) "PRÉPARATION (IMMOBILISÉ)" else "TEMPS DE TRAQUE",
+                            color = if (isFreeze) GhostCyan else TextSecondary,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = if (isFreeze) "Les fantômes se cachent... (${state.freezeRemainingSeconds}s)" else "Fantômes capturés : ${state.hiddenPlayers.count { it.isFound }} / ${state.hiddenPlayers.size}",
+                            color = TextPrimary,
+                            fontSize = 12.sp
+                        )
                     }
-                )
+
+                    Surface(
+                        shape = RoundedCornerShape(14.dp),
+                        color = if (isFreeze) GhostCyan.copy(alpha = 0.15f) else PacmanYellow.copy(alpha = 0.15f),
+                        border = androidx.compose.foundation.BorderStroke(
+                            1.dp,
+                            if (isFreeze) GhostCyan else PacmanYellow
+                        )
+                    ) {
+                        Text(
+                            text = if (isFreeze) "${state.freezeRemainingSeconds}s" else GameViewModel.formatSeconds(state.searchRemainingSeconds),
+                            color = if (isFreeze) GhostCyan else PacmanYellow,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Black,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -351,8 +407,26 @@ fun GameScreen(
         state.capturedDialogPlayer?.let { capturedPlayer ->
             CaptureSuccessDialog(
                 player = capturedPlayer,
-                seekerRemainingSeconds = state.seekerRemainingSeconds,
+                seekerRemainingSeconds = state.searchRemainingSeconds,
                 onDismiss = onDismissCaptureDialog
+            )
+        }
+
+        // Victory Dialog (All ghosts captured)
+        if (state.gamePhase == GamePhase.VICTORY) {
+            VictoryDialog(
+                state = state,
+                onReplay = onReplay,
+                onBackHome = onBackToHome
+            )
+        }
+
+        // Defeat Dialog (10 minutes expired with ghosts remaining)
+        if (state.gamePhase == GamePhase.DEFEAT) {
+            DefeatDialog(
+                state = state,
+                onRetry = onReplay,
+                onBackHome = onBackToHome
             )
         }
     }

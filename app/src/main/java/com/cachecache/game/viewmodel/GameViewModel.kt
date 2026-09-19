@@ -38,7 +38,11 @@ class GameViewModel : ViewModel() {
         _uiState.update {
             it.copy(
                 isGameRunning = true,
-                currentScreen = Screen.GAME
+                currentScreen = Screen.GAME,
+                gamePhase = GamePhase.FREEZE,
+                freezeRemainingSeconds = 30,
+                searchRemainingSeconds = 10 * 60,
+                seekerRemainingSeconds = 10 * 60
             )
         }
         startTimers()
@@ -61,12 +65,39 @@ class GameViewModel : ViewModel() {
             while (true) {
                 delay(1000)
                 _uiState.update { state ->
-                    val newSeeker = if (state.seekerRemainingSeconds > 0) state.seekerRemainingSeconds - 1 else 0
-                    val newHiding = if (state.hidingRemainingSeconds > 0) state.hidingRemainingSeconds - 1 else 0
-                    state.copy(
-                        seekerRemainingSeconds = newSeeker,
-                        hidingRemainingSeconds = newHiding
-                    )
+                    if (!state.isGameRunning) return@update state
+
+                    when (state.gamePhase) {
+                        GamePhase.FREEZE -> {
+                            val newFreeze = state.freezeRemainingSeconds - 1
+                            if (newFreeze <= 0) {
+                                state.copy(
+                                    gamePhase = GamePhase.SEARCHING,
+                                    freezeRemainingSeconds = 0,
+                                    searchRemainingSeconds = 10 * 60,
+                                    seekerRemainingSeconds = 10 * 60
+                                )
+                            } else {
+                                state.copy(freezeRemainingSeconds = newFreeze)
+                            }
+                        }
+                        GamePhase.SEARCHING -> {
+                            val newSearch = state.searchRemainingSeconds - 1
+                            if (newSearch <= 0) {
+                                state.copy(
+                                    gamePhase = GamePhase.DEFEAT,
+                                    searchRemainingSeconds = 0,
+                                    seekerRemainingSeconds = 0
+                                )
+                            } else {
+                                state.copy(
+                                    searchRemainingSeconds = newSearch,
+                                    seekerRemainingSeconds = newSearch
+                                )
+                            }
+                        }
+                        GamePhase.VICTORY, GamePhase.DEFEAT -> state
+                    }
                 }
             }
         }
@@ -134,11 +165,19 @@ class GameViewModel : ViewModel() {
     }
 
     fun onMapTapped(target: GeoPoint) {
+        if (_uiState.value.gamePhase == GamePhase.FREEZE) {
+            // Player is immobilized during 30s preparation phase
+            return
+        }
         // Walk towards the tapped coordinate
         walkTowards(target)
     }
 
     fun onPlayerTapped(player: HiddenPlayer) {
+        if (_uiState.value.gamePhase == GamePhase.FREEZE) {
+            // Player is immobilized during 30s preparation phase
+            return
+        }
         // If within 0.30m, capture immediately, otherwise walk directly to him
         val dist = calculateDistanceMeters(_uiState.value.seekerLocation, player.location)
         if (dist <= _uiState.value.settings.captureThresholdMeters) {
@@ -162,6 +201,7 @@ class GameViewModel : ViewModel() {
     }
 
     fun goToSuspectZone() {
+        if (_uiState.value.gamePhase == GamePhase.FREEZE) return
         val zone = _uiState.value.suspectZone ?: return
         _uiState.update { state ->
             state.copy(
@@ -173,6 +213,7 @@ class GameViewModel : ViewModel() {
 
     private fun walkAlongRoute(route: List<GeoPoint>) {
         if (route.isEmpty()) return
+        if (_uiState.value.gamePhase == GamePhase.FREEZE) return
         walkSimulationJob?.cancel()
         walkSimulationJob = viewModelScope.launch {
             _uiState.update { it.copy(isSimulationWalking = true) }
@@ -188,6 +229,7 @@ class GameViewModel : ViewModel() {
     }
 
     fun walkTowards(target: GeoPoint) {
+        if (_uiState.value.gamePhase == GamePhase.FREEZE) return
         walkSimulationJob?.cancel()
         walkSimulationJob = viewModelScope.launch {
             _uiState.update { it.copy(isSimulationWalking = true) }
@@ -285,18 +327,44 @@ class GameViewModel : ViewModel() {
                 iconType = "ghost"
             )
 
+            val allFound = updatedPlayers.all { it.isFound }
+            val nextPhase = if (allFound) GamePhase.VICTORY else GamePhase.SEARCHING
+
             _uiState.update { state ->
                 state.copy(
                     hiddenPlayers = updatedPlayers,
+                    gamePhase = nextPhase,
                     userScore = newScore,
                     userXp = if (newXp >= state.maxXp) newXp - state.maxXp else newXp,
                     userLevel = if (newXp >= state.maxXp) state.userLevel + 1 else state.userLevel,
-                    capturedDialogPlayer = player,
+                    capturedDialogPlayer = if (allFound) null else player,
                     capturingGhost = null,
                     recentHistory = listOf(newHistoryItem) + state.recentHistory
                 )
             }
         }
+    }
+
+    fun restartGame() {
+        walkSimulationJob?.cancel()
+        val resetPlayers = MockData.HiddenPlayersList.map { it.copy(isFound = false, isScared = false) }
+        _uiState.update { state ->
+            state.copy(
+                isGameRunning = true,
+                currentScreen = Screen.GAME,
+                gamePhase = GamePhase.FREEZE,
+                freezeRemainingSeconds = 30,
+                searchRemainingSeconds = 10 * 60,
+                seekerRemainingSeconds = 10 * 60,
+                hiddenPlayers = resetPlayers,
+                capturingGhost = null,
+                capturedDialogPlayer = null,
+                seekerLocation = GeoPoint(45.6415, 5.8680),
+                isFacingRight = true
+            )
+        }
+        recalculateDistances(GeoPoint(45.6415, 5.8680))
+        startTimers()
     }
 
     fun recenterOnCampus() {

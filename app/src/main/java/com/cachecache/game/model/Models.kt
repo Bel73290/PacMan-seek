@@ -103,6 +103,13 @@ data class AvatarItem(
     val isPremium: Boolean = false
 )
 
+enum class GamePhase {
+    FREEZE,      // 30s preparation, player immobilized
+    SEARCHING,   // 10min hunt timer, player seeks ghosts
+    VICTORY,     // All ghosts caught
+    DEFEAT       // 10min expired with ghosts remaining
+}
+
 data class GameSettings(
     val seekerDurationMinutes: Int = 3,
     val hidingDurationMinutes: Int = 10,
@@ -112,8 +119,11 @@ data class GameSettings(
 data class GameState(
     val currentScreen: Screen = Screen.SPLASH,
     val settings: GameSettings = GameSettings(),
-    val seekerRemainingSeconds: Int = 2 * 60 + 45, // 02:45
-    val hidingRemainingSeconds: Int = 9 * 60 + 32, // 09:32
+    val gamePhase: GamePhase = GamePhase.FREEZE,
+    val freezeRemainingSeconds: Int = 30, // 30s freeze phase
+    val searchRemainingSeconds: Int = 10 * 60, // 10 min search phase
+    val seekerRemainingSeconds: Int = 10 * 60, // Kept for compatibility
+    val hidingRemainingSeconds: Int = 10 * 60,
     val streetViewRemainingSeconds: Int = 2 * 60 + 18, // 02:18
     val isGameRunning: Boolean = false,
     val isSimulationWalking: Boolean = false,

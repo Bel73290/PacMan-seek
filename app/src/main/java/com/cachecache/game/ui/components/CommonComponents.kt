@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -27,83 +28,88 @@ fun BottomNavigationBar(
     currentScreen: Screen,
     onNavigate: (Screen) -> Unit
 ) {
-    Surface(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(72.dp),
-        color = NavyIntermediate,
-        border = androidx.compose.foundation.BorderStroke(1.dp, BorderSubtle)
+            .navigationBarsPadding()
+            .padding(horizontal = 38.dp, vertical = 12.dp),
+        contentAlignment = Alignment.Center
     ) {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(58.dp)
+                .shadow(12.dp, RoundedCornerShape(29.dp), spotColor = PacmanYellow.copy(alpha = 0.25f)),
+            shape = RoundedCornerShape(29.dp),
+            color = NavyIntermediate.copy(alpha = 0.96f),
+            border = androidx.compose.foundation.BorderStroke(1.2.dp, BorderSubtle)
         ) {
-            val isMapSelected = currentScreen == Screen.GAME || currentScreen == Screen.RADAR_FILTERS
-            BottomNavItem(
-                label = "Carte",
-                icon = Icons.Default.Map,
-                isSelected = isMapSelected,
-                onClick = { onNavigate(Screen.GAME) }
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 10.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val isMapSelected = currentScreen == Screen.GAME || currentScreen == Screen.RADAR_FILTERS
+                BottomNavIconItem(
+                    icon = Icons.Default.Map,
+                    contentDescription = "Carte",
+                    isSelected = isMapSelected,
+                    onClick = { onNavigate(Screen.GAME) }
+                )
 
-            val isShopSelected = currentScreen == Screen.SHOP
-            BottomNavItem(
-                label = "Boutique",
-                icon = Icons.Default.Palette,
-                isSelected = isShopSelected,
-                onClick = { onNavigate(Screen.SHOP) }
-            )
+                val isShopSelected = currentScreen == Screen.SHOP
+                BottomNavIconItem(
+                    icon = Icons.Default.Storefront,
+                    contentDescription = "Boutique",
+                    isSelected = isShopSelected,
+                    onClick = { onNavigate(Screen.SHOP) }
+                )
 
-            val isLeaderboardSelected = currentScreen == Screen.LEADERBOARD
-            BottomNavItem(
-                label = "Classement",
-                icon = Icons.Default.EmojiEvents,
-                isSelected = isLeaderboardSelected,
-                onClick = { onNavigate(Screen.LEADERBOARD) }
-            )
+                val isLeaderboardSelected = currentScreen == Screen.LEADERBOARD
+                BottomNavIconItem(
+                    icon = Icons.Default.EmojiEvents,
+                    contentDescription = "Classement",
+                    isSelected = isLeaderboardSelected,
+                    onClick = { onNavigate(Screen.LEADERBOARD) }
+                )
 
-            val isProfileSelected = currentScreen == Screen.PROFILE
-            BottomNavItem(
-                label = "Profil",
-                icon = Icons.Default.Person,
-                isSelected = isProfileSelected,
-                onClick = { onNavigate(Screen.PROFILE) }
-            )
+                val isProfileSelected = currentScreen == Screen.PROFILE
+                BottomNavIconItem(
+                    icon = Icons.Default.Person,
+                    contentDescription = "Profil",
+                    isSelected = isProfileSelected,
+                    onClick = { onNavigate(Screen.PROFILE) }
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun BottomNavItem(
-    label: String,
+private fun BottomNavIconItem(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
+    contentDescription: String,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
     val activeColor = PacmanYellow
     val inactiveColor = TextSecondary
 
-    Column(
+    Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
-            .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .size(44.dp)
+            .clip(CircleShape)
+            .background(if (isSelected) PacmanYellow.copy(alpha = 0.18f) else Color.Transparent)
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = label,
+            contentDescription = contentDescription,
             tint = if (isSelected) activeColor else inactiveColor,
             modifier = Modifier.size(24.dp)
-        )
-        Spacer(modifier = Modifier.height(3.dp))
-        Text(
-            text = label,
-            color = if (isSelected) activeColor else inactiveColor,
-            fontSize = 12.sp,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
         )
     }
 }
