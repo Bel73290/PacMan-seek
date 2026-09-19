@@ -15,7 +15,7 @@ object MockData {
             name = "Inky",
             locationName = "Polytech Annecy-Chambéry",
             location = GeoPoint(45.6420, 5.8690),
-            color = GhostRed,
+            color = GhostCyan,
             isFound = false,
             isScared = false
         ),
@@ -42,7 +42,7 @@ object MockData {
             name = "Blinky",
             locationName = "RU La Boussole",
             location = GeoPoint(45.6434, 5.8698),
-            color = GhostCyan,
+            color = GhostRed,
             isFound = false,
             isScared = false
         ),

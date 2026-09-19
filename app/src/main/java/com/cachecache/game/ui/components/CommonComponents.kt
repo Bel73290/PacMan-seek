@@ -120,8 +120,8 @@ fun SettingsDialog(
     onDismiss: () -> Unit,
     onSave: (Int, Int) -> Unit
 ) {
-    var seekerTime by remember { mutableStateOf(currentSettings.seekerDurationMinutes) }
-    var hidingTime by remember { mutableStateOf(currentSettings.hidingDurationMinutes) }
+    var freezeSeconds by remember { mutableStateOf(currentSettings.freezeDurationSeconds) }
+    var huntMinutes by remember { mutableStateOf(currentSettings.huntDurationMinutes) }
 
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -146,7 +146,8 @@ fun SettingsDialog(
                     Text(
                         text = "Réglages de la partie",
                         style = MaterialTheme.typography.titleLarge,
-                        color = TextPrimary
+                        color = TextPrimary,
+                        fontWeight = FontWeight.Bold
                     )
                     IconButton(onClick = onDismiss) {
                         Icon(Icons.Default.Close, contentDescription = "Fermer", tint = TextSecondary)
@@ -155,26 +156,26 @@ fun SettingsDialog(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Seeker time stepper
+                // Temps pour se cacher (freeze / délai d'attente initial en secondes)
                 TimerStepperRow(
-                    title = "Temps du chercheur",
-                    description = "Temps alloué pour débusquer les cachés",
-                    minutes = seekerTime,
-                    iconColor = PacmanYellow,
-                    onMinus = { if (seekerTime > 1) seekerTime-- },
-                    onPlus = { if (seekerTime < 30) seekerTime++ }
+                    title = "Temps pour se cacher",
+                    description = "Délai d'attente avant le début de la traque",
+                    valueDisplay = "$freezeSeconds s",
+                    iconColor = GhostPink,
+                    onMinus = { if (freezeSeconds > 10) freezeSeconds -= 5 },
+                    onPlus = { if (freezeSeconds < 180) freezeSeconds += 5 }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Hiding time stepper
+                // Temps pour la traque (chasse aux fantômes en minutes)
                 TimerStepperRow(
-                    title = "Temps des cachés",
-                    description = "Temps pour se dissimuler sur le campus",
-                    minutes = hidingTime,
-                    iconColor = GhostPink,
-                    onMinus = { if (hidingTime > 1) hidingTime-- },
-                    onPlus = { if (hidingTime < 30) hidingTime++ }
+                    title = "Temps pour la traque",
+                    description = "Temps alloué pour trouver tous les fantômes",
+                    valueDisplay = "$huntMinutes min",
+                    iconColor = PacmanYellow,
+                    onMinus = { if (huntMinutes > 1) huntMinutes-- },
+                    onPlus = { if (huntMinutes < 30) huntMinutes++ }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -190,7 +191,7 @@ fun SettingsDialog(
 
                 Button(
                     onClick = {
-                        onSave(seekerTime, hidingTime)
+                        onSave(freezeSeconds, huntMinutes)
                         onDismiss()
                     },
                     modifier = Modifier
@@ -217,7 +218,7 @@ fun SettingsDialog(
 private fun TimerStepperRow(
     title: String,
     description: String,
-    minutes: Int,
+    valueDisplay: String,
     iconColor: Color,
     onMinus: () -> Unit,
     onPlus: () -> Unit
@@ -252,7 +253,7 @@ private fun TimerStepperRow(
                 }
 
                 Text(
-                    text = "$minutes min",
+                    text = valueDisplay,
                     color = iconColor,
                     fontWeight = FontWeight.Black,
                     fontSize = 15.sp,

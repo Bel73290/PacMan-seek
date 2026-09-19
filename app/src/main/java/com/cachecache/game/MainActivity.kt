@@ -128,6 +128,16 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                     }
+
+                    if (state.showSettingsDialog && state.currentScreen != Screen.SPLASH) {
+                        com.cachecache.game.ui.components.SettingsDialog(
+                            currentSettings = state.settings,
+                            onDismiss = { viewModel.openSettingsDialog(false) },
+                            onSave = { freezeSec, huntMin ->
+                                viewModel.updateSettings(freezeSec, huntMin)
+                            }
+                        )
+                    }
                 }
             }
         }

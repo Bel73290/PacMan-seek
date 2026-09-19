@@ -8,6 +8,17 @@ data class GeoPoint(
     val longitude: Double
 )
 
+fun resolveGhostColor(name: String, defaultColor: Color = GhostRed): Color {
+    return when (name.trim().lowercase()) {
+        "blinky" -> GhostRed
+        "pinky" -> GhostPink
+        "inky" -> GhostCyan
+        "clyde" -> GhostOrange
+        "sue" -> GhostPurple
+        else -> defaultColor
+    }
+}
+
 data class HiddenPlayer(
     val id: Int,
     val name: String,
@@ -17,7 +28,9 @@ data class HiddenPlayer(
     val isFound: Boolean = false,
     val isScared: Boolean = false,
     val distanceMeters: Double = 999.0
-)
+) {
+    val actualColor: Color get() = resolveGhostColor(name, color)
+}
 
 data class SuspectZone(
     val id: String,
@@ -71,8 +84,7 @@ enum class FilterType(val label: String) {
 
 enum class LeaderboardTab(val label: String) {
     GENERAL("Général"),
-    FRIENDS("Amis"),
-    SEASONS("Saisons")
+    FRIENDS("Amis")
 }
 
 enum class Screen {
@@ -111,9 +123,11 @@ enum class GamePhase {
 }
 
 data class GameSettings(
-    val seekerDurationMinutes: Int = 3,
-    val hidingDurationMinutes: Int = 10,
-    val captureThresholdMeters: Double = 0.30
+    val freezeDurationSeconds: Int = 30,
+    val huntDurationMinutes: Int = 10,
+    val captureThresholdMeters: Double = 0.30,
+    val seekerDurationMinutes: Int = 10,
+    val hidingDurationMinutes: Int = 10
 )
 
 data class GameState(
@@ -135,7 +149,7 @@ data class GameState(
     val pacDotsRoute: List<GeoPoint> = emptyList(),
     val activeFilter: FilterType = FilterType.ALL,
     val activeLeaderboardTab: LeaderboardTab = LeaderboardTab.GENERAL,
-    val userScore: Int = 1820,
+    val userScore: Int = 1_000_000,
     val userLevel: Int = 5,
     val userXp: Int = 320,
     val maxXp: Int = 500,

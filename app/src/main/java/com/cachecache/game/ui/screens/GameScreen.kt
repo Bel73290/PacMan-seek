@@ -348,13 +348,14 @@ fun GameScreen(
             ) {
                 // Left: Contact / Proximity indicator
                 nearestPlayer?.let { nearest ->
+                    val ghostColor = nearest.actualColor
                     Card(
                         shape = RoundedCornerShape(16.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = if (nearest.distanceMeters <= 25.0) GhostRed.copy(alpha = 0.9f) else NavyIntermediate.copy(alpha = 0.9f)
+                            containerColor = if (nearest.distanceMeters <= 25.0) ghostColor.copy(alpha = 0.85f) else NavyIntermediate.copy(alpha = 0.9f)
                         ),
                         modifier = Modifier
-                            .border(1.dp, BorderSubtle, RoundedCornerShape(16.dp))
+                            .border(1.dp, if (nearest.distanceMeters <= 25.0) ghostColor else BorderSubtle, RoundedCornerShape(16.dp))
                             .clickable { onTestInstantCapture() }
                     ) {
                         Row(
@@ -363,7 +364,7 @@ fun GameScreen(
                         ) {
                             GhostComposable(
                                 size = 22.dp,
-                                baseColor = nearest.color,
+                                baseColor = ghostColor,
                                 isScared = nearest.isScared
                             )
                             Spacer(modifier = Modifier.width(8.dp))

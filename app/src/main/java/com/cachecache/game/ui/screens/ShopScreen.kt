@@ -40,6 +40,12 @@ import com.cachecache.game.ui.theme.*
 import java.text.NumberFormat
 import java.util.Locale
 
+enum class ShopTab(val label: String) {
+    CLASSIC("Classiques"),
+    PREMIUM("✨ Premium"),
+    INVENTORY("🎒 Inventaire")
+}
+
 @Composable
 fun ShopScreen(
     state: GameState,
@@ -48,7 +54,7 @@ fun ShopScreen(
     onEquipAvatar: (String) -> Unit,
     onUnlockAvatar: (AvatarItem) -> Unit
 ) {
-    var selectedCategory by remember { mutableStateOf(AvatarCategory.CLASSIC) }
+    var selectedTab by remember { mutableStateOf(ShopTab.CLASSIC) }
     var previewAvatarId by remember(state.equippedAvatarId) { mutableStateOf(state.equippedAvatarId) }
 
     val currentCatalog = MockData.AvatarItemsCatalog
@@ -151,14 +157,14 @@ fun ShopScreen(
                     // Avatar Showcase Circle with Glow
                     Box(
                         modifier = Modifier
-                            .size(80.dp)
+                            .size(92.dp)
                             .shadow(12.dp, CircleShape, spotColor = PacmanYellow)
                             .clip(CircleShape)
                             .background(NavyIntermediate)
                             .border(3.dp, if (state.equippedAvatarId == activePreviewAvatar.id) PacmanYellow else BorderSubtle, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        AvatarVisual(avatar = activePreviewAvatar, size = 60.dp)
+                        AvatarVisual(avatar = activePreviewAvatar, size = 76.dp)
                     }
 
                     Spacer(modifier = Modifier.width(16.dp))
@@ -265,17 +271,29 @@ fun ShopScreen(
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            // 3. Category Filter Tabs: "Classiques" vs "✨ Premium"
+            // 3. Category Filter Tabs: "Classiques", "✨ Premium", "🎒 Inventaire"
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                AvatarCategory.entries.forEach { category ->
-                    val isSelected = selectedCategory == category
-                    val isPremiumTab = category == AvatarCategory.PREMIUM
-                    val activeColor = if (isPremiumTab) Color(0xFFFFD700) else PacmanYellow
+                ShopTab.entries.forEach { tab ->
+                    val isSelected = selectedTab == tab
+                    val isPremiumTab = tab == ShopTab.PREMIUM
+                    val isInventoryTab = tab == ShopTab.INVENTORY
+                    val activeColor = when {
+                        isInventoryTab -> ScaredBlue
+                        isPremiumTab -> Color(0xFFFFD700)
+                        else -> PacmanYellow
+                    }
+                    val textColor = when {
+                        isSelected && isInventoryTab -> TextPrimary
+                        isSelected -> DarkContrast
+                        isPremiumTab -> Color(0xFFFFD700)
+                        isInventoryTab -> ScaredBlue
+                        else -> TextSecondary
+                    }
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -287,23 +305,43 @@ fun ShopScreen(
                                 if (isSelected) activeColor else if (isPremiumTab) Color(0xFFFFD700).copy(alpha = 0.4f) else BorderSubtle,
                                 RoundedCornerShape(21.dp)
                             )
-                            .clickable { selectedCategory = category },
+                            .clickable { selectedTab = tab },
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = category.label,
-                            color = if (isSelected) DarkContrast else if (isPremiumTab) Color(0xFFFFD700) else TextSecondary,
+                            text = tab.label,
+                            color = textColor,
                             fontWeight = if (isSelected) FontWeight.Black else FontWeight.SemiBold,
-                            fontSize = 14.sp
+                            fontSize = 13.sp
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
             // 4. Grid of Avatar Selection Cards
-            val filteredAvatars = currentCatalog.filter { it.category == selectedCategory }
+            val filteredAvatars = when (selectedTab) {
+                ShopTab.CLASSIC -> currentCatalog.filter { it.category == AvatarCategory.CLASSIC }
+                ShopTab.PREMIUM -> currentCatalog.filter { it.category == AvatarCategory.PREMIUM }
+                ShopTab.INVENTORY -> currentCatalog.filter { state.unlockedAvatarIds.contains(it.id) }
+            }
+
+            if (selectedTab == ShopTab.INVENTORY) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "${filteredAvatars.size} skins débloqués dans votre collection",
+                        color = ScaredBlue,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            } else {
+                Spacer(modifier = Modifier.height(4.dp))
+            }
 
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
@@ -368,10 +406,10 @@ fun ShopScreen(
                                 }
                             }
 
-                            // Avatar Visual
+                            // Avatar Visual - Enriched & Large for maximum clarity
                             Box(
                                 modifier = Modifier
-                                    .size(62.dp)
+                                    .size(86.dp)
                                     .clip(CircleShape)
                                     .background(NavyIntermediate)
                                     .border(
@@ -381,7 +419,7 @@ fun ShopScreen(
                                     ),
                                 contentAlignment = Alignment.Center
                             ) {
-                                AvatarVisual(avatar = avatar, size = 46.dp)
+                                AvatarVisual(avatar = avatar, size = 72.dp)
                             }
 
                             Spacer(modifier = Modifier.height(8.dp))

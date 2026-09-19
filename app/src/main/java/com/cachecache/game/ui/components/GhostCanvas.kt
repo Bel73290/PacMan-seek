@@ -158,7 +158,7 @@ fun getGhostDrawableId(
         "orange_back_0" -> R.drawable.ghost_orange_back_0
         "orange_back_1" -> R.drawable.ghost_orange_back_1
 
-        "purple_true_front_0", "purple_front_0" -> R.drawable.ghost_purple_true_front_0
+        "purple_true_front_0", "purple_front_0" -> R.drawable.ghost_purple_true_front_1
         "purple_true_front_1", "purple_front_1" -> R.drawable.ghost_purple_true_front_1
         "purple_slight_right_0" -> R.drawable.ghost_purple_front_0
         "purple_slight_right_1" -> R.drawable.ghost_purple_front_1

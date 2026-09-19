@@ -35,14 +35,14 @@ class GameViewModel : ViewModel() {
     }
 
     fun startGame() {
-        _uiState.update {
-            it.copy(
+        _uiState.update { state ->
+            state.copy(
                 isGameRunning = true,
                 currentScreen = Screen.GAME,
                 gamePhase = GamePhase.FREEZE,
-                freezeRemainingSeconds = 30,
-                searchRemainingSeconds = 10 * 60,
-                seekerRemainingSeconds = 10 * 60
+                freezeRemainingSeconds = state.settings.freezeDurationSeconds,
+                searchRemainingSeconds = state.settings.huntDurationMinutes * 60,
+                seekerRemainingSeconds = state.settings.huntDurationMinutes * 60
             )
         }
         startTimers()
@@ -74,8 +74,8 @@ class GameViewModel : ViewModel() {
                                 state.copy(
                                     gamePhase = GamePhase.SEARCHING,
                                     freezeRemainingSeconds = 0,
-                                    searchRemainingSeconds = 10 * 60,
-                                    seekerRemainingSeconds = 10 * 60
+                                    searchRemainingSeconds = state.settings.huntDurationMinutes * 60,
+                                    seekerRemainingSeconds = state.settings.huntDurationMinutes * 60
                                 )
                             } else {
                                 state.copy(freezeRemainingSeconds = newFreeze)
@@ -103,16 +103,19 @@ class GameViewModel : ViewModel() {
         }
     }
 
-    fun updateSettings(seekerMin: Int, hidingMin: Int) {
+    fun updateSettings(freezeSec: Int, huntMin: Int) {
         _uiState.update { state ->
             val newSettings = state.settings.copy(
-                seekerDurationMinutes = seekerMin,
-                hidingDurationMinutes = hidingMin
+                freezeDurationSeconds = freezeSec,
+                huntDurationMinutes = huntMin,
+                seekerDurationMinutes = huntMin,
+                hidingDurationMinutes = freezeSec / 60
             )
             state.copy(
                 settings = newSettings,
-                seekerRemainingSeconds = seekerMin * 60,
-                hidingRemainingSeconds = hidingMin * 60,
+                freezeRemainingSeconds = freezeSec,
+                searchRemainingSeconds = huntMin * 60,
+                seekerRemainingSeconds = huntMin * 60,
                 showSettingsDialog = false
             )
         }
@@ -353,9 +356,9 @@ class GameViewModel : ViewModel() {
                 isGameRunning = true,
                 currentScreen = Screen.GAME,
                 gamePhase = GamePhase.FREEZE,
-                freezeRemainingSeconds = 30,
-                searchRemainingSeconds = 10 * 60,
-                seekerRemainingSeconds = 10 * 60,
+                freezeRemainingSeconds = state.settings.freezeDurationSeconds,
+                searchRemainingSeconds = state.settings.huntDurationMinutes * 60,
+                seekerRemainingSeconds = state.settings.huntDurationMinutes * 60,
                 hiddenPlayers = resetPlayers,
                 capturingGhost = null,
                 capturedDialogPlayer = null,

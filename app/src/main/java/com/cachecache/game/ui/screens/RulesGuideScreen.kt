@@ -107,8 +107,8 @@ fun RulesGuideScreen(
             // 1. Le chercheur
             RuleCard(
                 stepNumber = "1",
-                title = "Le chercheur",
-                description = "A ${state.settings.seekerDurationMinutes} minutes pour trouver les cachés.",
+                title = "La traque",
+                description = "A ${state.settings.huntDurationMinutes} minutes pour trouver tous les fantômes.",
                 iconContent = {
                     Box(
                         modifier = Modifier
@@ -128,8 +128,8 @@ fun RulesGuideScreen(
             // 2. Les cachés
             RuleCard(
                 stepNumber = "2",
-                title = "Les cachés",
-                description = "Ont ${state.settings.hidingDurationMinutes} minutes pour se cacher sur le campus.",
+                title = "Temps pour se cacher",
+                description = "Délai de ${state.settings.freezeDurationSeconds} secondes avant le début de la traque.",
                 iconContent = {
                     Box(
                         modifier = Modifier

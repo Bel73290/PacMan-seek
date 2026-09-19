@@ -121,9 +121,9 @@ fun OsmMapView(
             "orange_back_0" to R.drawable.ghost_orange_back_0,
             "orange_back_1" to R.drawable.ghost_orange_back_1,
 
-            "purple_true_front_0" to R.drawable.ghost_purple_true_front_0,
+            "purple_true_front_0" to R.drawable.ghost_purple_true_front_1,
             "purple_true_front_1" to R.drawable.ghost_purple_true_front_1,
-            "purple_front_0" to R.drawable.ghost_purple_true_front_0,
+            "purple_front_0" to R.drawable.ghost_purple_true_front_1,
             "purple_front_1" to R.drawable.ghost_purple_true_front_1,
             "purple_slight_right_0" to R.drawable.ghost_purple_front_0,
             "purple_slight_right_1" to R.drawable.ghost_purple_front_1,
@@ -459,11 +459,12 @@ fun OsmMapView(
                     else -> "back"
                 }
 
-                val colorPrefix = when (player.name) {
-                    "Pinky" -> "pink"
-                    "Inky" -> "cyan"
-                    "Clyde" -> "orange"
-                    "Blinky" -> "red"
+                val colorPrefix = when (player.name.trim().lowercase()) {
+                    "pinky" -> "pink"
+                    "inky" -> "cyan"
+                    "clyde" -> "orange"
+                    "blinky" -> "red"
+                    "sue" -> "purple"
                     else -> "purple"
                 }
 
