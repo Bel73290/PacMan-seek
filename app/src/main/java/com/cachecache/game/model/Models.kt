@@ -87,8 +87,8 @@ enum class Screen {
 }
 
 enum class AvatarCategory(val label: String) {
-    PACMANS("Pac-Mans"),
-    GHOSTS("Fantômes")
+    CLASSIC("Classiques"),
+    PREMIUM("✨ Premium")
 }
 
 data class AvatarItem(
@@ -99,7 +99,8 @@ data class AvatarItem(
     val price: Int = 0, // 0 = gratuit
     val ghostColor: Color? = null,
     val isAnimatedPacman: Boolean = false,
-    val drawableResId: Int? = null
+    val drawableResId: Int? = null,
+    val isPremium: Boolean = false
 )
 
 data class GameSettings(
@@ -130,11 +131,12 @@ data class GameState(
     val maxXp: Int = 500,
     val totalGamesPlayed: Int = 12,
     val totalVictories: Int = 7,
-    val equippedAvatarId: String = "pacman_classic",
-    val unlockedAvatarIds: Set<String> = setOf("pacman_classic", "ghost_blinky", "ghost_pinky"),
+    val equippedAvatarId: String = "ghost_red_classic",
+    val unlockedAvatarIds: Set<String> = setOf("ghost_red_classic", "ghost_pink_classic"),
     val isGhostProximityAlertVisible: Boolean = true,
     val isStreetViewMiniVisible: Boolean = true,
     val isStreetViewRadarOpen: Boolean = true,
+    val capturingGhost: HiddenPlayer? = null,
     val capturedDialogPlayer: HiddenPlayer? = null,
     val selectedBadgeDetail: BadgeItem? = null,
     val showSettingsDialog: Boolean = false,

@@ -96,16 +96,22 @@ fun getGhostDrawableId(
 
     val dir = when {
         absY > absX && lookDirY < -0.15f -> "back"
-        absY > absX && lookDirY > 0.15f  -> "front"
-        lookDirX < -0.15f                -> "left"
-        lookDirX > 0.15f                 -> "right"
-        lookDirY < -0.15f                -> "back"
-        else                             -> "front"
+        lookDirY > 0.15f && absX <= 0.15f -> "true_front"
+        lookDirY > 0.15f && lookDirX in -0.45f..-0.15f -> "slight_left"
+        lookDirY > 0.15f && lookDirX in 0.15f..0.45f -> "slight_right"
+        lookDirX < -0.15f -> "left"
+        lookDirX > 0.15f -> "right"
+        lookDirY < -0.15f -> "back"
+        else -> "true_front"
     }
 
     return when ("${colorPrefix}_${dir}_$frameSuffix") {
-        "red_front_0" -> R.drawable.ghost_red_front_0
-        "red_front_1" -> R.drawable.ghost_red_front_1
+        "red_true_front_0", "red_front_0" -> R.drawable.ghost_red_true_front_0
+        "red_true_front_1", "red_front_1" -> R.drawable.ghost_red_true_front_1
+        "red_slight_right_0" -> R.drawable.ghost_red_front_0
+        "red_slight_right_1" -> R.drawable.ghost_red_front_1
+        "red_slight_left_0" -> R.drawable.ghost_red_slight_left_0
+        "red_slight_left_1" -> R.drawable.ghost_red_slight_left_1
         "red_left_0" -> R.drawable.ghost_red_left_0
         "red_left_1" -> R.drawable.ghost_red_left_1
         "red_right_0" -> R.drawable.ghost_red_right_0
@@ -113,8 +119,12 @@ fun getGhostDrawableId(
         "red_back_0" -> R.drawable.ghost_red_back_0
         "red_back_1" -> R.drawable.ghost_red_back_1
 
-        "pink_front_0" -> R.drawable.ghost_pink_front_0
-        "pink_front_1" -> R.drawable.ghost_pink_front_1
+        "pink_true_front_0", "pink_front_0" -> R.drawable.ghost_pink_true_front_0
+        "pink_true_front_1", "pink_front_1" -> R.drawable.ghost_pink_true_front_1
+        "pink_slight_right_0" -> R.drawable.ghost_pink_front_0
+        "pink_slight_right_1" -> R.drawable.ghost_pink_front_1
+        "pink_slight_left_0" -> R.drawable.ghost_pink_slight_left_0
+        "pink_slight_left_1" -> R.drawable.ghost_pink_slight_left_1
         "pink_left_0" -> R.drawable.ghost_pink_left_0
         "pink_left_1" -> R.drawable.ghost_pink_left_1
         "pink_right_0" -> R.drawable.ghost_pink_right_0
@@ -122,8 +132,12 @@ fun getGhostDrawableId(
         "pink_back_0" -> R.drawable.ghost_pink_back_0
         "pink_back_1" -> R.drawable.ghost_pink_back_1
 
-        "cyan_front_0" -> R.drawable.ghost_cyan_front_0
-        "cyan_front_1" -> R.drawable.ghost_cyan_front_1
+        "cyan_true_front_0", "cyan_front_0" -> R.drawable.ghost_cyan_true_front_0
+        "cyan_true_front_1", "cyan_front_1" -> R.drawable.ghost_cyan_true_front_1
+        "cyan_slight_right_0" -> R.drawable.ghost_cyan_front_0
+        "cyan_slight_right_1" -> R.drawable.ghost_cyan_front_1
+        "cyan_slight_left_0" -> R.drawable.ghost_cyan_slight_left_0
+        "cyan_slight_left_1" -> R.drawable.ghost_cyan_slight_left_1
         "cyan_left_0" -> R.drawable.ghost_cyan_left_0
         "cyan_left_1" -> R.drawable.ghost_cyan_left_1
         "cyan_right_0" -> R.drawable.ghost_cyan_right_0
@@ -131,8 +145,12 @@ fun getGhostDrawableId(
         "cyan_back_0" -> R.drawable.ghost_cyan_back_0
         "cyan_back_1" -> R.drawable.ghost_cyan_back_1
 
-        "orange_front_0" -> R.drawable.ghost_orange_front_0
-        "orange_front_1" -> R.drawable.ghost_orange_front_1
+        "orange_true_front_0", "orange_front_0" -> R.drawable.ghost_orange_true_front_0
+        "orange_true_front_1", "orange_front_1" -> R.drawable.ghost_orange_true_front_1
+        "orange_slight_right_0" -> R.drawable.ghost_orange_front_0
+        "orange_slight_right_1" -> R.drawable.ghost_orange_front_1
+        "orange_slight_left_0" -> R.drawable.ghost_orange_slight_left_0
+        "orange_slight_left_1" -> R.drawable.ghost_orange_slight_left_1
         "orange_left_0" -> R.drawable.ghost_orange_left_0
         "orange_left_1" -> R.drawable.ghost_orange_left_1
         "orange_right_0" -> R.drawable.ghost_orange_right_0
@@ -140,8 +158,12 @@ fun getGhostDrawableId(
         "orange_back_0" -> R.drawable.ghost_orange_back_0
         "orange_back_1" -> R.drawable.ghost_orange_back_1
 
-        "purple_front_0" -> R.drawable.ghost_purple_front_0
-        "purple_front_1" -> R.drawable.ghost_purple_front_1
+        "purple_true_front_0", "purple_front_0" -> R.drawable.ghost_purple_true_front_0
+        "purple_true_front_1", "purple_front_1" -> R.drawable.ghost_purple_true_front_1
+        "purple_slight_right_0" -> R.drawable.ghost_purple_front_0
+        "purple_slight_right_1" -> R.drawable.ghost_purple_front_1
+        "purple_slight_left_0" -> R.drawable.ghost_purple_slight_left_0
+        "purple_slight_left_1" -> R.drawable.ghost_purple_slight_left_1
         "purple_left_0" -> R.drawable.ghost_purple_left_0
         "purple_left_1" -> R.drawable.ghost_purple_left_1
         "purple_right_0" -> R.drawable.ghost_purple_right_0
@@ -149,6 +171,6 @@ fun getGhostDrawableId(
         "purple_back_0" -> R.drawable.ghost_purple_back_0
         "purple_back_1" -> R.drawable.ghost_purple_back_1
 
-        else -> R.drawable.ghost_red_front_0
+        else -> R.drawable.ghost_red_true_front_0
     }
 }

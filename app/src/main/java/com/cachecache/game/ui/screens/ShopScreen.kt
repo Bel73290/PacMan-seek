@@ -48,7 +48,7 @@ fun ShopScreen(
     onEquipAvatar: (String) -> Unit,
     onUnlockAvatar: (AvatarItem) -> Unit
 ) {
-    var selectedCategory by remember { mutableStateOf(AvatarCategory.PACMANS) }
+    var selectedCategory by remember { mutableStateOf(AvatarCategory.CLASSIC) }
     var previewAvatarId by remember(state.equippedAvatarId) { mutableStateOf(state.equippedAvatarId) }
 
     val currentCatalog = MockData.AvatarItemsCatalog
@@ -164,15 +164,35 @@ fun ShopScreen(
                     Spacer(modifier = Modifier.width(16.dp))
 
                     Column(modifier = Modifier.weight(1f)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
                             Text(
                                 text = activePreviewAvatar.name,
                                 color = TextPrimary,
                                 fontSize = 17.sp,
-                                fontWeight = FontWeight.Black
+                                fontWeight = FontWeight.Black,
+                                modifier = Modifier.weight(1f, fill = false)
                             )
+                            if (activePreviewAvatar.isPremium) {
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Surface(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = Color(0xFFFFD700).copy(alpha = 0.2f),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFFD700))
+                                ) {
+                                    Text(
+                                        text = "★ ÉLITE",
+                                        color = Color(0xFFFFD700),
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.Black,
+                                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                                    )
+                                }
+                            }
                             if (state.equippedAvatarId == activePreviewAvatar.id) {
-                                Spacer(modifier = Modifier.width(8.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
                                 Surface(
                                     shape = RoundedCornerShape(10.dp),
                                     color = PacmanYellow.copy(alpha = 0.2f),
@@ -205,6 +225,11 @@ fun ShopScreen(
                         val isEquipped = state.equippedAvatarId == activePreviewAvatar.id
 
                         if (!isEquipped) {
+                            val buttonColor = when {
+                                isUnlocked -> ScaredBlue
+                                activePreviewAvatar.isPremium -> Color(0xFFFFD700)
+                                else -> PacmanYellow
+                            }
                             Button(
                                 onClick = {
                                     if (isUnlocked) {
@@ -218,7 +243,7 @@ fun ShopScreen(
                                     .fillMaxWidth(),
                                 shape = RoundedCornerShape(17.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = if (isUnlocked) ScaredBlue else PacmanYellow,
+                                    containerColor = buttonColor,
                                     contentColor = if (isUnlocked) TextPrimary else DarkContrast
                                 ),
                                 enabled = isUnlocked || state.userScore >= activePreviewAvatar.price
@@ -240,7 +265,7 @@ fun ShopScreen(
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            // 3. Category Filter Tabs: "Pac-Mans" vs "Fantômes"
+            // 3. Category Filter Tabs: "Classiques" vs "✨ Premium"
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -249,19 +274,25 @@ fun ShopScreen(
             ) {
                 AvatarCategory.entries.forEach { category ->
                     val isSelected = selectedCategory == category
+                    val isPremiumTab = category == AvatarCategory.PREMIUM
+                    val activeColor = if (isPremiumTab) Color(0xFFFFD700) else PacmanYellow
                     Box(
                         modifier = Modifier
                             .weight(1f)
                             .height(42.dp)
                             .clip(RoundedCornerShape(21.dp))
-                            .background(if (isSelected) PacmanYellow else CardSurface)
-                            .border(1.dp, if (isSelected) PacmanYellow else BorderSubtle, RoundedCornerShape(21.dp))
+                            .background(if (isSelected) activeColor else CardSurface)
+                            .border(
+                                1.dp,
+                                if (isSelected) activeColor else if (isPremiumTab) Color(0xFFFFD700).copy(alpha = 0.4f) else BorderSubtle,
+                                RoundedCornerShape(21.dp)
+                            )
                             .clickable { selectedCategory = category },
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = category.label,
-                            color = if (isSelected) DarkContrast else TextSecondary,
+                            color = if (isSelected) DarkContrast else if (isPremiumTab) Color(0xFFFFD700) else TextSecondary,
                             fontWeight = if (isSelected) FontWeight.Black else FontWeight.SemiBold,
                             fontSize = 14.sp
                         )
@@ -291,13 +322,18 @@ fun ShopScreen(
                     val cardBorder = when {
                         isEquipped -> PacmanYellow
                         isPreviewed -> ScaredBlue
+                        avatar.isPremium -> Color(0xFFFFD700).copy(alpha = 0.7f)
                         else -> BorderSubtle
                     }
 
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .border(if (isEquipped || isPreviewed) 2.dp else 1.dp, cardBorder, RoundedCornerShape(20.dp))
+                            .border(
+                                if (isEquipped || isPreviewed || avatar.isPremium) 1.5.dp else 1.dp,
+                                cardBorder,
+                                RoundedCornerShape(20.dp)
+                            )
                             .clickable {
                                 previewAvatarId = avatar.id
                                 if (isUnlocked && !isEquipped) {
@@ -306,34 +342,55 @@ fun ShopScreen(
                             },
                         shape = RoundedCornerShape(20.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = if (isEquipped) SelectedSurface else CardSurface
+                            containerColor = if (isEquipped) SelectedSurface else if (avatar.isPremium) NavyIntermediate else CardSurface
                         )
                     ) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(14.dp),
+                                .padding(12.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
+                            if (avatar.isPremium) {
+                                Surface(
+                                    shape = RoundedCornerShape(6.dp),
+                                    color = Color(0xFFFFD700).copy(alpha = 0.2f),
+                                    border = androidx.compose.foundation.BorderStroke(0.8.dp, Color(0xFFFFD700)),
+                                    modifier = Modifier.padding(bottom = 6.dp)
+                                ) {
+                                    Text(
+                                        text = "★ ÉLITE",
+                                        color = Color(0xFFFFD700),
+                                        fontSize = 8.sp,
+                                        fontWeight = FontWeight.Black,
+                                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
+                                    )
+                                }
+                            }
+
                             // Avatar Visual
                             Box(
                                 modifier = Modifier
                                     .size(62.dp)
                                     .clip(CircleShape)
                                     .background(NavyIntermediate)
-                                    .border(1.5.dp, if (isEquipped) PacmanYellow else BorderSubtle, CircleShape),
+                                    .border(
+                                        1.5.dp,
+                                        if (isEquipped) PacmanYellow else if (avatar.isPremium) Color(0xFFFFD700).copy(alpha = 0.5f) else BorderSubtle,
+                                        CircleShape
+                                    ),
                                 contentAlignment = Alignment.Center
                             ) {
                                 AvatarVisual(avatar = avatar, size = 46.dp)
                             }
 
-                            Spacer(modifier = Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
 
                             Text(
                                 text = avatar.name,
-                                color = if (isEquipped) PacmanYellow else TextPrimary,
+                                color = if (isEquipped) PacmanYellow else if (avatar.isPremium) Color(0xFFFFE066) else TextPrimary,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 13.sp,
+                                fontSize = 12.sp,
                                 textAlign = TextAlign.Center,
                                 maxLines = 1
                             )
@@ -381,11 +438,12 @@ fun ShopScreen(
                                 }
                                 else -> {
                                     val canAfford = state.userScore >= avatar.price
+                                    val unlockBtnColor = if (avatar.isPremium) Color(0xFFFFD700) else PacmanYellow
                                     Button(
                                         onClick = { onUnlockAvatar(avatar) },
                                         shape = RoundedCornerShape(12.dp),
                                         colors = ButtonDefaults.buttonColors(
-                                            containerColor = if (canAfford) PacmanYellow else CardSurface,
+                                            containerColor = if (canAfford) unlockBtnColor else CardSurface,
                                             contentColor = if (canAfford) DarkContrast else TextSecondary
                                         ),
                                         border = if (canAfford) null else androidx.compose.foundation.BorderStroke(1.dp, BorderSubtle),

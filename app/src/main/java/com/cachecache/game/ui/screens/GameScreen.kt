@@ -66,6 +66,7 @@ fun GameScreen(
             seekerLocation = state.seekerLocation,
             seekerHeading = state.seekerHeading,
             isFacingRight = state.isFacingRight,
+            capturingGhost = state.capturingGhost,
             hiddenPlayers = state.hiddenPlayers,
             suspectZone = state.suspectZone,
             pacDotsRoute = if (state.suspectZone?.isTargeted == true || state.suspectZone?.isModalVisible == true) state.pacDotsRoute else emptyList(),
@@ -343,7 +344,10 @@ fun GameScreen(
             )
         }
 
-        // Screen 5: Capture Dialog Overlay (triggered at <= 0.30m)
+        // Arcade Ghost Absorption Animation (Blue Lines Dissolve + Fleeing Eyes)
+        GhostCaptureOverlay(capturingGhost = state.capturingGhost)
+
+        // Screen 5: Capture Dialog Overlay (triggered after absorption animation)
         state.capturedDialogPlayer?.let { capturedPlayer ->
             CaptureSuccessDialog(
                 player = capturedPlayer,

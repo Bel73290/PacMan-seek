@@ -261,30 +261,41 @@ class GameViewModel : ViewModel() {
     }
 
     private fun triggerCapture(player: HiddenPlayer) {
-        val updatedPlayers = _uiState.value.hiddenPlayers.map {
-            if (it.id == player.id) it.copy(isFound = true, isScared = false) else it
-        }
+        if (_uiState.value.capturingGhost != null) return
+        viewModelScope.launch {
+            // 1. Enter capture animation state (arcade blue lines dissolution + fleeing eyes)
+            _uiState.update { it.copy(capturingGhost = player) }
 
-        val addedScore = 50
-        val newScore = _uiState.value.userScore + addedScore
-        val newXp = _uiState.value.userXp + addedScore
-        val newHistoryItem = HistoryItem(
-            id = "hist_${System.currentTimeMillis()}",
-            date = "Aujourd'hui",
-            title = "Trouvé ${player.name} (${player.locationName})",
-            deltaScore = addedScore,
-            iconType = "ghost"
-        )
+            // 2. Play absorption sequence for ~1100ms
+            delay(1100L)
 
-        _uiState.update { state ->
-            state.copy(
-                hiddenPlayers = updatedPlayers,
-                userScore = newScore,
-                userXp = if (newXp >= state.maxXp) newXp - state.maxXp else newXp,
-                userLevel = if (newXp >= state.maxXp) state.userLevel + 1 else state.userLevel,
-                capturedDialogPlayer = player,
-                recentHistory = listOf(newHistoryItem) + state.recentHistory
+            // 3. Complete capture, update score & history, and show score dialog
+            val updatedPlayers = _uiState.value.hiddenPlayers.map {
+                if (it.id == player.id) it.copy(isFound = true, isScared = false) else it
+            }
+
+            val addedScore = 50
+            val newScore = _uiState.value.userScore + addedScore
+            val newXp = _uiState.value.userXp + addedScore
+            val newHistoryItem = HistoryItem(
+                id = "hist_${System.currentTimeMillis()}",
+                date = "Aujourd'hui",
+                title = "Trouvé ${player.name} (${player.locationName})",
+                deltaScore = addedScore,
+                iconType = "ghost"
             )
+
+            _uiState.update { state ->
+                state.copy(
+                    hiddenPlayers = updatedPlayers,
+                    userScore = newScore,
+                    userXp = if (newXp >= state.maxXp) newXp - state.maxXp else newXp,
+                    userLevel = if (newXp >= state.maxXp) state.userLevel + 1 else state.userLevel,
+                    capturedDialogPlayer = player,
+                    capturingGhost = null,
+                    recentHistory = listOf(newHistoryItem) + state.recentHistory
+                )
+            }
         }
     }
 
