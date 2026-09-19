@@ -100,7 +100,7 @@ enum class Screen {
 
 enum class AvatarCategory(val label: String) {
     CLASSIC("Classiques"),
-    PREMIUM("✨ Premium")
+    PREMIUM("Premium")
 }
 
 data class AvatarItem(

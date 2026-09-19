@@ -199,14 +199,5 @@ fun StreetViewScreen(
                 }
             }
         }
-
-        // Capture popup trigger if close
-        state.capturedDialogPlayer?.let { player ->
-            CaptureSuccessDialog(
-                player = player,
-                seekerRemainingSeconds = state.seekerRemainingSeconds,
-                onDismiss = onBack
-            )
-        }
     }
 }

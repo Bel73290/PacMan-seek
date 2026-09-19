@@ -42,8 +42,8 @@ import java.util.Locale
 
 enum class ShopTab(val label: String) {
     CLASSIC("Classiques"),
-    PREMIUM("✨ Premium"),
-    INVENTORY("🎒 Inventaire")
+    PREMIUM("Premium"),
+    INVENTORY("Inventaire")
 }
 
 @Composable
@@ -271,7 +271,7 @@ fun ShopScreen(
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            // 3. Category Filter Tabs: "Classiques", "✨ Premium", "🎒 Inventaire"
+            // 3. Category Filter Tabs: "Classiques", "Premium", "Inventaire"
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

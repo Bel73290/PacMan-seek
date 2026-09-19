@@ -340,7 +340,7 @@ class GameViewModel : ViewModel() {
                     userScore = newScore,
                     userXp = if (newXp >= state.maxXp) newXp - state.maxXp else newXp,
                     userLevel = if (newXp >= state.maxXp) state.userLevel + 1 else state.userLevel,
-                    capturedDialogPlayer = if (allFound) null else player,
+                    capturedDialogPlayer = null,
                     capturingGhost = null,
                     recentHistory = listOf(newHistoryItem) + state.recentHistory
                 )

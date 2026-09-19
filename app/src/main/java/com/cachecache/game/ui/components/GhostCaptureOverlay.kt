@@ -109,20 +109,24 @@ fun GhostCaptureOverlay(
             )
         }
 
-        // Retro Arcade "ABSORBÉ !" Toast during the first 500ms
-        if (progress < 0.6f) {
-            val textAlpha = (1f - progress / 0.6f).coerceIn(0f, 1f)
+        // Retro Arcade "+ 50 points" displayed under the ghost
+        if (progress < 0.92f) {
+            val textAlpha = when {
+                progress < 0.65f -> 1f
+                else -> (1f - (progress - 0.65f) / 0.27f).coerceIn(0f, 1f)
+            }
+            val textFloatY = 60.dp - (progress * 15f).dp
             Box(
                 modifier = Modifier
-                    .offset(y = 65.dp)
+                    .offset(y = textFloatY)
                     .alpha(textAlpha)
             ) {
                 Text(
-                    text = "FANTÔME CAPTURÉ !",
+                    text = "+ 50 points",
                     color = PacmanYellow,
-                    fontSize = 18.sp,
+                    fontSize = 22.sp,
                     fontWeight = FontWeight.Black,
-                    letterSpacing = 2.sp
+                    letterSpacing = 1.sp
                 )
             }
         }

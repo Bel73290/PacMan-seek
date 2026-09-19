@@ -84,10 +84,17 @@ fun GameScreen(
                 .statusBarsPadding()
                 .padding(horizontal = 16.dp, vertical = 6.dp)
         ) {
-            // Header Bar
+            val isFreeze = state.gamePhase == GamePhase.FREEZE
+            val timerColor = if (isFreeze) GhostCyan else PacmanYellow
+            val timerText = if (isFreeze) "${state.freezeRemainingSeconds}s" else GameViewModel.formatSeconds(state.searchRemainingSeconds)
+
+            // Top Header Bar: Back Button, Timer (replaces "Partie en cours"), and Ghosts Counter
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
                     onClick = onBackToHome,
@@ -104,102 +111,75 @@ fun GameScreen(
                     )
                 }
 
-                Text(
-                    text = "Partie en cours",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = TextPrimary,
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.size(42.dp))
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Single Dynamic Game Timer (30s Freeze Preparation -> 10min Hunt)
-            val isFreeze = state.gamePhase == GamePhase.FREEZE
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(
-                        1.2.dp,
-                        if (isFreeze) GhostCyan else PacmanYellow.copy(alpha = 0.8f),
-                        RoundedCornerShape(20.dp)
-                    ),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = NavyIntermediate.copy(alpha = 0.96f)
-                )
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                // In place of "Partie en cours": Live Game Timer
+                Surface(
+                    shape = RoundedCornerShape(22.dp),
+                    color = NavyIntermediate.copy(alpha = 0.95f),
+                    border = androidx.compose.foundation.BorderStroke(1.5.dp, timerColor),
+                    modifier = Modifier.padding(horizontal = 4.dp)
                 ) {
-                    if (isFreeze) {
-                        Surface(
-                            shape = CircleShape,
-                            color = GhostCyan.copy(alpha = 0.20f),
-                            modifier = Modifier.size(40.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Icons.Default.Lock,
-                                    contentDescription = "Immobilisé",
-                                    tint = GhostCyan,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                        }
-                    } else {
-                        PacmanComposable(
-                            size = 36.dp,
-                            color = PacmanYellow,
-                            isAnimated = true,
-                            rotationAngle = 0f
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = if (isFreeze) "PRÉPARATION (IMMOBILISÉ)" else "TEMPS DE TRAQUE",
-                            color = if (isFreeze) GhostCyan else TextSecondary,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.sp
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = if (isFreeze) "Les fantômes se cachent... (${state.freezeRemainingSeconds}s)" else "Fantômes capturés : ${state.hiddenPlayers.count { it.isFound }} / ${state.hiddenPlayers.size}",
-                            color = TextPrimary,
-                            fontSize = 12.sp
-                        )
-                    }
-
-                    Surface(
-                        shape = RoundedCornerShape(14.dp),
-                        color = if (isFreeze) GhostCyan.copy(alpha = 0.15f) else PacmanYellow.copy(alpha = 0.15f),
-                        border = androidx.compose.foundation.BorderStroke(
-                            1.dp,
-                            if (isFreeze) GhostCyan else PacmanYellow
-                        )
+                    Row(
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
+                        if (isFreeze) {
+                            Icon(
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = "Immobilisé",
+                                tint = GhostCyan,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "ATTENTE : $timerText",
+                                color = GhostCyan,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 1.sp
+                            )
+                        } else {
+                            PacmanComposable(
+                                size = 22.dp,
+                                color = PacmanYellow,
+                                isAnimated = true,
+                                rotationAngle = 0f
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = timerText,
+                                color = PacmanYellow,
+                                fontSize = 19.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 1.5.sp
+                            )
+                        }
+                    }
+                }
+
+                // Ghosts captured counter badge
+                Surface(
+                    shape = RoundedCornerShape(20.dp),
+                    color = NavyIntermediate.copy(alpha = 0.95f),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, BorderSubtle),
+                    modifier = Modifier.height(42.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        GhostComposable(size = 18.dp, baseColor = GhostCyan, isScared = false)
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = if (isFreeze) "${state.freezeRemainingSeconds}s" else GameViewModel.formatSeconds(state.searchRemainingSeconds),
-                            color = if (isFreeze) GhostCyan else PacmanYellow,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Black,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                            text = "${state.hiddenPlayers.count { it.isFound }}/${state.hiddenPlayers.size}",
+                            color = TextPrimary,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             // Écran 3 : Bannière Flottante "Proche d'un fantôme !" (moins de 30 mètres)
             AnimatedVisibility(
@@ -401,17 +381,8 @@ fun GameScreen(
             )
         }
 
-        // Arcade Ghost Absorption Animation (Blue Lines Dissolve + Fleeing Eyes)
+        // Arcade Ghost Absorption Animation (Blue Lines Dissolve + Fleeing Eyes + "+ 50 points")
         GhostCaptureOverlay(capturingGhost = state.capturingGhost)
-
-        // Screen 5: Capture Dialog Overlay (triggered after absorption animation)
-        state.capturedDialogPlayer?.let { capturedPlayer ->
-            CaptureSuccessDialog(
-                player = capturedPlayer,
-                seekerRemainingSeconds = state.searchRemainingSeconds,
-                onDismiss = onDismissCaptureDialog
-            )
-        }
 
         // Victory Dialog (All ghosts captured)
         if (state.gamePhase == GamePhase.VICTORY) {

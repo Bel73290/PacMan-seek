@@ -184,9 +184,10 @@ fun VictoryDialog(
                             modifier = Modifier.padding(10.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Text(text = "Score Total", color = TextSecondary, fontSize = 11.sp)
+                            Text(text = "Points gagnés", color = TextSecondary, fontSize = 11.sp)
+                            val victoryPoints = state.hiddenPlayers.size.coerceAtLeast(1) * 50
                             Text(
-                                text = "${numberFormat.format(state.userScore)} pts",
+                                text = "+$victoryPoints pts",
                                 color = PacmanYellow,
                                 fontWeight = FontWeight.Black,
                                 fontSize = 16.sp
@@ -361,10 +362,11 @@ fun DefeatDialog(
                         }
 
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = "Score final", color = TextSecondary, fontSize = 11.sp)
+                            Text(text = "Points gagnés", color = TextSecondary, fontSize = 11.sp)
+                            val earnedPoints = ghostsFound * 50
                             Text(
-                                text = "${numberFormat.format(state.userScore)} pts",
-                                color = PacmanYellow,
+                                text = if (earnedPoints > 0) "+$earnedPoints pts" else "0 pt",
+                                color = if (earnedPoints > 0) PacmanYellow else TextSecondary,
                                 fontWeight = FontWeight.Black,
                                 fontSize = 16.sp
                             )
