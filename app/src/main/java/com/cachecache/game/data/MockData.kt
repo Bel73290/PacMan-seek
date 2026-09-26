@@ -205,18 +205,6 @@ object MockData {
     )
 
     val AvatarItemsCatalog = listOf(
-        // === AVATAR OFFICIEL PAC & SEEK (PP JOUEUR) ===
-        AvatarItem(
-            id = "avatar_pac_seek_pp",
-            name = "Emblème Pac & Seek",
-            category = AvatarCategory.PREMIUM,
-            description = "L'emblème officiel Pac & Seek au cœur du labyrinthe géolocalisé.",
-            price = 0,
-            ghostColor = PacmanYellow,
-            drawableResId = com.cachecache.game.R.drawable.avatar_pac_seek_pp,
-            isPremium = true
-        ),
-
         // === CATÉGORIE 1 : CLASSIQUES ICONIQUES & DISTINCTIFS ===
         AvatarItem(
             id = "ghost_red_classic",

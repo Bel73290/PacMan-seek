@@ -187,9 +187,8 @@ data class GameState(
     val maxXp: Int = 500,
     val totalGamesPlayed: Int = 12,
     val totalVictories: Int = 7,
-    val equippedAvatarId: String = "avatar_pac_seek_pp",
+    val equippedAvatarId: String = "ghost_red_classic",
     val unlockedAvatarIds: Set<String> = setOf(
-        "avatar_pac_seek_pp",
         "ghost_red_classic",
         "ghost_pink_classic",
         "premium_ghost_gold_king",
