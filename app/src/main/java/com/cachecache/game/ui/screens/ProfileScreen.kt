@@ -60,12 +60,11 @@ fun ProfileScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp, vertical = 10.dp)
         ) {
-            // Header: "Mon profil" on left + Gear Settings Icon on right
+            // Header: "Mon profil"
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -74,21 +73,6 @@ fun ProfileScreen(
                     color = TextPrimary,
                     fontWeight = FontWeight.Bold
                 )
-
-                IconButton(
-                    onClick = onOpenSettings,
-                    modifier = Modifier
-                        .size(42.dp)
-                        .clip(CircleShape)
-                        .background(NavyIntermediate)
-                        .border(1.dp, BorderSubtle, CircleShape)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = "Réglages",
-                        tint = PacmanYellow
-                    )
-                }
             }
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -118,48 +102,17 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.width(16.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Toi",
-                            color = TextPrimary,
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Black
-                        )
+                    Text(
+                        text = "Toi",
+                        color = TextPrimary,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Black
+                    )
 
-                        // Boutique Shortcut Button
-                        Surface(
-                            shape = RoundedCornerShape(14.dp),
-                            color = NavyIntermediate,
-                            border = androidx.compose.foundation.BorderStroke(1.dp, BorderSubtle),
-                            modifier = Modifier.clickable { onNavigate(Screen.SHOP) }
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Palette,
-                                    contentDescription = "Boutique",
-                                    tint = PacmanYellow,
-                                    modifier = Modifier.size(12.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = "Boutique PP",
-                                    color = PacmanYellow,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.ExtraBold
-                                )
-                            }
-                        }
-                    }
+                    Spacer(modifier = Modifier.height(2.dp))
 
                     Text(
-                        text = "Niveau ${state.userLevel} • ${equippedAvatar.name}",
+                        text = "Niveau ${state.userLevel}",
                         color = TextSecondary,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Medium
@@ -640,7 +593,7 @@ private fun AchievementSkinDetailDialog(
                                 contentColor = DarkContrast
                             )
                         ) {
-                            Text(text = "Équiper cette PP", fontWeight = FontWeight.Black, fontSize = 14.sp)
+                            Text(text = "Équiper ce skin", fontWeight = FontWeight.Black, fontSize = 14.sp)
                         }
                     }
                 } else {

@@ -105,7 +105,7 @@ fun ShopScreen(
                     Spacer(modifier = Modifier.width(14.dp))
 
                     Text(
-                        text = "Boutique PP",
+                        text = "Boutique",
                         style = MaterialTheme.typography.headlineSmall,
                         color = TextPrimary,
                         fontWeight = FontWeight.Black
@@ -257,7 +257,7 @@ fun ShopScreen(
                                 if (isUnlocked) {
                                     Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(15.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
-                                    Text(text = "Équiper cette PP", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                    Text(text = "Équiper ce skin", fontWeight = FontWeight.Bold, fontSize = 12.sp)
                                 } else {
                                     Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(14.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
