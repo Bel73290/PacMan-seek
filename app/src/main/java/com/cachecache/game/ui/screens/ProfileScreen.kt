@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Settings
@@ -38,7 +39,8 @@ import com.cachecache.game.ui.theme.*
 fun ProfileScreen(
     state: GameState,
     onNavigate: (Screen) -> Unit,
-    onOpenSettings: () -> Unit,
+    onBack: () -> Unit = { onNavigate(Screen.SPLASH) },
+    onOpenSettings: () -> Unit = {},
     onEquipAvatar: (String) -> Unit = {},
     onSelectAchievementSkin: (AchievementSkinItem?) -> Unit = {},
     onSelectBadge: (BadgeItem?) -> Unit = {}
@@ -58,67 +60,84 @@ fun ProfileScreen(
                 .padding(paddingValues)
                 .statusBarsPadding()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 10.dp)
+                .padding(horizontal = 20.dp, vertical = 6.dp)
         ) {
-            // Header: "Mon profil"
+            // Header: Back Arrow & "Mon profil"
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 12.dp),
+                    .padding(vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier
+                        .size(38.dp)
+                        .clip(CircleShape)
+                        .background(NavyIntermediate)
+                        .border(1.dp, BorderSubtle, CircleShape)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Retour",
+                        tint = TextPrimary
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(14.dp))
+
                 Text(
                     text = "Mon profil",
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.titleLarge,
                     color = TextPrimary,
                     fontWeight = FontWeight.Bold
                 )
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             val equippedAvatar = MockData.AvatarItemsCatalog.firstOrNull { it.id == state.equippedAvatarId }
                 ?: MockData.AvatarItemsCatalog.first()
 
-            // 1. Player Identity Card
+            // 1. Player Identity Card (Compact)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                    .padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Large Round Avatar
+                // Round Avatar
                 Box(
                     modifier = Modifier
-                        .size(76.dp)
+                        .size(58.dp)
                         .clip(CircleShape)
                         .background(NavyIntermediate)
-                        .border(3.dp, PacmanYellow, CircleShape),
+                        .border(2.dp, PacmanYellow, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    AvatarVisual(avatar = equippedAvatar, size = 58.dp)
+                    AvatarVisual(avatar = equippedAvatar, size = 44.dp)
                 }
 
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(14.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "Toi",
                         color = TextPrimary,
-                        fontSize = 22.sp,
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.Black
                     )
 
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.height(1.dp))
 
                     Text(
                         text = "Niveau ${state.userLevel}",
                         color = TextSecondary,
-                        fontSize = 13.sp,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Medium
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     // XP Progress Bar
                     Column {
@@ -126,37 +145,45 @@ fun ProfileScreen(
                             progress = { (state.userXp.toFloat() / state.maxXp.toFloat()).coerceIn(0f, 1f) },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(8.dp)
-                                .clip(RoundedCornerShape(4.dp)),
+                                .height(6.dp)
+                                .clip(RoundedCornerShape(3.dp)),
                             color = PacmanYellow,
                             trackColor = CardSurface
                         )
 
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(3.dp))
 
                         Text(
                             text = "${formatCompactScore(state.userXp)} / ${formatCompactScore(state.maxXp)} pts",
                             color = TextSecondary,
-                            fontSize = 11.sp,
+                            fontSize = 10.sp,
                             modifier = Modifier.align(Alignment.End)
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
-            // 2. Three Key Metrics Grid (Points with Star, Parties with Gamepad, Victoires with Trophy)
+            // 2. Three Key Metrics Grid (Points with Pac-gomme, Parties with Gamepad, Victoires with Medal)
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Points (Star) formatted with k / Mill
+                // Points (Pac-gomme round yellow circle) formatted with k / Mill
                 StatCard(
                     modifier = Modifier.weight(1f),
                     value = formatCompactScore(state.userScore),
                     label = "Points",
-                    iconContent = { StarComposable(size = 24.dp, color = PacmanYellow) }
+                    iconContent = {
+                        Box(
+                            modifier = Modifier
+                                .size(14.dp)
+                                .shadow(6.dp, CircleShape, spotColor = PacmanYellow)
+                                .clip(CircleShape)
+                                .background(PacmanYellow)
+                        )
+                    }
                 )
 
                 // Parties (Gamepad Icon in Purple)
@@ -169,21 +196,21 @@ fun ProfileScreen(
                             imageVector = Icons.Default.SportsEsports,
                             contentDescription = "Parties",
                             tint = GhostPurple,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 )
 
-                // Victoires (Trophy)
+                // Victoires (Medal)
                 StatCard(
                     modifier = Modifier.weight(1f),
                     value = state.totalVictories.toString(),
                     label = "Victoires",
-                    iconContent = { TrophyComposable(size = 24.dp, rank = 1) }
+                    iconContent = { MedalComposable(size = 18.dp, rank = 1) }
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             // 3. Section "Skins à débloquer" (replaces static Badges)
             Row(
@@ -279,35 +306,35 @@ private fun AchievementSkinCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
-            .border(1.2.dp, borderColor, RoundedCornerShape(18.dp))
+            .clip(RoundedCornerShape(16.dp))
+            .border(1.2.dp, borderColor, RoundedCornerShape(16.dp))
             .clickable { onClick() },
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = CardSurface)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
+                .padding(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Avatar with unlock badge/lock icon
             Box(
                 modifier = Modifier
-                    .size(54.dp)
+                    .size(44.dp)
                     .clip(CircleShape)
                     .background(NavyIntermediate)
                     .border(
-                        2.dp,
+                        1.5.dp,
                         if (achievement.isUnlocked) Color(0xFFFFD700) else BorderSubtle,
                         CircleShape
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 if (avatar != null) {
-                    AvatarVisual(avatar = avatar, size = 42.dp)
+                    AvatarVisual(avatar = avatar, size = 34.dp)
                 } else {
-                    GhostComposable(size = 38.dp, baseColor = GhostCyan, isScared = false)
+                    GhostComposable(size = 30.dp, baseColor = GhostCyan, isScared = false)
                 }
 
                 if (!achievement.isUnlocked) {
@@ -321,20 +348,20 @@ private fun AchievementSkinCard(
                             imageVector = Icons.Default.Lock,
                             contentDescription = "Verrouillé",
                             tint = Color.White.copy(alpha = 0.85f),
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(14.dp)
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.width(14.dp))
+            Spacer(modifier = Modifier.width(10.dp))
 
             // Details & Progress
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = achievement.title,
                     color = if (achievement.isUnlocked) Color(0xFFFFE066) else TextPrimary,
-                    fontSize = 14.sp,
+                    fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1
                 )
@@ -344,12 +371,12 @@ private fun AchievementSkinCard(
                 Text(
                     text = achievement.requirementDescription,
                     color = TextSecondary,
-                    fontSize = 11.sp,
-                    lineHeight = 14.sp,
+                    fontSize = 10.sp,
+                    lineHeight = 13.sp,
                     maxLines = 2
                 )
 
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
                 // Progress Indicator
                 Row(
@@ -360,42 +387,42 @@ private fun AchievementSkinCard(
                         progress = { achievement.progressRatio },
                         modifier = Modifier
                             .weight(1f)
-                            .height(6.dp)
+                            .height(5.dp)
                             .clip(RoundedCornerShape(3.dp)),
                         color = if (achievement.isUnlocked) Color(0xFFFFD700) else PacmanYellow,
                         trackColor = NavyIntermediate
                     )
 
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
 
                     Text(
                         text = "${formatCompactScore(achievement.progressCurrent)}/${formatCompactScore(achievement.progressTarget)}",
                         color = if (achievement.isUnlocked) Color(0xFFFFD700) else TextSecondary,
-                        fontSize = 10.sp,
+                        fontSize = 9.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(8.dp))
 
             // Action / Status Button
             when {
                 isEquipped -> {
                     Surface(
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(10.dp),
                         color = PacmanYellow,
-                        modifier = Modifier.height(28.dp)
+                        modifier = Modifier.height(24.dp)
                     ) {
                         Box(
-                            modifier = Modifier.padding(horizontal = 8.dp),
+                            modifier = Modifier.padding(horizontal = 6.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = "ÉQUIPÉ",
                                 color = DarkContrast,
                                 fontWeight = FontWeight.Black,
-                                fontSize = 10.sp
+                                fontSize = 9.sp
                             )
                         }
                     }
@@ -403,44 +430,44 @@ private fun AchievementSkinCard(
                 achievement.isUnlocked -> {
                     Button(
                         onClick = onEquip,
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(10.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFFFFD700),
                             contentColor = DarkContrast
                         ),
-                        modifier = Modifier.height(30.dp),
-                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp)
+                        modifier = Modifier.height(26.dp),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
                     ) {
                         Text(
                             text = "Équiper",
                             fontWeight = FontWeight.Black,
-                            fontSize = 11.sp
+                            fontSize = 10.sp
                         )
                     }
                 }
                 else -> {
                     Surface(
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(10.dp),
                         color = NavyIntermediate,
                         border = androidx.compose.foundation.BorderStroke(1.dp, BorderSubtle),
-                        modifier = Modifier.height(28.dp)
+                        modifier = Modifier.height(24.dp)
                     ) {
                         Row(
-                            modifier = Modifier.padding(horizontal = 8.dp),
+                            modifier = Modifier.padding(horizontal = 6.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Lock,
                                 contentDescription = null,
                                 tint = TextSecondary,
-                                modifier = Modifier.size(11.dp)
+                                modifier = Modifier.size(10.dp)
                             )
-                            Spacer(modifier = Modifier.width(4.dp))
+                            Spacer(modifier = Modifier.width(3.dp))
                             Text(
                                 text = "Défi",
                                 color = TextSecondary,
                                 fontWeight = FontWeight.SemiBold,
-                                fontSize = 10.sp
+                                fontSize = 9.sp
                             )
                         }
                     }
@@ -625,33 +652,38 @@ private fun StatCard(
     iconContent: @Composable () -> Unit
 ) {
     Card(
-        modifier = modifier.border(1.dp, BorderSubtle, RoundedCornerShape(20.dp)),
-        shape = RoundedCornerShape(20.dp),
+        modifier = modifier.border(1.dp, BorderSubtle, RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = NavyIntermediate)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 14.dp),
+                .padding(vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            iconContent()
+            Box(
+                modifier = Modifier.height(20.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                iconContent()
+            }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             Text(
                 text = value,
                 color = TextPrimary,
-                fontSize = 17.sp,
+                fontSize = 15.sp,
                 fontWeight = FontWeight.Black
             )
 
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(modifier = Modifier.height(1.dp))
 
             Text(
                 text = label,
                 color = TextSecondary,
-                fontSize = 12.sp,
+                fontSize = 11.sp,
                 fontWeight = FontWeight.Medium
             )
         }

@@ -6,8 +6,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -83,7 +81,7 @@ fun SplashScreen(
                     )
                 }
 
-                // Button "Menu" (Dark Glass with Menu Icon)
+                // Button "Menu"
                 Button(
                     onClick = onOpenMenu,
                     modifier = Modifier
@@ -96,13 +94,6 @@ fun SplashScreen(
                         contentColor = TextPrimary
                     )
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Menu,
-                        contentDescription = "Menu",
-                        tint = TextPrimary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
                     Text(
                         text = "Menu",
                         fontSize = 16.sp,

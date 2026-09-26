@@ -23,8 +23,8 @@ import com.cachecache.game.data.MockData
 import com.cachecache.game.model.*
 import com.cachecache.game.ui.components.BottomNavigationBar
 import com.cachecache.game.ui.components.GhostComposable
+import com.cachecache.game.ui.components.MedalComposable
 import com.cachecache.game.ui.components.PacmanComposable
-import com.cachecache.game.ui.components.TrophyComposable
 import com.cachecache.game.ui.theme.*
 import java.text.NumberFormat
 import java.util.Locale
@@ -72,13 +72,13 @@ fun LeaderboardScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                    .padding(horizontal = 16.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
                     onClick = onBack,
                     modifier = Modifier
-                        .size(42.dp)
+                        .size(38.dp)
                         .clip(CircleShape)
                         .background(NavyIntermediate)
                         .border(1.dp, BorderSubtle, CircleShape)
@@ -90,34 +90,34 @@ fun LeaderboardScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(14.dp))
 
                 Text(
                     text = "Classement",
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.titleLarge,
                     color = TextPrimary,
                     fontWeight = FontWeight.Bold
                 )
             }
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(2.dp))
 
             // Filter Tabs (Pills): Général vs Amis
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    .padding(horizontal = 18.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 LeaderboardTab.entries.forEach { tab ->
                     val isSelected = state.activeLeaderboardTab == tab
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(40.dp)
-                            .clip(RoundedCornerShape(20.dp))
+                            .height(34.dp)
+                            .clip(RoundedCornerShape(17.dp))
                             .background(if (isSelected) PacmanYellow else CardSurface)
-                            .border(1.dp, if (isSelected) PacmanYellow else BorderSubtle, RoundedCornerShape(20.dp))
+                            .border(1.dp, if (isSelected) PacmanYellow else BorderSubtle, RoundedCornerShape(17.dp))
                             .clickable { onSelectTab(tab) },
                         contentAlignment = Alignment.Center
                     ) {
@@ -125,21 +125,21 @@ fun LeaderboardScreen(
                             text = tab.label,
                             color = if (isSelected) DarkContrast else TextSecondary,
                             fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium,
-                            fontSize = 14.sp
+                            fontSize = 13.sp
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             // LazyColumn with Podium at top and remaining ranks below
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                contentPadding = PaddingValues(bottom = 20.dp)
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+                contentPadding = PaddingValues(bottom = 16.dp)
             ) {
                 // Podium Header (Top 3)
                 item {
@@ -149,18 +149,6 @@ fun LeaderboardScreen(
                         top3 = top3,
                         equippedAvatarId = state.equippedAvatarId
                     )
-                }
-
-                if (remainingEntries.isNotEmpty()) {
-                    item {
-                        Text(
-                            text = "RANGS SUIVANTS",
-                            color = TextSecondary,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(start = 4.dp, top = 4.dp, bottom = 2.dp)
-                        )
-                    }
                 }
 
                 // Remaining Ranks (4th place and below)
@@ -185,14 +173,14 @@ private fun LeaderboardPodium(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, BorderSubtle, RoundedCornerShape(24.dp)),
-        shape = RoundedCornerShape(24.dp),
+            .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp)),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = CardSurface)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp, start = 8.dp, end = 8.dp, bottom = 0.dp),
+                .padding(top = 8.dp, start = 6.dp, end = 6.dp, bottom = 0.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
@@ -206,7 +194,7 @@ private fun LeaderboardPodium(
                         entry = entry,
                         equippedAvatarId = equippedAvatarId,
                         rank = 2,
-                        pedestalHeight = 90.dp,
+                        pedestalHeight = 56.dp,
                         accentColor = Color(0xFFC0C0C0),
                         modifier = Modifier.weight(1f)
                     )
@@ -220,7 +208,7 @@ private fun LeaderboardPodium(
                         entry = entry,
                         equippedAvatarId = equippedAvatarId,
                         rank = 1,
-                        pedestalHeight = 125.dp,
+                        pedestalHeight = 80.dp,
                         accentColor = Color(0xFFFFD700),
                         modifier = Modifier.weight(1.15f)
                     )
@@ -234,7 +222,7 @@ private fun LeaderboardPodium(
                         entry = entry,
                         equippedAvatarId = equippedAvatarId,
                         rank = 3,
-                        pedestalHeight = 70.dp,
+                        pedestalHeight = 42.dp,
                         accentColor = Color(0xFFCD7F32),
                         modifier = Modifier.weight(1f)
                     )
@@ -253,17 +241,16 @@ private fun PodiumColumn(
     accentColor: Color,
     modifier: Modifier = Modifier
 ) {
-    val numberFormat = NumberFormat.getNumberInstance(Locale.FRANCE)
-    val avatarSize = if (rank == 1) 56.dp else 46.dp
+    val avatarSize = if (rank == 1) 46.dp else 38.dp
 
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Trophy / Medal Badge
-        TrophyComposable(size = if (rank == 1) 28.dp else 22.dp, rank = rank)
+        // Medal Badge (Olympic style medal instead of trophy cup)
+        MedalComposable(size = if (rank == 1) 24.dp else 20.dp, rank = rank)
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(2.dp))
 
         // Avatar
         Box(
@@ -271,7 +258,7 @@ private fun PodiumColumn(
                 .size(avatarSize)
                 .clip(CircleShape)
                 .background(NavyIntermediate)
-                .border(if (rank == 1) 3.dp else 2.dp, accentColor, CircleShape),
+                .border(if (rank == 1) 2.5.dp else 2.dp, accentColor, CircleShape),
             contentAlignment = Alignment.Center
         ) {
             if (entry.isCurrentUser) {
@@ -283,14 +270,14 @@ private fun PodiumColumn(
             }
         }
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(3.dp))
 
         // Player Name
         Text(
             text = entry.name,
             color = if (entry.isCurrentUser) PacmanYellow else TextPrimary,
             fontWeight = if (rank == 1 || entry.isCurrentUser) FontWeight.Black else FontWeight.Bold,
-            fontSize = if (rank == 1) 13.sp else 12.sp,
+            fontSize = if (rank == 1) 12.sp else 11.sp,
             maxLines = 1,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
@@ -300,26 +287,26 @@ private fun PodiumColumn(
             text = "${formatCompactScore(entry.score)} pts",
             color = accentColor,
             fontWeight = FontWeight.ExtraBold,
-            fontSize = if (rank == 1) 11.sp else 10.sp,
+            fontSize = if (rank == 1) 10.sp else 9.sp,
             maxLines = 1,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
         // Pedestal Block
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(pedestalHeight)
-                .clip(RoundedCornerShape(topStart = 14.dp, topEnd = 14.dp))
+                .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
                 .background(
                     if (rank == 1) NavyIntermediate else DarkContrast.copy(alpha = 0.8f)
                 )
                 .border(
-                    1.5.dp,
+                    1.2.dp,
                     accentColor.copy(alpha = if (rank == 1) 0.8f else 0.5f),
-                    RoundedCornerShape(topStart = 14.dp, topEnd = 14.dp)
+                    RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
                 ),
             contentAlignment = Alignment.Center
         ) {
@@ -327,7 +314,7 @@ private fun PodiumColumn(
                 Text(
                     text = "$rank",
                     color = accentColor,
-                    fontSize = if (rank == 1) 34.sp else 26.sp,
+                    fontSize = if (rank == 1) 22.sp else 16.sp,
                     fontWeight = FontWeight.Black
                 )
             }
@@ -348,75 +335,75 @@ private fun LeaderboardRow(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, rowBorder, RoundedCornerShape(18.dp)),
-        shape = RoundedCornerShape(18.dp),
+            .border(1.dp, rowBorder, RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = rowBackground)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = 14.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Rank Badge or Number
             Box(
-                modifier = Modifier.width(36.dp),
+                modifier = Modifier.width(32.dp),
                 contentAlignment = Alignment.Center
             ) {
                 when (entry.rank) {
-                    1, 2, 3 -> TrophyComposable(size = 26.dp, rank = entry.rank)
+                    1, 2, 3 -> MedalComposable(size = 22.dp, rank = entry.rank)
                     else -> Text(
                         text = entry.rank.toString(),
                         color = TextSecondary,
-                        fontSize = 15.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(10.dp))
 
             // Round Avatar
             Box(
                 modifier = Modifier
-                    .size(42.dp)
+                    .size(36.dp)
                     .clip(CircleShape)
                     .background(NavyIntermediate)
-                    .border(2.dp, if (entry.isCurrentUser) PacmanYellow else entry.avatarColor.copy(alpha = 0.5f), CircleShape),
+                    .border(1.5.dp, if (entry.isCurrentUser) PacmanYellow else entry.avatarColor.copy(alpha = 0.5f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 if (entry.isCurrentUser) {
                     val equippedAvatar = MockData.AvatarItemsCatalog.firstOrNull { it.id == equippedAvatarId }
                         ?: MockData.AvatarItemsCatalog.first()
-                    AvatarVisual(avatar = equippedAvatar, size = 30.dp)
+                    AvatarVisual(avatar = equippedAvatar, size = 26.dp)
                 } else {
-                    GhostComposable(size = 28.dp, baseColor = entry.avatarColor, isScared = false)
+                    GhostComposable(size = 24.dp, baseColor = entry.avatarColor, isScared = false)
                 }
             }
 
-            Spacer(modifier = Modifier.width(14.dp))
+            Spacer(modifier = Modifier.width(12.dp))
 
             // Player Name
             Text(
                 text = entry.name,
                 color = if (entry.isCurrentUser) PacmanYellow else TextPrimary,
-                fontSize = 15.sp,
+                fontSize = 14.sp,
                 fontWeight = if (entry.isCurrentUser) FontWeight.Black else FontWeight.SemiBold,
                 modifier = Modifier.weight(1f)
             )
 
-            // Score with optional gold trophy
+            // Score with optional medal for 1st
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = formattedScore,
                     color = if (entry.isCurrentUser) PacmanYellow else TextPrimary,
-                    fontSize = 15.sp,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.Bold
                 )
 
                 if (entry.rank == 1) {
                     Spacer(modifier = Modifier.width(6.dp))
-                    TrophyComposable(size = 18.dp, rank = 1)
+                    MedalComposable(size = 16.dp, rank = 1)
                 }
             }
         }

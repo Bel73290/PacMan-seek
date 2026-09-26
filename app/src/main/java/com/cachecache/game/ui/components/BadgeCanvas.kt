@@ -21,6 +21,91 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 @Composable
+fun MedalComposable(
+    modifier: Modifier = Modifier,
+    size: Dp = 24.dp,
+    rank: Int = 1
+) {
+    val medalColor = when (rank) {
+        1 -> GoldTrophy
+        2 -> SilverTrophy
+        3 -> BronzeTrophy
+        else -> GoldTrophy
+    }
+    val ribbonColorLeft = when (rank) {
+        1 -> GhostCyan
+        2 -> GhostPurple
+        else -> GhostOrange
+    }
+    val ribbonColorRight = when (rank) {
+        1 -> GhostRed
+        2 -> GhostPink
+        else -> Color(0xFFB22222)
+    }
+
+    Canvas(modifier = modifier.size(size)) {
+        val w = this.size.width
+        val h = this.size.height
+
+        // 1. Ribbon V-Shape hanging from top to medal ring
+        val leftRibbon = Path().apply {
+            moveTo(w * 0.22f, 0f)
+            lineTo(w * 0.44f, 0f)
+            lineTo(w * 0.50f, h * 0.46f)
+            lineTo(w * 0.36f, h * 0.46f)
+            close()
+        }
+        drawPath(leftRibbon, color = ribbonColorLeft)
+
+        val rightRibbon = Path().apply {
+            moveTo(w * 0.56f, 0f)
+            lineTo(w * 0.78f, 0f)
+            lineTo(w * 0.64f, h * 0.46f)
+            lineTo(w * 0.50f, h * 0.46f)
+            close()
+        }
+        drawPath(rightRibbon, color = ribbonColorRight)
+
+        // Connector ring
+        drawCircle(
+            color = medalColor,
+            radius = w * 0.08f,
+            center = Offset(w * 0.5f, h * 0.44f),
+            style = Stroke(width = w * 0.04f)
+        )
+
+        // 2. Circular Medal Medallion
+        val medalCenter = Offset(w * 0.5f, h * 0.68f)
+        val medalRadius = w * 0.31f
+
+        drawCircle(
+            color = medalColor,
+            radius = medalRadius,
+            center = medalCenter
+        )
+
+        drawCircle(
+            color = Color.White.copy(alpha = 0.45f),
+            radius = medalRadius * 0.78f,
+            center = medalCenter,
+            style = Stroke(width = w * 0.035f)
+        )
+
+        drawCircle(
+            color = DarkContrast.copy(alpha = 0.85f),
+            radius = medalRadius * 0.38f,
+            center = medalCenter
+        )
+
+        drawCircle(
+            color = medalColor,
+            radius = medalRadius * 0.22f,
+            center = medalCenter
+        )
+    }
+}
+
+@Composable
 fun TrophyComposable(
     modifier: Modifier = Modifier,
     size: Dp = 24.dp,

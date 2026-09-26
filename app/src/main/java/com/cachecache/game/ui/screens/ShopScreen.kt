@@ -139,92 +139,46 @@ fun ShopScreen(
                 }
             }
 
-            // 2. Big Live Avatar Preview Showcase Card
+            // 2. Live Avatar Preview Showcase Card (Compact)
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 6.dp)
-                    .border(1.5.dp, BorderSubtle, RoundedCornerShape(24.dp)),
-                shape = RoundedCornerShape(24.dp),
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .border(1.2.dp, BorderSubtle, RoundedCornerShape(20.dp)),
+                shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = CardSurface)
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(horizontal = 14.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Avatar Showcase Circle with Glow
                     Box(
                         modifier = Modifier
-                            .size(92.dp)
-                            .shadow(12.dp, CircleShape, spotColor = PacmanYellow)
+                            .size(62.dp)
+                            .shadow(8.dp, CircleShape, spotColor = PacmanYellow)
                             .clip(CircleShape)
                             .background(NavyIntermediate)
-                            .border(3.dp, if (state.equippedAvatarId == activePreviewAvatar.id) PacmanYellow else BorderSubtle, CircleShape),
+                            .border(2.5.dp, if (state.equippedAvatarId == activePreviewAvatar.id) PacmanYellow else BorderSubtle, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        AvatarVisual(avatar = activePreviewAvatar, size = 76.dp)
+                        AvatarVisual(avatar = activePreviewAvatar, size = 50.dp)
                     }
 
-                    Spacer(modifier = Modifier.width(16.dp))
+                    Spacer(modifier = Modifier.width(14.dp))
 
                     Column(modifier = Modifier.weight(1f)) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = activePreviewAvatar.name,
-                                color = TextPrimary,
-                                fontSize = 17.sp,
-                                fontWeight = FontWeight.Black,
-                                modifier = Modifier.weight(1f, fill = false)
-                            )
-                            if (activePreviewAvatar.isPremium) {
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Surface(
-                                    shape = RoundedCornerShape(8.dp),
-                                    color = Color(0xFFFFD700).copy(alpha = 0.2f),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFFD700))
-                                ) {
-                                    Text(
-                                        text = "★ ÉLITE",
-                                        color = Color(0xFFFFD700),
-                                        fontSize = 9.sp,
-                                        fontWeight = FontWeight.Black,
-                                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
-                                    )
-                                }
-                            }
-                            if (state.equippedAvatarId == activePreviewAvatar.id) {
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Surface(
-                                    shape = RoundedCornerShape(10.dp),
-                                    color = PacmanYellow.copy(alpha = 0.2f),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, PacmanYellow)
-                                ) {
-                                    Text(
-                                        text = "ÉQUIPÉ",
-                                        color = PacmanYellow,
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                    )
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(4.dp))
-
                         Text(
-                            text = activePreviewAvatar.description,
-                            color = TextSecondary,
-                            fontSize = 12.sp,
-                            lineHeight = 16.sp
+                            text = activePreviewAvatar.name,
+                            color = TextPrimary,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Black,
+                            maxLines = 1
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(6.dp))
 
                         // Action Button inside showcase
                         val isUnlocked = state.unlockedAvatarIds.contains(activePreviewAvatar.id)
@@ -245,38 +199,46 @@ fun ShopScreen(
                                     }
                                 },
                                 modifier = Modifier
-                                    .height(34.dp)
+                                    .height(30.dp)
                                     .fillMaxWidth(),
-                                shape = RoundedCornerShape(17.dp),
+                                shape = RoundedCornerShape(15.dp),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = buttonColor,
                                     contentColor = if (isUnlocked) TextPrimary else DarkContrast
                                 ),
+                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
                                 enabled = isUnlocked || state.userScore >= activePreviewAvatar.price
                             ) {
                                 if (isUnlocked) {
-                                    Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(15.dp))
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text(text = "Équiper ce skin", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                    Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(14.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(text = "Équiper ce skin", fontWeight = FontWeight.Bold, fontSize = 11.sp)
                                 } else {
-                                    Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(14.dp))
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text(text = "Débloquer (${formatCompactScore(activePreviewAvatar.price)} pts)", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                    Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(13.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(text = "Débloquer (${formatCompactScore(activePreviewAvatar.price)} pts)", fontWeight = FontWeight.Bold, fontSize = 11.sp)
                                 }
                             }
+                        } else {
+                            Text(
+                                text = "Skin actuellement équipé",
+                                color = PacmanYellow,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(2.dp))
 
             // 3. Category Filter Tabs: "Classiques", "Premium", "Inventaire"
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    .padding(horizontal = 16.dp, vertical = 2.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 ShopTab.entries.forEach { tab ->
                     val isSelected = selectedTab == tab
@@ -297,13 +259,13 @@ fun ShopScreen(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(42.dp)
-                            .clip(RoundedCornerShape(21.dp))
+                            .height(34.dp)
+                            .clip(RoundedCornerShape(17.dp))
                             .background(if (isSelected) activeColor else CardSurface)
                             .border(
                                 1.dp,
                                 if (isSelected) activeColor else if (isPremiumTab) Color(0xFFFFD700).copy(alpha = 0.4f) else BorderSubtle,
-                                RoundedCornerShape(21.dp)
+                                RoundedCornerShape(17.dp)
                             )
                             .clickable { selectedTab = tab },
                         contentAlignment = Alignment.Center
@@ -312,7 +274,7 @@ fun ShopScreen(
                             text = tab.label,
                             color = textColor,
                             fontWeight = if (isSelected) FontWeight.Black else FontWeight.SemiBold,
-                            fontSize = 13.sp
+                            fontSize = 12.sp
                         )
                     }
                 }
@@ -347,10 +309,10 @@ fun ShopScreen(
                 columns = GridCells.Fixed(2),
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                contentPadding = PaddingValues(bottom = 16.dp)
+                    .padding(horizontal = 14.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(bottom = 12.dp)
             ) {
                 items(filteredAvatars) { avatar ->
                     val isEquipped = state.equippedAvatarId == avatar.id
@@ -386,30 +348,13 @@ fun ShopScreen(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(12.dp),
+                                .padding(8.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            if (avatar.isPremium) {
-                                Surface(
-                                    shape = RoundedCornerShape(6.dp),
-                                    color = Color(0xFFFFD700).copy(alpha = 0.2f),
-                                    border = androidx.compose.foundation.BorderStroke(0.8.dp, Color(0xFFFFD700)),
-                                    modifier = Modifier.padding(bottom = 6.dp)
-                                ) {
-                                    Text(
-                                        text = "★ ÉLITE",
-                                        color = Color(0xFFFFD700),
-                                        fontSize = 8.sp,
-                                        fontWeight = FontWeight.Black,
-                                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
-                                    )
-                                }
-                            }
-
-                            // Avatar Visual - Enriched & Large for maximum clarity
+                            // Avatar Visual - Compact
                             Box(
                                 modifier = Modifier
-                                    .size(86.dp)
+                                    .size(54.dp)
                                     .clip(CircleShape)
                                     .background(NavyIntermediate)
                                     .border(
@@ -419,41 +364,35 @@ fun ShopScreen(
                                     ),
                                 contentAlignment = Alignment.Center
                             ) {
-                                AvatarVisual(avatar = avatar, size = 72.dp)
+                                AvatarVisual(avatar = avatar, size = 42.dp)
                             }
 
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
 
                             Text(
                                 text = avatar.name,
                                 color = if (isEquipped) PacmanYellow else if (avatar.isPremium) Color(0xFFFFE066) else TextPrimary,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp,
+                                fontSize = 11.sp,
                                 textAlign = TextAlign.Center,
                                 maxLines = 1
                             )
 
                             Spacer(modifier = Modifier.height(4.dp))
 
-                            // Status Pill or Price
+                            // Status or Action Button
                             when {
                                 isEquipped -> {
-                                    Surface(
-                                        shape = RoundedCornerShape(12.dp),
-                                        color = PacmanYellow,
-                                        modifier = Modifier.height(26.dp)
+                                    Box(
+                                        modifier = Modifier.height(24.dp),
+                                        contentAlignment = Alignment.Center
                                     ) {
-                                        Box(
-                                            modifier = Modifier.padding(horizontal = 10.dp),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(
-                                                text = "ÉQUIPÉ",
-                                                color = DarkContrast,
-                                                fontWeight = FontWeight.Black,
-                                                fontSize = 11.sp
-                                            )
-                                        }
+                                        Icon(
+                                            imageVector = Icons.Default.Check,
+                                            contentDescription = "Équipé",
+                                            tint = PacmanYellow,
+                                            modifier = Modifier.size(18.dp)
+                                        )
                                     }
                                 }
                                 isUnlocked -> {
@@ -464,13 +403,13 @@ fun ShopScreen(
                                             containerColor = ScaredBlue,
                                             contentColor = TextPrimary
                                         ),
-                                        modifier = Modifier.height(28.dp),
-                                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp)
+                                        modifier = Modifier.height(24.dp),
+                                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
                                     ) {
                                         Text(
                                             text = "Équiper",
                                             fontWeight = FontWeight.Bold,
-                                            fontSize = 11.sp
+                                            fontSize = 10.sp
                                         )
                                     }
                                 }
@@ -485,20 +424,20 @@ fun ShopScreen(
                                             contentColor = if (canAfford) DarkContrast else TextSecondary
                                         ),
                                         border = if (canAfford) null else androidx.compose.foundation.BorderStroke(1.dp, BorderSubtle),
-                                        modifier = Modifier.height(28.dp),
+                                        modifier = Modifier.height(24.dp),
                                         enabled = canAfford,
-                                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp)
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Lock,
                                             contentDescription = null,
-                                            modifier = Modifier.size(12.dp)
+                                            modifier = Modifier.size(11.dp)
                                         )
-                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Spacer(modifier = Modifier.width(3.dp))
                                         Text(
                                             text = "${formatCompactScore(avatar.price)} pts",
                                             fontWeight = FontWeight.Bold,
-                                            fontSize = 11.sp
+                                            fontSize = 10.sp
                                         )
                                     }
                                 }

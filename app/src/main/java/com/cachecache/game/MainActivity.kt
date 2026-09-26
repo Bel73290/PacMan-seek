@@ -108,6 +108,7 @@ class MainActivity : ComponentActivity() {
                             ProfileScreen(
                                 state = state,
                                 onNavigate = { screen -> viewModel.setScreen(screen) },
+                                onBack = { viewModel.setScreen(Screen.SPLASH) },
                                 onOpenSettings = { viewModel.openSettingsDialog(true) },
                                 onEquipAvatar = { avatarId -> viewModel.equipAvatar(avatarId) },
                                 onSelectAchievementSkin = { ach -> viewModel.selectAchievementSkin(ach) },
