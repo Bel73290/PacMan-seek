@@ -145,6 +145,10 @@ class GameViewModel : ViewModel() {
         _uiState.update { it.copy(selectedBadgeDetail = badge) }
     }
 
+    fun selectAchievementSkin(achievement: AchievementSkinItem?) {
+        _uiState.update { it.copy(selectedAchievementSkin = achievement) }
+    }
+
     fun dismissProximityAlert() {
         _uiState.update { it.copy(isGhostProximityAlertVisible = false) }
     }

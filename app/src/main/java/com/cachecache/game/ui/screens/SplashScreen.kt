@@ -46,7 +46,7 @@ fun SplashScreen(
         // 1. Official High-Resolution Illustration without buttons
         Image(
             painter = painterResource(id = R.drawable.splash_bg),
-            contentDescription = "Cache Cache",
+            contentDescription = "Pac & Seek",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )

@@ -52,6 +52,24 @@ data class LeaderboardEntry(
     val badgeType: String? = null // "gold", "silver", "bronze"
 )
 
+fun formatCompactScore(score: Int): String {
+    val abs = kotlin.math.abs(score)
+    val sign = if (score < 0) "-" else ""
+    return when {
+        abs >= 1_000_000 -> {
+            val m = abs / 1_000_000.0
+            val formatted = "%.1f".format(java.util.Locale.FRANCE, m).removeSuffix(",0")
+            "${sign}${formatted}Mill"
+        }
+        abs >= 1_000 -> {
+            val k = abs / 1_000.0
+            val formatted = "%.1f".format(java.util.Locale.FRANCE, k).removeSuffix(",0")
+            "${sign}${formatted}k"
+        }
+        else -> "$score"
+    }
+}
+
 enum class BadgeShape {
     SHIELD,
     STAR,
@@ -66,6 +84,20 @@ data class BadgeItem(
     val unlocked: Boolean = true,
     val unlockDate: String
 )
+
+data class AchievementSkinItem(
+    val id: String,
+    val avatarId: String,
+    val title: String,
+    val requirementDescription: String,
+    val progressCurrent: Int,
+    val progressTarget: Int,
+    val isUnlocked: Boolean = false,
+    val unlockDate: String? = null
+) {
+    val progressRatio: Float
+        get() = (progressCurrent.toFloat() / progressTarget.coerceAtLeast(1).toFloat()).coerceIn(0f, 1f)
+}
 
 data class HistoryItem(
     val id: String,
@@ -155,14 +187,22 @@ data class GameState(
     val maxXp: Int = 500,
     val totalGamesPlayed: Int = 12,
     val totalVictories: Int = 7,
-    val equippedAvatarId: String = "ghost_red_classic",
-    val unlockedAvatarIds: Set<String> = setOf("ghost_red_classic", "ghost_pink_classic"),
+    val equippedAvatarId: String = "avatar_pac_seek_pp",
+    val unlockedAvatarIds: Set<String> = setOf(
+        "avatar_pac_seek_pp",
+        "ghost_red_classic",
+        "ghost_pink_classic",
+        "premium_ghost_gold_king",
+        "premium_ghost_samurai",
+        "ghost_blue_devil"
+    ),
     val isGhostProximityAlertVisible: Boolean = true,
     val isStreetViewMiniVisible: Boolean = true,
     val isStreetViewRadarOpen: Boolean = true,
     val capturingGhost: HiddenPlayer? = null,
     val capturedDialogPlayer: HiddenPlayer? = null,
     val selectedBadgeDetail: BadgeItem? = null,
+    val selectedAchievementSkin: AchievementSkinItem? = null,
     val showSettingsDialog: Boolean = false,
     val showFilterMenu: Boolean = false,
     val recentHistory: List<HistoryItem> = emptyList()

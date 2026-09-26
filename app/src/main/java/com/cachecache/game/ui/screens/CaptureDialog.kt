@@ -95,7 +95,7 @@ fun CaptureSuccessDialog(
 
                 // Score géant : "+ 50 points"
                 Text(
-                    text = "+ $scoreAnim points",
+                    text = "+ ${com.cachecache.game.model.formatCompactScore(scoreAnim)} points",
                     color = PacmanYellow,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Black,

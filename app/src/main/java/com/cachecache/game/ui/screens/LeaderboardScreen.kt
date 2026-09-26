@@ -20,10 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cachecache.game.data.MockData
-import com.cachecache.game.model.GameState
-import com.cachecache.game.model.LeaderboardEntry
-import com.cachecache.game.model.LeaderboardTab
-import com.cachecache.game.model.Screen
+import com.cachecache.game.model.*
 import com.cachecache.game.ui.components.BottomNavigationBar
 import com.cachecache.game.ui.components.GhostComposable
 import com.cachecache.game.ui.components.PacmanComposable
@@ -300,7 +297,7 @@ private fun PodiumColumn(
 
         // Player Score
         Text(
-            text = "${numberFormat.format(entry.score)} pts",
+            text = "${formatCompactScore(entry.score)} pts",
             color = accentColor,
             fontWeight = FontWeight.ExtraBold,
             fontSize = if (rank == 1) 11.sp else 10.sp,
@@ -343,8 +340,7 @@ private fun LeaderboardRow(
     entry: LeaderboardEntry,
     equippedAvatarId: String = "pacman_classic"
 ) {
-    val numberFormat = NumberFormat.getNumberInstance(Locale.FRANCE)
-    val formattedScore = "${numberFormat.format(entry.score)} pts"
+    val formattedScore = "${formatCompactScore(entry.score)} pts"
 
     val rowBackground = if (entry.isCurrentUser) SelectedSurface else CardSurface
     val rowBorder = if (entry.isCurrentUser) PacmanYellow.copy(alpha = 0.6f) else BorderSubtle

@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SportsEsports
@@ -18,32 +19,30 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.cachecache.game.R
 import com.cachecache.game.data.MockData
-import com.cachecache.game.model.BadgeItem
-import com.cachecache.game.model.GameState
-import com.cachecache.game.model.HistoryItem
-import com.cachecache.game.model.Screen
+import com.cachecache.game.model.*
 import com.cachecache.game.ui.components.*
 import com.cachecache.game.ui.theme.*
-import java.text.NumberFormat
-import java.util.Locale
 
 @Composable
 fun ProfileScreen(
     state: GameState,
     onNavigate: (Screen) -> Unit,
     onOpenSettings: () -> Unit,
-    onSelectBadge: (BadgeItem?) -> Unit
+    onEquipAvatar: (String) -> Unit = {},
+    onSelectAchievementSkin: (AchievementSkinItem?) -> Unit = {},
+    onSelectBadge: (BadgeItem?) -> Unit = {}
 ) {
-    val numberFormat = NumberFormat.getNumberInstance(Locale.FRANCE)
-
     Scaffold(
         containerColor = DeepNavy,
         bottomBar = {
@@ -183,7 +182,7 @@ fun ProfileScreen(
                         Spacer(modifier = Modifier.height(4.dp))
 
                         Text(
-                            text = "${state.userXp} / ${state.maxXp} pts",
+                            text = "${formatCompactScore(state.userXp)} / ${formatCompactScore(state.maxXp)} pts",
                             color = TextSecondary,
                             fontSize = 11.sp,
                             modifier = Modifier.align(Alignment.End)
@@ -199,10 +198,10 @@ fun ProfileScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Points (Star)
+                // Points (Star) formatted with k / Mill
                 StatCard(
                     modifier = Modifier.weight(1f),
-                    value = numberFormat.format(state.userScore),
+                    value = formatCompactScore(state.userScore),
                     label = "Points",
                     iconContent = { StarComposable(size = 24.dp, color = PacmanYellow) }
                 )
@@ -233,40 +232,38 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 3. Section "Mes badges"
-            Text(
-                text = "Mes badges",
-                color = TextPrimary,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
+            // 3. Section "Skins à débloquer" (replaces static Badges)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "Skins à débloquer",
+                        color = TextPrimary,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Accomplis des exploits pour débloquer ces skins exclusifs",
+                        color = TextSecondary,
+                        fontSize = 11.sp
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                MockData.BadgesList.forEach { badge ->
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(16.dp))
-                            .clickable { onSelectBadge(badge) }
-                            .padding(8.dp)
-                    ) {
-                        BadgeComposable(badge = badge, size = 64.dp)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = badge.title,
-                            color = TextPrimary,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            textAlign = TextAlign.Center,
-                            lineHeight = 16.sp
-                        )
-                    }
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                MockData.AchievementSkinsList.forEach { achievement ->
+                    val isEquipped = state.equippedAvatarId == achievement.avatarId
+                    AchievementSkinCard(
+                        achievement = achievement,
+                        isEquipped = isEquipped,
+                        onEquip = { onEquipAvatar(achievement.avatarId) },
+                        onClick = { onSelectAchievementSkin(achievement) }
+                    )
                 }
             }
 
@@ -291,12 +288,378 @@ fun ProfileScreen(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // Badge Detail Dialog
+        // Achievement Skin Detail Dialog
+        state.selectedAchievementSkin?.let { achievement ->
+            val isEquipped = state.equippedAvatarId == achievement.avatarId
+            AchievementSkinDetailDialog(
+                achievement = achievement,
+                isEquipped = isEquipped,
+                onEquip = { onEquipAvatar(achievement.avatarId) },
+                onDismiss = { onSelectAchievementSkin(null) }
+            )
+        }
+
+        // Fallback Badge Detail Dialog
         state.selectedBadgeDetail?.let { badge ->
             BadgeDetailDialog(
                 badge = badge,
                 onDismiss = { onSelectBadge(null) }
             )
+        }
+    }
+}
+
+@Composable
+private fun AchievementSkinCard(
+    achievement: AchievementSkinItem,
+    isEquipped: Boolean,
+    onEquip: () -> Unit,
+    onClick: () -> Unit
+) {
+    val avatar = MockData.AvatarItemsCatalog.firstOrNull { it.id == achievement.avatarId }
+    val borderColor = when {
+        isEquipped -> PacmanYellow
+        achievement.isUnlocked -> Color(0xFFFFD700).copy(alpha = 0.6f)
+        else -> BorderSubtle
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
+            .border(1.2.dp, borderColor, RoundedCornerShape(18.dp))
+            .clickable { onClick() },
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = CardSurface)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Avatar with unlock badge/lock icon
+            Box(
+                modifier = Modifier
+                    .size(54.dp)
+                    .clip(CircleShape)
+                    .background(NavyIntermediate)
+                    .border(
+                        2.dp,
+                        if (achievement.isUnlocked) Color(0xFFFFD700) else BorderSubtle,
+                        CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                if (avatar != null) {
+                    AvatarVisual(avatar = avatar, size = 42.dp)
+                } else {
+                    GhostComposable(size = 38.dp, baseColor = GhostCyan, isScared = false)
+                }
+
+                if (!achievement.isUnlocked) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.45f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Lock,
+                            contentDescription = "Verrouillé",
+                            tint = Color.White.copy(alpha = 0.85f),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.width(14.dp))
+
+            // Details & Progress
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = achievement.title,
+                    color = if (achievement.isUnlocked) Color(0xFFFFE066) else TextPrimary,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
+                )
+
+                Spacer(modifier = Modifier.height(2.dp))
+
+                Text(
+                    text = achievement.requirementDescription,
+                    color = TextSecondary,
+                    fontSize = 11.sp,
+                    lineHeight = 14.sp,
+                    maxLines = 2
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                // Progress Indicator
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    LinearProgressIndicator(
+                        progress = { achievement.progressRatio },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(6.dp)
+                            .clip(RoundedCornerShape(3.dp)),
+                        color = if (achievement.isUnlocked) Color(0xFFFFD700) else PacmanYellow,
+                        trackColor = NavyIntermediate
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Text(
+                        text = "${formatCompactScore(achievement.progressCurrent)}/${formatCompactScore(achievement.progressTarget)}",
+                        color = if (achievement.isUnlocked) Color(0xFFFFD700) else TextSecondary,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(10.dp))
+
+            // Action / Status Button
+            when {
+                isEquipped -> {
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = PacmanYellow,
+                        modifier = Modifier.height(28.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "ÉQUIPÉ",
+                                color = DarkContrast,
+                                fontWeight = FontWeight.Black,
+                                fontSize = 10.sp
+                            )
+                        }
+                    }
+                }
+                achievement.isUnlocked -> {
+                    Button(
+                        onClick = onEquip,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFFFD700),
+                            contentColor = DarkContrast
+                        ),
+                        modifier = Modifier.height(30.dp),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = "Équiper",
+                            fontWeight = FontWeight.Black,
+                            fontSize = 11.sp
+                        )
+                    }
+                }
+                else -> {
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = NavyIntermediate,
+                        border = androidx.compose.foundation.BorderStroke(1.dp, BorderSubtle),
+                        modifier = Modifier.height(28.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = null,
+                                tint = TextSecondary,
+                                modifier = Modifier.size(11.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "Défi",
+                                color = TextSecondary,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 10.sp
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AchievementSkinDetailDialog(
+    achievement: AchievementSkinItem,
+    isEquipped: Boolean,
+    onEquip: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val avatar = MockData.AvatarItemsCatalog.firstOrNull { it.id == achievement.avatarId }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(0.92f)
+                .shadow(16.dp, RoundedCornerShape(26.dp), spotColor = if (achievement.isUnlocked) Color(0xFFFFD700) else Color.Black)
+                .border(
+                    1.5.dp,
+                    if (achievement.isUnlocked) Color(0xFFFFD700) else BorderSubtle,
+                    RoundedCornerShape(26.dp)
+                ),
+            shape = RoundedCornerShape(26.dp),
+            colors = CardDefaults.cardColors(containerColor = NavyIntermediate)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Header badge
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = if (achievement.isUnlocked) Color(0xFFFFD700).copy(alpha = 0.2f) else CardSurface,
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        if (achievement.isUnlocked) Color(0xFFFFD700) else BorderSubtle
+                    )
+                ) {
+                    Text(
+                        text = if (achievement.isUnlocked) "★ SKIN DÉBLOQUÉ ★" else "DÉFI EN COURS",
+                        color = if (achievement.isUnlocked) Color(0xFFFFD700) else TextSecondary,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Avatar showcase
+                Box(
+                    modifier = Modifier
+                        .size(86.dp)
+                        .clip(CircleShape)
+                        .background(CardSurface)
+                        .border(
+                            3.dp,
+                            if (achievement.isUnlocked) Color(0xFFFFD700) else BorderSubtle,
+                            CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (avatar != null) {
+                        AvatarVisual(avatar = avatar, size = 70.dp)
+                    } else {
+                        GhostComposable(size = 60.dp, baseColor = GhostCyan, isScared = false)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Text(
+                    text = achievement.title,
+                    color = if (achievement.isUnlocked) Color(0xFFFFE066) else TextPrimary,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Black,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = achievement.requirementDescription,
+                    color = TextSecondary,
+                    fontSize = 13.sp,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 18.sp
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Progress bar
+                LinearProgressIndicator(
+                    progress = { achievement.progressRatio },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                        .clip(RoundedCornerShape(4.dp)),
+                    color = if (achievement.isUnlocked) Color(0xFFFFD700) else PacmanYellow,
+                    trackColor = CardSurface
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = "Progression : ${formatCompactScore(achievement.progressCurrent)} / ${formatCompactScore(achievement.progressTarget)}",
+                    color = TextSecondary,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Action button
+                if (achievement.isUnlocked) {
+                    if (isEquipped) {
+                        Button(
+                            onClick = onDismiss,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(46.dp),
+                            shape = RoundedCornerShape(23.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = CardSurface,
+                                contentColor = PacmanYellow
+                            )
+                        ) {
+                            Text(text = "Actuellement équipé", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        }
+                    } else {
+                        Button(
+                            onClick = {
+                                onEquip()
+                                onDismiss()
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(46.dp),
+                            shape = RoundedCornerShape(23.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFFFD700),
+                                contentColor = DarkContrast
+                            )
+                        ) {
+                            Text(text = "Équiper cette PP", fontWeight = FontWeight.Black, fontSize = 14.sp)
+                        }
+                    }
+                } else {
+                    Button(
+                        onClick = onDismiss,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(46.dp),
+                        shape = RoundedCornerShape(23.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = CardSurface,
+                            contentColor = TextPrimary
+                        ),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, BorderSubtle)
+                    ) {
+                        Text(text = "Fermer", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    }
+                }
+            }
         }
     }
 }
@@ -384,7 +747,7 @@ private fun HistoryRow(item: HistoryItem) {
             }
 
             Text(
-                text = "+${item.deltaScore} pts",
+                text = "+${formatCompactScore(item.deltaScore)} pts",
                 color = PacmanYellow,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Black

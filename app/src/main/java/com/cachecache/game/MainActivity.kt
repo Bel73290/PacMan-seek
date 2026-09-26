@@ -115,6 +115,8 @@ class MainActivity : ComponentActivity() {
                                 state = state,
                                 onNavigate = { screen -> viewModel.setScreen(screen) },
                                 onOpenSettings = { viewModel.openSettingsDialog(true) },
+                                onEquipAvatar = { avatarId -> viewModel.equipAvatar(avatarId) },
+                                onSelectAchievementSkin = { ach -> viewModel.selectAchievementSkin(ach) },
                                 onSelectBadge = { badge -> viewModel.selectBadge(badge) }
                             )
                         }

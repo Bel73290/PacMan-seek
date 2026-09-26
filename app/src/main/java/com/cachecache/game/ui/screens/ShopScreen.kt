@@ -130,7 +130,7 @@ fun ShopScreen(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "${numberFormat.format(state.userScore)} pts",
+                            text = "${formatCompactScore(state.userScore)} pts",
                             color = PacmanYellow,
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 13.sp
@@ -261,7 +261,7 @@ fun ShopScreen(
                                 } else {
                                     Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(14.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
-                                    Text(text = "Débloquer (${activePreviewAvatar.price} pts)", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                    Text(text = "Débloquer (${formatCompactScore(activePreviewAvatar.price)} pts)", fontWeight = FontWeight.Bold, fontSize = 12.sp)
                                 }
                             }
                         }
@@ -496,7 +496,7 @@ fun ShopScreen(
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Text(
-                                            text = "${avatar.price} pts",
+                                            text = "${formatCompactScore(avatar.price)} pts",
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 11.sp
                                         )

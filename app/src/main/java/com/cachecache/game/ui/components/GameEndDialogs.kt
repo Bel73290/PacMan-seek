@@ -187,7 +187,7 @@ fun VictoryDialog(
                             Text(text = "Points gagnés", color = TextSecondary, fontSize = 11.sp)
                             val victoryPoints = state.hiddenPlayers.size.coerceAtLeast(1) * 50
                             Text(
-                                text = "+$victoryPoints pts",
+                                text = "+${com.cachecache.game.model.formatCompactScore(victoryPoints)} pts",
                                 color = PacmanYellow,
                                 fontWeight = FontWeight.Black,
                                 fontSize = 16.sp
@@ -365,7 +365,7 @@ fun DefeatDialog(
                             Text(text = "Points gagnés", color = TextSecondary, fontSize = 11.sp)
                             val earnedPoints = ghostsFound * 50
                             Text(
-                                text = if (earnedPoints > 0) "+$earnedPoints pts" else "0 pt",
+                                text = if (earnedPoints > 0) "+${com.cachecache.game.model.formatCompactScore(earnedPoints)} pts" else "0 pt",
                                 color = if (earnedPoints > 0) PacmanYellow else TextSecondary,
                                 fontWeight = FontWeight.Black,
                                 fontSize = 16.sp

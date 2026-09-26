@@ -144,794 +144,257 @@ object MockData {
         HistoryItem("hist_3", "08/04", "Victoire", 200, "trophy")
     )
 
+    val AchievementSkinsList = listOf(
+        AchievementSkinItem(
+            id = "achieve_gold_king",
+            avatarId = "premium_ghost_gold_king",
+            title = "Roi Doré Suprême",
+            requirementDescription = "Atteindre 1Mill de points",
+            progressCurrent = 1_000_000,
+            progressTarget = 1_000_000,
+            isUnlocked = true,
+            unlockDate = "25/09"
+        ),
+        AchievementSkinItem(
+            id = "achieve_samurai",
+            avatarId = "premium_ghost_samurai",
+            title = "Samouraï du Campus",
+            requirementDescription = "Découvrir 20 cachettes secrètes sur Savoie Technolac",
+            progressCurrent = 20,
+            progressTarget = 20,
+            isUnlocked = true,
+            unlockDate = "24/09"
+        ),
+        AchievementSkinItem(
+            id = "achieve_devil",
+            avatarId = "ghost_blue_devil",
+            title = "Diablotin Farceur",
+            requirementDescription = "Attraper Sue dans le Bâtiment Éveillon",
+            progressCurrent = 1,
+            progressTarget = 1,
+            isUnlocked = true,
+            unlockDate = "12/04"
+        ),
+        AchievementSkinItem(
+            id = "achieve_cyberpunk",
+            avatarId = "premium_ghost_cyberpunk",
+            title = "Cyberpunk 2099",
+            requirementDescription = "Gagner 10 parties en tant que chercheur",
+            progressCurrent = 7,
+            progressTarget = 10,
+            isUnlocked = false
+        ),
+        AchievementSkinItem(
+            id = "achieve_pirate",
+            avatarId = "premium_ghost_pirate_captain",
+            title = "Capitaine Corsaire",
+            requirementDescription = "Capturer 5 fantômes en moins de 3 minutes",
+            progressCurrent = 3,
+            progressTarget = 5,
+            isUnlocked = false
+        ),
+        AchievementSkinItem(
+            id = "achieve_angel",
+            avatarId = "premium_ghost_angel_wings",
+            title = "Séraphin Ailé",
+            requirementDescription = "Terminer 3 parties consécutives sans radar",
+            progressCurrent = 1,
+            progressTarget = 3,
+            isUnlocked = false
+        )
+    )
+
     val AvatarItemsCatalog = listOf(
-        // === CATÉGORIE 1 : CLASSIQUES (IMAGE 1) ===
+        // === AVATAR OFFICIEL PAC & SEEK (PP JOUEUR) ===
+        AvatarItem(
+            id = "avatar_pac_seek_pp",
+            name = "Emblème Pac & Seek",
+            category = AvatarCategory.PREMIUM,
+            description = "L'emblème officiel Pac & Seek au cœur du labyrinthe géolocalisé.",
+            price = 0,
+            ghostColor = PacmanYellow,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pac_seek_pp,
+            isPremium = true
+        ),
+
+        // === CATÉGORIE 1 : CLASSIQUES ICONIQUES & DISTINCTIFS ===
         AvatarItem(
             id = "ghost_red_classic",
-            name = "Blinky Classique",
+            name = "Blinky L'Ombre",
             category = AvatarCategory.CLASSIC,
-            description = "Le style légendaire et intemporel.",
+            description = "Le fantôme rouge légendaire, rapide et redoutable.",
             price = 0,
             ghostColor = GhostRed,
             drawableResId = com.cachecache.game.R.drawable.avatar_ghost_red_classic,
             isPremium = false
         ),
         AvatarItem(
-            id = "ghost_red_sunglasses",
-            name = "Blinky Lunettes Noires",
+            id = "ghost_pink_classic",
+            name = "Pinky La Furtive",
             category = AvatarCategory.CLASSIC,
-            description = "Impassible et ultra-stylé avec ses verres teintés.",
-            price = 300,
-            ghostColor = GhostRed,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_red_sunglasses,
+            description = "Embusquée dans les ruelles, elle anticipe chaque virage.",
+            price = 150,
+            ghostColor = GhostPink,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_pink_classic,
             isPremium = false
         ),
         AvatarItem(
-            id = "ghost_red_crown",
-            name = "Blinky Roi",
+            id = "ghost_cyan_classic",
+            name = "Inky Le Farceur",
             category = AvatarCategory.CLASSIC,
-            description = "Couronné roi des ectoplasmes et des spectres errants.",
+            description = "Imprévisible et facétieux avec sa robe turquoise.",
+            price = 200,
+            ghostColor = GhostCyan,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_cyan_classic,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "ghost_orange_classic",
+            name = "Clyde Le Rêveur",
+            category = AvatarCategory.CLASSIC,
+            description = "Un esprit solitaire et contemplatif à la robe orangée.",
+            price = 200,
+            ghostColor = GhostOrange,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_orange_classic,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "ghost_blue_sunglasses",
+            name = "Spectre VIP Lunettes",
+            category = AvatarCategory.CLASSIC,
+            description = "Impassible et ultra-stylé avec ses verres teintés sombres.",
             price = 350,
-            ghostColor = GhostRed,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_red_crown,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_red_cap",
-            name = "Blinky Casquette",
-            category = AvatarCategory.CLASSIC,
-            description = "Casquette sportive portée fièrement sur la tête.",
-            price = 400,
-            ghostColor = GhostRed,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_red_cap,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_red_flower",
-            name = "Blinky Fleuri",
-            category = AvatarCategory.CLASSIC,
-            description = "Orné d'une délicate fleur printanière.",
-            price = 450,
-            ghostColor = GhostRed,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_red_flower,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_red_headband",
-            name = "Blinky Bandeau",
-            category = AvatarCategory.CLASSIC,
-            description = "Bandeau d'athlète prêt pour le sprint.",
-            price = 450,
-            ghostColor = GhostRed,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_red_headband,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_red_wink",
-            name = "Blinky Clin d'Œil",
-            category = AvatarCategory.CLASSIC,
-            description = "Un clin d'œil malicieux pour désorienter l'adversaire.",
-            price = 500,
-            ghostColor = GhostRed,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_red_wink,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_red_halo",
-            name = "Blinky Ange",
-            category = AvatarCategory.CLASSIC,
-            description = "Une auréole sacrée pour un esprit pur et bienveillant.",
-            price = 550,
-            ghostColor = GhostRed,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_red_halo,
+            ghostColor = GhostPurple,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_blue_sunglasses,
             isPremium = false
         ),
         AvatarItem(
             id = "ghost_red_headphones",
-            name = "Blinky DJ / Gamer",
+            name = "Blinky Gamer DJ",
             category = AvatarCategory.CLASSIC,
-            description = "Casque circum-aural pour mixer des beats électro.",
-            price = 600,
+            description = "Casque circum-aural pour mixer et traquer sur le meilleur son.",
+            price = 450,
             ghostColor = GhostRed,
             drawableResId = com.cachecache.game.R.drawable.avatar_ghost_red_headphones,
             isPremium = false
         ),
         AvatarItem(
-            id = "ghost_red_pirate",
-            name = "Blinky Pirate",
+            id = "ghost_pink_flower",
+            name = "Pinky Bohème",
             category = AvatarCategory.CLASSIC,
-            description = "Capitaine corsaire à l'abordage des power-pellets.",
-            price = 650,
-            ghostColor = GhostRed,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_red_pirate,
+            description = "Ornée d'une fleur printanière cueillie au bord du lac.",
+            price = 400,
+            ghostColor = GhostPink,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_pink_flower,
             isPremium = false
         ),
         AvatarItem(
-            id = "ghost_red_devil",
-            name = "Blinky Diablotin",
+            id = "ghost_cyan_cap",
+            name = "Inky Rider Urbain",
             category = AvatarCategory.CLASSIC,
-            description = "Cornes écarlates et malice infernale.",
-            price = 700,
-            ghostColor = GhostRed,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_red_devil,
+            description = "Casquette street portée à l'envers pour le parkour du campus.",
+            price = 450,
+            ghostColor = GhostCyan,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_cyan_cap,
             isPremium = false
         ),
         AvatarItem(
-            id = "ghost_red_mustache",
-            name = "Blinky Gentleman",
+            id = "ghost_red_crown",
+            name = "Blinky Monarque",
             category = AvatarCategory.CLASSIC,
-            description = "Moustache distinguée et classe britannique vintage.",
-            price = 750,
+            description = "Couronné de rubis pour régner sur les couloirs universitaires.",
+            price = 600,
             ghostColor = GhostRed,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_red_mustache,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_red_crown,
             isPremium = false
         ),
         AvatarItem(
-            id = "ghost_red_glasses",
-            name = "Blinky Intello",
+            id = "ghost_blue_glasses",
+            name = "Spectre Érudit",
             category = AvatarCategory.CLASSIC,
-            description = "Grosses montures d'érudit pour anticiper tous les pièges.",
-            price = 800,
-            ghostColor = GhostRed,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_red_glasses,
+            description = "Grosses montures d'intello pour décoder la carte GPS en temps réel.",
+            price = 500,
+            ghostColor = GhostPurple,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_blue_glasses,
             isPremium = false
         ),
         AvatarItem(
             id = "ghost_red_3d",
             name = "Blinky Cinéma 3D",
             category = AvatarCategory.CLASSIC,
-            description = "Lunettes anaglyphes stéréoscopiques rouge et cyan.",
-            price = 850,
+            description = "Lunettes anaglyphes rétro rouge et cyan pour voir à travers les murs.",
+            price = 550,
             ghostColor = GhostRed,
             drawableResId = com.cachecache.game.R.drawable.avatar_ghost_red_3d,
             isPremium = false
         ),
         AvatarItem(
-            id = "ghost_red_special",
-            name = "Blinky Spécial",
+            id = "avatar_ghost_cowboy",
+            name = "Shérif de l'Ouest",
             category = AvatarCategory.CLASSIC,
-            description = "Costume thématique exclusif de grande fête.",
-            price = 900,
-            ghostColor = GhostRed,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_red_special,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_pink_classic",
-            name = "Pinky Classique",
-            category = AvatarCategory.CLASSIC,
-            description = "Le style légendaire et intemporel.",
-            price = 0,
-            ghostColor = GhostPink,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_pink_classic,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_pink_sunglasses",
-            name = "Pinky Lunettes Noires",
-            category = AvatarCategory.CLASSIC,
-            description = "Impassible et ultra-stylé avec ses verres teintés.",
-            price = 300,
-            ghostColor = GhostPink,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_pink_sunglasses,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_pink_crown",
-            name = "Pinky Roi",
-            category = AvatarCategory.CLASSIC,
-            description = "Couronné roi des ectoplasmes et des spectres errants.",
-            price = 350,
-            ghostColor = GhostPink,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_pink_crown,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_pink_cap",
-            name = "Pinky Casquette",
-            category = AvatarCategory.CLASSIC,
-            description = "Casquette sportive portée fièrement sur la tête.",
-            price = 400,
-            ghostColor = GhostPink,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_pink_cap,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_pink_flower",
-            name = "Pinky Fleuri",
-            category = AvatarCategory.CLASSIC,
-            description = "Orné d'une délicate fleur printanière.",
-            price = 450,
-            ghostColor = GhostPink,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_pink_flower,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_pink_headband",
-            name = "Pinky Bandeau",
-            category = AvatarCategory.CLASSIC,
-            description = "Bandeau d'athlète prêt pour le sprint.",
-            price = 450,
-            ghostColor = GhostPink,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_pink_headband,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_pink_wink",
-            name = "Pinky Clin d'Œil",
-            category = AvatarCategory.CLASSIC,
-            description = "Un clin d'œil malicieux pour désorienter l'adversaire.",
-            price = 500,
-            ghostColor = GhostPink,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_pink_wink,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_pink_halo",
-            name = "Pinky Ange",
-            category = AvatarCategory.CLASSIC,
-            description = "Une auréole sacrée pour un esprit pur et bienveillant.",
-            price = 550,
-            ghostColor = GhostPink,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_pink_halo,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_pink_headphones",
-            name = "Pinky DJ / Gamer",
-            category = AvatarCategory.CLASSIC,
-            description = "Casque circum-aural pour mixer des beats électro.",
-            price = 600,
-            ghostColor = GhostPink,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_pink_headphones,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_pink_pirate",
-            name = "Pinky Pirate",
-            category = AvatarCategory.CLASSIC,
-            description = "Capitaine corsaire à l'abordage des power-pellets.",
-            price = 650,
-            ghostColor = GhostPink,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_pink_pirate,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_pink_devil",
-            name = "Pinky Diablotin",
-            category = AvatarCategory.CLASSIC,
-            description = "Cornes écarlates et malice infernale.",
-            price = 700,
-            ghostColor = GhostPink,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_pink_devil,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_pink_mustache",
-            name = "Pinky Gentleman",
-            category = AvatarCategory.CLASSIC,
-            description = "Moustache distinguée et classe britannique vintage.",
-            price = 750,
-            ghostColor = GhostPink,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_pink_mustache,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_pink_glasses",
-            name = "Pinky Intello",
-            category = AvatarCategory.CLASSIC,
-            description = "Grosses montures d'érudit pour anticiper tous les pièges.",
-            price = 800,
-            ghostColor = GhostPink,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_pink_glasses,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_pink_3d",
-            name = "Pinky Cinéma 3D",
-            category = AvatarCategory.CLASSIC,
-            description = "Lunettes anaglyphes stéréoscopiques rouge et cyan.",
-            price = 850,
-            ghostColor = GhostPink,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_pink_3d,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_pink_special",
-            name = "Pinky Spécial",
-            category = AvatarCategory.CLASSIC,
-            description = "Costume thématique exclusif de grande fête.",
-            price = 900,
-            ghostColor = GhostPink,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_pink_special,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_cyan_classic",
-            name = "Inky Classique",
-            category = AvatarCategory.CLASSIC,
-            description = "Le style légendaire et intemporel.",
-            price = 0,
-            ghostColor = GhostCyan,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_cyan_classic,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_cyan_sunglasses",
-            name = "Inky Lunettes Noires",
-            category = AvatarCategory.CLASSIC,
-            description = "Impassible et ultra-stylé avec ses verres teintés.",
-            price = 300,
-            ghostColor = GhostCyan,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_cyan_sunglasses,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_cyan_crown",
-            name = "Inky Roi",
-            category = AvatarCategory.CLASSIC,
-            description = "Couronné roi des ectoplasmes et des spectres errants.",
-            price = 350,
-            ghostColor = GhostCyan,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_cyan_crown,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_cyan_cap",
-            name = "Inky Casquette",
-            category = AvatarCategory.CLASSIC,
-            description = "Casquette sportive portée fièrement sur la tête.",
-            price = 400,
-            ghostColor = GhostCyan,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_cyan_cap,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_cyan_flower",
-            name = "Inky Fleuri",
-            category = AvatarCategory.CLASSIC,
-            description = "Orné d'une délicate fleur printanière.",
-            price = 450,
-            ghostColor = GhostCyan,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_cyan_flower,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_cyan_headband",
-            name = "Inky Bandeau",
-            category = AvatarCategory.CLASSIC,
-            description = "Bandeau d'athlète prêt pour le sprint.",
-            price = 450,
-            ghostColor = GhostCyan,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_cyan_headband,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_cyan_wink",
-            name = "Inky Clin d'Œil",
-            category = AvatarCategory.CLASSIC,
-            description = "Un clin d'œil malicieux pour désorienter l'adversaire.",
-            price = 500,
-            ghostColor = GhostCyan,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_cyan_wink,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_cyan_halo",
-            name = "Inky Ange",
-            category = AvatarCategory.CLASSIC,
-            description = "Une auréole sacrée pour un esprit pur et bienveillant.",
-            price = 550,
-            ghostColor = GhostCyan,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_cyan_halo,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_cyan_headphones",
-            name = "Inky DJ / Gamer",
-            category = AvatarCategory.CLASSIC,
-            description = "Casque circum-aural pour mixer des beats électro.",
-            price = 600,
-            ghostColor = GhostCyan,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_cyan_headphones,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_cyan_pirate",
-            name = "Inky Pirate",
-            category = AvatarCategory.CLASSIC,
-            description = "Capitaine corsaire à l'abordage des power-pellets.",
-            price = 650,
-            ghostColor = GhostCyan,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_cyan_pirate,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_cyan_devil",
-            name = "Inky Diablotin",
-            category = AvatarCategory.CLASSIC,
-            description = "Cornes écarlates et malice infernale.",
-            price = 700,
-            ghostColor = GhostCyan,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_cyan_devil,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_cyan_mustache",
-            name = "Inky Gentleman",
-            category = AvatarCategory.CLASSIC,
-            description = "Moustache distinguée et classe britannique vintage.",
-            price = 750,
-            ghostColor = GhostCyan,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_cyan_mustache,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_cyan_glasses",
-            name = "Inky Intello",
-            category = AvatarCategory.CLASSIC,
-            description = "Grosses montures d'érudit pour anticiper tous les pièges.",
-            price = 800,
-            ghostColor = GhostCyan,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_cyan_glasses,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_cyan_3d",
-            name = "Inky Cinéma 3D",
-            category = AvatarCategory.CLASSIC,
-            description = "Lunettes anaglyphes stéréoscopiques rouge et cyan.",
-            price = 850,
-            ghostColor = GhostCyan,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_cyan_3d,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_cyan_special",
-            name = "Inky Spécial",
-            category = AvatarCategory.CLASSIC,
-            description = "Costume thématique exclusif de grande fête.",
-            price = 900,
-            ghostColor = GhostCyan,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_cyan_special,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_orange_classic",
-            name = "Clyde Classique",
-            category = AvatarCategory.CLASSIC,
-            description = "Le style légendaire et intemporel.",
-            price = 0,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_orange_classic,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_orange_sunglasses",
-            name = "Clyde Lunettes Noires",
-            category = AvatarCategory.CLASSIC,
-            description = "Impassible et ultra-stylé avec ses verres teintés.",
-            price = 300,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_orange_sunglasses,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_orange_crown",
-            name = "Clyde Roi",
-            category = AvatarCategory.CLASSIC,
-            description = "Couronné roi des ectoplasmes et des spectres errants.",
-            price = 350,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_orange_crown,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_orange_cap",
-            name = "Clyde Casquette",
-            category = AvatarCategory.CLASSIC,
-            description = "Casquette sportive portée fièrement sur la tête.",
-            price = 400,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_orange_cap,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_orange_flower",
-            name = "Clyde Fleuri",
-            category = AvatarCategory.CLASSIC,
-            description = "Orné d'une délicate fleur printanière.",
-            price = 450,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_orange_flower,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_orange_headband",
-            name = "Clyde Bandeau",
-            category = AvatarCategory.CLASSIC,
-            description = "Bandeau d'athlète prêt pour le sprint.",
-            price = 450,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_orange_headband,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_orange_wink",
-            name = "Clyde Clin d'Œil",
-            category = AvatarCategory.CLASSIC,
-            description = "Un clin d'œil malicieux pour désorienter l'adversaire.",
-            price = 500,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_orange_wink,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_orange_halo",
-            name = "Clyde Ange",
-            category = AvatarCategory.CLASSIC,
-            description = "Une auréole sacrée pour un esprit pur et bienveillant.",
-            price = 550,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_orange_halo,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_orange_headphones",
-            name = "Clyde DJ / Gamer",
-            category = AvatarCategory.CLASSIC,
-            description = "Casque circum-aural pour mixer des beats électro.",
-            price = 600,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_orange_headphones,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_orange_pirate",
-            name = "Clyde Pirate",
-            category = AvatarCategory.CLASSIC,
-            description = "Capitaine corsaire à l'abordage des power-pellets.",
-            price = 650,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_orange_pirate,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_orange_devil",
-            name = "Clyde Diablotin",
-            category = AvatarCategory.CLASSIC,
-            description = "Cornes écarlates et malice infernale.",
+            description = "Stetson texan paré pour le duel au coucher du soleil.",
             price = 700,
             ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_orange_devil,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_cowboy,
             isPremium = false
         ),
         AvatarItem(
-            id = "ghost_orange_mustache",
-            name = "Clyde Gentleman",
+            id = "avatar_ghost_wizard",
+            name = "Archimage Spectrale",
             category = AvatarCategory.CLASSIC,
-            description = "Moustache distinguée et classe britannique vintage.",
-            price = 750,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_orange_mustache,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_orange_glasses",
-            name = "Clyde Intello",
-            category = AvatarCategory.CLASSIC,
-            description = "Grosses montures d'érudit pour anticiper tous les pièges.",
-            price = 800,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_orange_glasses,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_orange_3d",
-            name = "Clyde Cinéma 3D",
-            category = AvatarCategory.CLASSIC,
-            description = "Lunettes anaglyphes stéréoscopiques rouge et cyan.",
-            price = 850,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_orange_3d,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_orange_special",
-            name = "Clyde Spécial",
-            category = AvatarCategory.CLASSIC,
-            description = "Costume thématique exclusif de grande fête.",
-            price = 900,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_orange_special,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_blue_classic",
-            name = "Spectre Bleu Classique",
-            category = AvatarCategory.CLASSIC,
-            description = "Le style légendaire et intemporel.",
-            price = 0,
-            ghostColor = GhostPurple,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_blue_classic,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_blue_sunglasses",
-            name = "Spectre Bleu Lunettes Noires",
-            category = AvatarCategory.CLASSIC,
-            description = "Impassible et ultra-stylé avec ses verres teintés.",
-            price = 300,
-            ghostColor = GhostPurple,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_blue_sunglasses,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_blue_crown",
-            name = "Spectre Bleu Roi",
-            category = AvatarCategory.CLASSIC,
-            description = "Couronné roi des ectoplasmes et des spectres errants.",
-            price = 350,
-            ghostColor = GhostPurple,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_blue_crown,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_blue_cap",
-            name = "Spectre Bleu Casquette",
-            category = AvatarCategory.CLASSIC,
-            description = "Casquette sportive portée fièrement sur la tête.",
-            price = 400,
-            ghostColor = GhostPurple,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_blue_cap,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_blue_flower",
-            name = "Spectre Bleu Fleuri",
-            category = AvatarCategory.CLASSIC,
-            description = "Orné d'une délicate fleur printanière.",
-            price = 450,
-            ghostColor = GhostPurple,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_blue_flower,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_blue_headband",
-            name = "Spectre Bleu Bandeau",
-            category = AvatarCategory.CLASSIC,
-            description = "Bandeau d'athlète prêt pour le sprint.",
-            price = 450,
-            ghostColor = GhostPurple,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_blue_headband,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_blue_wink",
-            name = "Spectre Bleu Clin d'Œil",
-            category = AvatarCategory.CLASSIC,
-            description = "Un clin d'œil malicieux pour désorienter l'adversaire.",
-            price = 500,
-            ghostColor = GhostPurple,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_blue_wink,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_blue_halo",
-            name = "Spectre Bleu Ange",
-            category = AvatarCategory.CLASSIC,
-            description = "Une auréole sacrée pour un esprit pur et bienveillant.",
-            price = 550,
-            ghostColor = GhostPurple,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_blue_halo,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_blue_headphones",
-            name = "Spectre Bleu DJ / Gamer",
-            category = AvatarCategory.CLASSIC,
-            description = "Casque circum-aural pour mixer des beats électro.",
-            price = 600,
-            ghostColor = GhostPurple,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_blue_headphones,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_blue_pirate",
-            name = "Spectre Bleu Pirate",
-            category = AvatarCategory.CLASSIC,
-            description = "Capitaine corsaire à l'abordage des power-pellets.",
-            price = 650,
-            ghostColor = GhostPurple,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_blue_pirate,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_blue_devil",
-            name = "Spectre Bleu Diablotin",
-            category = AvatarCategory.CLASSIC,
-            description = "Cornes écarlates et malice infernale.",
-            price = 700,
-            ghostColor = GhostPurple,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_blue_devil,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_blue_mustache",
-            name = "Spectre Bleu Gentleman",
-            category = AvatarCategory.CLASSIC,
-            description = "Moustache distinguée et classe britannique vintage.",
-            price = 750,
-            ghostColor = GhostPurple,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_blue_mustache,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_blue_glasses",
-            name = "Spectre Bleu Intello",
-            category = AvatarCategory.CLASSIC,
-            description = "Grosses montures d'érudit pour anticiper tous les pièges.",
+            description = "Chapeau pointu infusé d'arcanes de téléportation furtive.",
             price = 800,
             ghostColor = GhostPurple,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_blue_glasses,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_wizard,
             isPremium = false
         ),
-        AvatarItem(
-            id = "ghost_blue_3d",
-            name = "Spectre Bleu Cinéma 3D",
-            category = AvatarCategory.CLASSIC,
-            description = "Lunettes anaglyphes stéréoscopiques rouge et cyan.",
-            price = 850,
-            ghostColor = GhostPurple,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_blue_3d,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_blue_special",
-            name = "Spectre Bleu Spécial",
-            category = AvatarCategory.CLASSIC,
-            description = "Costume thématique exclusif de grande fête.",
-            price = 900,
-            ghostColor = GhostPurple,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_blue_special,
-            isPremium = false
-        ),
-        // === CATÉGORIE 2 : SKINS PREMIUM (IMAGE 2) ===
+
+        // === SKINS DE SUCCÈS (DÉBLOQUÉS PAR DES EXPLOITS DANS LE PROFIL) ===
         AvatarItem(
             id = "premium_ghost_gold_king",
             name = "Roi Doré Suprême",
             category = AvatarCategory.PREMIUM,
-            description = "Souverain mythique auréolé d'or pur et de lauriers impériaux.",
-            price = 2500,
+            description = "Souverain auréolé d'or pur. Débloqué en atteignant 1Mill de points !",
+            price = 0,
             ghostColor = GhostOrange,
             drawableResId = com.cachecache.game.R.drawable.premium_ghost_gold_king,
             isPremium = true
         ),
         AvatarItem(
-            id = "premium_ghost_crystal_ice",
-            name = "Cristal de Givre",
+            id = "premium_ghost_samurai",
+            name = "Samouraï Kabuto",
             category = AvatarCategory.PREMIUM,
-            description = "Taillé dans la glace éternelle avec ses éclats scintillants.",
-            price = 2000,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.premium_ghost_crystal_ice,
+            description = "Guerrier d'honneur. Débloqué en découvrant 20 cachettes secrètes.",
+            price = 0,
+            ghostColor = GhostRed,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_samurai,
             isPremium = true
         ),
         AvatarItem(
-            id = "premium_ghost_fire_flame",
-            name = "Flamme Infernale",
+            id = "ghost_blue_devil",
+            name = "Diablotin Farceur",
+            category = AvatarCategory.CLASSIC,
+            description = "Cornes écarlates et malice infernale. Débloqué en capturant Sue.",
+            price = 0,
+            ghostColor = GhostPurple,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_blue_devil,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "premium_ghost_cyberpunk",
+            name = "Cyberpunk 2099",
             category = AvatarCategory.PREMIUM,
-            description = "Brasier incandescent pulsant d'une énergie volcanique.",
-            price = 2200,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.premium_ghost_fire_flame,
+            description = "Visière néon HUD cybernétique. Déblocable en gagnant 10 parties !",
+            price = 2100,
+            ghostColor = GhostCyan,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_cyberpunk,
             isPremium = true
         ),
         AvatarItem(
             id = "premium_ghost_pirate_captain",
             name = "Vieux Loup de Mer",
             category = AvatarCategory.PREMIUM,
-            description = "Capitaine pirate légendaire avec bicorne et cache-œil.",
+            description = "Capitaine corsaire légendaire. Déblocable en capturant 5 fantômes rapidement.",
             price = 1800,
             ghostColor = GhostOrange,
             drawableResId = com.cachecache.game.R.drawable.premium_ghost_pirate_captain,
@@ -941,10 +404,32 @@ object MockData {
             id = "premium_ghost_angel_wings",
             name = "Séraphin Ailé",
             category = AvatarCategory.PREMIUM,
-            description = "Ailes d'or divines et auréole céleste flottante.",
+            description = "Ailes d'or divines et auréole céleste. Déblocable sans radar ni boussole.",
             price = 2400,
-            ghostColor = GhostOrange,
+            ghostColor = GhostPink,
             drawableResId = com.cachecache.game.R.drawable.premium_ghost_angel_wings,
+            isPremium = true
+        ),
+
+        // === CATÉGORIE 2 : SKINS PREMIUM DE LA BOUTIQUE ===
+        AvatarItem(
+            id = "premium_ghost_crystal_ice",
+            name = "Cristal de Givre",
+            category = AvatarCategory.PREMIUM,
+            description = "Taillé dans la glace éternelle avec des reflets prismatiques scintillants.",
+            price = 2000,
+            ghostColor = GhostCyan,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_crystal_ice,
+            isPremium = true
+        ),
+        AvatarItem(
+            id = "premium_ghost_fire_flame",
+            name = "Flamme Infernale",
+            category = AvatarCategory.PREMIUM,
+            description = "Brasier incandescent pulsant d'une énergie volcanique bouillonnante.",
+            price = 2200,
+            ghostColor = GhostRed,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_fire_flame,
             isPremium = true
         ),
         AvatarItem(
@@ -953,28 +438,8 @@ object MockData {
             category = AvatarCategory.PREMIUM,
             description = "Seigneur des ténèbres couronné d'améthyste et de flammes sombres.",
             price = 2600,
-            ghostColor = GhostOrange,
+            ghostColor = GhostPurple,
             drawableResId = com.cachecache.game.R.drawable.premium_ghost_dark_void,
-            isPremium = true
-        ),
-        AvatarItem(
-            id = "premium_ghost_cyberpunk",
-            name = "Cyberpunk 2099",
-            category = AvatarCategory.PREMIUM,
-            description = "Visière néon HUD et câblage cybernétique futuriste.",
-            price = 2100,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.premium_ghost_cyberpunk,
-            isPremium = true
-        ),
-        AvatarItem(
-            id = "premium_ghost_flower_spring",
-            name = "Printemps Fleuri",
-            category = AvatarCategory.PREMIUM,
-            description = "Couronne florale luxuriante aux parfums de victoire.",
-            price = 1600,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.premium_ghost_flower_spring,
             isPremium = true
         ),
         AvatarItem(
@@ -983,7 +448,7 @@ object MockData {
             category = AvatarCategory.PREMIUM,
             description = "Cape volante rouge et blason héroïque invincible.",
             price = 1900,
-            ghostColor = GhostOrange,
+            ghostColor = GhostCyan,
             drawableResId = com.cachecache.game.R.drawable.premium_ghost_superhero,
             isPremium = true
         ),
@@ -993,28 +458,8 @@ object MockData {
             category = AvatarCategory.PREMIUM,
             description = "Ambiance néon rétro 80s et lunettes à persiennes dorées.",
             price = 2300,
-            ghostColor = GhostOrange,
+            ghostColor = GhostPink,
             drawableResId = com.cachecache.game.R.drawable.premium_ghost_disco_synthwave,
-            isPremium = true
-        ),
-        AvatarItem(
-            id = "premium_ghost_samurai",
-            name = "Samouraï Kabuto",
-            category = AvatarCategory.PREMIUM,
-            description = "Casque orné traditionnel et honneur guerrier intouchable.",
-            price = 2200,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.premium_ghost_samurai,
-            isPremium = true
-        ),
-        AvatarItem(
-            id = "premium_ghost_pharaoh",
-            name = "Pharaon Solaire",
-            category = AvatarCategory.PREMIUM,
-            description = "Némès d'or et de lapis-lazuli des souverains du Nil.",
-            price = 2400,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.premium_ghost_pharaoh,
             isPremium = true
         ),
         AvatarItem(
@@ -1023,68 +468,28 @@ object MockData {
             category = AvatarCategory.PREMIUM,
             description = "Cape de velours rouge, canines acérées et nœud papillon.",
             price = 2000,
-            ghostColor = GhostOrange,
+            ghostColor = GhostPurple,
             drawableResId = com.cachecache.game.R.drawable.premium_ghost_vampire,
-            isPremium = true
-        ),
-        AvatarItem(
-            id = "premium_ghost_princess",
-            name = "Princesse Impériale",
-            category = AvatarCategory.PREMIUM,
-            description = "Tiare incrustée de rubis et collier de perles précieuses.",
-            price = 1800,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.premium_ghost_princess,
-            isPremium = true
-        ),
-        AvatarItem(
-            id = "premium_ghost_astral_mage",
-            name = "Mage Astral",
-            category = AvatarCategory.PREMIUM,
-            description = "Chapeau mystique brodé d'étoiles et croissant de lune.",
-            price = 2500,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.premium_ghost_astral_mage,
-            isPremium = true
-        ),
-        AvatarItem(
-            id = "premium_ghost_santa_deluxe",
-            name = "Père Noël Deluxe",
-            category = AvatarCategory.PREMIUM,
-            description = "Bonnet en velours rouge, barbe blanche et houx festif.",
-            price = 1900,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.premium_ghost_santa_deluxe,
             isPremium = true
         ),
         AvatarItem(
             id = "premium_ghost_steampunk",
             name = "Steampunk Aviateur",
             category = AvatarCategory.PREMIUM,
-            description = "Lunettes de pilote en laiton et engrenages mécaniques.",
+            description = "Lunettes de pilote en laiton et engrenages mécaniques ouvragés.",
             price = 2100,
             ghostColor = GhostOrange,
             drawableResId = com.cachecache.game.R.drawable.premium_ghost_steampunk,
             isPremium = true
         ),
         AvatarItem(
-            id = "premium_ghost_punk_rock",
-            name = "Punk Rock Néon",
+            id = "premium_ghost_astral_mage",
+            name = "Mage Astral",
             category = AvatarCategory.PREMIUM,
-            description = "Crête multicolore et lunettes shutter néon électriques.",
-            price = 2000,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.premium_ghost_punk_rock,
-            isPremium = true
-        ),
-        AvatarItem(
-            id = "premium_ghost_mummy",
-            name = "Momie Ancienne",
-            category = AvatarCategory.PREMIUM,
-            description = "Bandelettes sacrées et amulette Ânkh de vie éternelle.",
-            price = 1900,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.premium_ghost_mummy,
+            description = "Chapeau mystique brodé d'étoiles filantes et croissant lunaire.",
+            price = 2500,
+            ghostColor = GhostCyan,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_astral_mage,
             isPremium = true
         ),
         AvatarItem(
@@ -1093,9 +498,9 @@ object MockData {
             category = AvatarCategory.PREMIUM,
             description = "Astres étincelants et couronne de triomphe d'or massif.",
             price = 3000,
-            ghostColor = GhostOrange,
+            ghostColor = PacmanYellow,
             drawableResId = com.cachecache.game.R.drawable.premium_ghost_divine_sun,
             isPremium = true
-        ),
+        )
     )
 }

@@ -4,4 +4,6 @@
     <color name="colorPrimary">#4499FF</color>
     <color name="colorPrimaryDark">#224477</color>
     <color name="colorDefault">#888888</color>
+    <color name="black">#000000</color>
+    <color name="deep_navy">#0A0F24</color>
 </resources>
