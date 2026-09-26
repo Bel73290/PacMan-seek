@@ -29,6 +29,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cachecache.game.data.MockData
@@ -82,7 +83,7 @@ fun ShopScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                    .padding(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -90,7 +91,7 @@ fun ShopScreen(
                     IconButton(
                         onClick = onBack,
                         modifier = Modifier
-                            .size(42.dp)
+                            .size(38.dp)
                             .clip(CircleShape)
                             .background(NavyIntermediate)
                             .border(1.dp, BorderSubtle, CircleShape)
@@ -139,11 +140,13 @@ fun ShopScreen(
                 }
             }
 
+            Spacer(modifier = Modifier.height(6.dp))
+
             // 2. Live Avatar Preview Showcase Card (Compact)
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .padding(horizontal = 16.dp)
                     .border(1.2.dp, BorderSubtle, RoundedCornerShape(20.dp)),
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = CardSurface)
@@ -231,13 +234,13 @@ fun ShopScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             // 3. Category Filter Tabs: "Classiques", "Premium", "Inventaire"
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 2.dp),
+                    .padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 ShopTab.entries.forEach { tab ->
@@ -280,7 +283,7 @@ fun ShopScreen(
                 }
             }
 
-            // 4. Grid of Avatar Selection Cards
+            // 4. Grid of Avatar Selection Cards (3 per line)
             val filteredAvatars = when (selectedTab) {
                 ShopTab.CLASSIC -> currentCatalog.filter { it.category == AvatarCategory.CLASSIC }
                 ShopTab.PREMIUM -> currentCatalog.filter { it.category == AvatarCategory.PREMIUM }
@@ -291,7 +294,7 @@ fun ShopScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 4.dp),
+                        .padding(horizontal = 20.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
@@ -302,16 +305,16 @@ fun ShopScreen(
                     )
                 }
             } else {
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(10.dp))
             }
 
             LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
+                columns = GridCells.Fixed(3),
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 14.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                    .padding(horizontal = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
                 contentPadding = PaddingValues(bottom = 12.dp)
             ) {
                 items(filteredAvatars) { avatar ->
@@ -332,7 +335,7 @@ fun ShopScreen(
                             .border(
                                 if (isEquipped || isPreviewed || avatar.isPremium) 1.5.dp else 1.dp,
                                 cardBorder,
-                                RoundedCornerShape(20.dp)
+                                RoundedCornerShape(16.dp)
                             )
                             .clickable {
                                 previewAvatarId = avatar.id
@@ -340,7 +343,7 @@ fun ShopScreen(
                                     onEquipAvatar(avatar.id)
                                 }
                             },
-                        shape = RoundedCornerShape(20.dp),
+                        shape = RoundedCornerShape(16.dp),
                         colors = CardDefaults.cardColors(
                             containerColor = if (isEquipped) SelectedSurface else if (avatar.isPremium) NavyIntermediate else CardSurface
                         )
@@ -348,13 +351,13 @@ fun ShopScreen(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(8.dp),
+                                .padding(horizontal = 4.dp, vertical = 6.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             // Avatar Visual - Compact
                             Box(
                                 modifier = Modifier
-                                    .size(54.dp)
+                                    .size(44.dp)
                                     .clip(CircleShape)
                                     .background(NavyIntermediate)
                                     .border(
@@ -364,7 +367,7 @@ fun ShopScreen(
                                     ),
                                 contentAlignment = Alignment.Center
                             ) {
-                                AvatarVisual(avatar = avatar, size = 42.dp)
+                                AvatarVisual(avatar = avatar, size = 32.dp)
                             }
 
                             Spacer(modifier = Modifier.height(4.dp))
@@ -373,9 +376,10 @@ fun ShopScreen(
                                 text = avatar.name,
                                 color = if (isEquipped) PacmanYellow else if (avatar.isPremium) Color(0xFFFFE066) else TextPrimary,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 11.sp,
+                                fontSize = 10.sp,
                                 textAlign = TextAlign.Center,
-                                maxLines = 1
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
 
                             Spacer(modifier = Modifier.height(4.dp))
@@ -384,32 +388,32 @@ fun ShopScreen(
                             when {
                                 isEquipped -> {
                                     Box(
-                                        modifier = Modifier.height(24.dp),
+                                        modifier = Modifier.height(22.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Check,
                                             contentDescription = "Équipé",
                                             tint = PacmanYellow,
-                                            modifier = Modifier.size(18.dp)
+                                            modifier = Modifier.size(16.dp)
                                         )
                                     }
                                 }
                                 isUnlocked -> {
                                     Button(
                                         onClick = { onEquipAvatar(avatar.id) },
-                                        shape = RoundedCornerShape(12.dp),
+                                        shape = RoundedCornerShape(10.dp),
                                         colors = ButtonDefaults.buttonColors(
                                             containerColor = ScaredBlue,
                                             contentColor = TextPrimary
                                         ),
-                                        modifier = Modifier.height(24.dp),
-                                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                                        modifier = Modifier.height(22.dp),
+                                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp)
                                     ) {
                                         Text(
                                             text = "Équiper",
                                             fontWeight = FontWeight.Bold,
-                                            fontSize = 10.sp
+                                            fontSize = 9.sp
                                         )
                                     }
                                 }
@@ -418,26 +422,27 @@ fun ShopScreen(
                                     val unlockBtnColor = if (avatar.isPremium) Color(0xFFFFD700) else PacmanYellow
                                     Button(
                                         onClick = { onUnlockAvatar(avatar) },
-                                        shape = RoundedCornerShape(12.dp),
+                                        shape = RoundedCornerShape(10.dp),
                                         colors = ButtonDefaults.buttonColors(
                                             containerColor = if (canAfford) unlockBtnColor else CardSurface,
                                             contentColor = if (canAfford) DarkContrast else TextSecondary
                                         ),
                                         border = if (canAfford) null else androidx.compose.foundation.BorderStroke(1.dp, BorderSubtle),
-                                        modifier = Modifier.height(24.dp),
+                                        modifier = Modifier.height(22.dp),
                                         enabled = canAfford,
-                                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp)
+                                        contentPadding = PaddingValues(horizontal = 2.dp, vertical = 0.dp)
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Lock,
                                             contentDescription = null,
-                                            modifier = Modifier.size(11.dp)
+                                            modifier = Modifier.size(9.dp)
                                         )
-                                        Spacer(modifier = Modifier.width(3.dp))
+                                        Spacer(modifier = Modifier.width(2.dp))
                                         Text(
                                             text = "${formatCompactScore(avatar.price)} pts",
                                             fontWeight = FontWeight.Bold,
-                                            fontSize = 10.sp
+                                            fontSize = 9.sp,
+                                            maxLines = 1
                                         )
                                     }
                                 }

@@ -62,11 +62,14 @@ fun ProfileScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp, vertical = 6.dp)
         ) {
-            // Header: Back Arrow & "Mon profil"
+            val equippedAvatar = MockData.AvatarItemsCatalog.firstOrNull { it.id == state.equippedAvatarId }
+                ?: MockData.AvatarItemsCatalog.first()
+
+            // Header: Back Arrow + Skin Avatar + Level & Compact XP Bar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 6.dp),
+                    .padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
@@ -84,86 +87,79 @@ fun ProfileScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.width(14.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
-                Text(
-                    text = "Mon profil",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = TextPrimary,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            val equippedAvatar = MockData.AvatarItemsCatalog.firstOrNull { it.id == state.equippedAvatarId }
-                ?: MockData.AvatarItemsCatalog.first()
-
-            // 1. Player Identity Card (Compact)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Round Avatar
+                // Equipped Skin Avatar
                 Box(
                     modifier = Modifier
-                        .size(58.dp)
+                        .size(52.dp)
                         .clip(CircleShape)
                         .background(NavyIntermediate)
                         .border(2.dp, PacmanYellow, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    AvatarVisual(avatar = equippedAvatar, size = 44.dp)
+                    AvatarVisual(avatar = equippedAvatar, size = 38.dp)
                 }
 
-                Spacer(modifier = Modifier.width(14.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Toi",
-                        color = TextPrimary,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Black
-                    )
+                Column {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Toi",
+                            color = TextPrimary,
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Black
+                        )
 
-                    Spacer(modifier = Modifier.height(1.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
 
-                    Text(
-                        text = "Niveau ${state.userLevel}",
-                        color = TextSecondary,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = NavyIntermediate,
+                            border = androidx.compose.foundation.BorderStroke(1.dp, PacmanYellow.copy(alpha = 0.5f))
+                        ) {
+                            Text(
+                                text = "Niveau ${state.userLevel}",
+                                color = PacmanYellow,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
 
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
-                    // XP Progress Bar
-                    Column {
+                    // Reduced length XP Progress Bar
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         LinearProgressIndicator(
                             progress = { (state.userXp.toFloat() / state.maxXp.toFloat()).coerceIn(0f, 1f) },
                             modifier = Modifier
-                                .fillMaxWidth()
+                                .width(125.dp)
                                 .height(6.dp)
                                 .clip(RoundedCornerShape(3.dp)),
                             color = PacmanYellow,
                             trackColor = CardSurface
                         )
 
-                        Spacer(modifier = Modifier.height(3.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
 
                         Text(
                             text = "${formatCompactScore(state.userXp)} / ${formatCompactScore(state.maxXp)} pts",
                             color = TextSecondary,
                             fontSize = 10.sp,
-                            modifier = Modifier.align(Alignment.End)
+                            fontWeight = FontWeight.Medium
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             // 2. Three Key Metrics Grid (Points with Pac-gomme, Parties with Gamepad, Victoires with Medal)
             Row(

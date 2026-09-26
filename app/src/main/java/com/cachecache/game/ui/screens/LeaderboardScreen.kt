@@ -72,7 +72,7 @@ fun LeaderboardScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 6.dp),
+                    .padding(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 2.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
@@ -100,7 +100,7 @@ fun LeaderboardScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             // Filter Tabs (Pills): Général vs Amis
             Row(
@@ -131,14 +131,14 @@ fun LeaderboardScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             // LazyColumn with Podium at top and remaining ranks below
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
                 // Podium Header (Top 3)
@@ -180,7 +180,7 @@ private fun LeaderboardPodium(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp, start = 6.dp, end = 6.dp, bottom = 0.dp),
+                .padding(top = 12.dp, start = 8.dp, end = 8.dp, bottom = 0.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
@@ -194,13 +194,13 @@ private fun LeaderboardPodium(
                         entry = entry,
                         equippedAvatarId = equippedAvatarId,
                         rank = 2,
-                        pedestalHeight = 56.dp,
+                        pedestalHeight = 62.dp,
                         accentColor = Color(0xFFC0C0C0),
                         modifier = Modifier.weight(1f)
                     )
                 }
 
-                Spacer(modifier = Modifier.width(6.dp))
+                Spacer(modifier = Modifier.width(8.dp))
 
                 // #1 Gold (Center, highest)
                 top1?.let { entry ->
@@ -208,13 +208,13 @@ private fun LeaderboardPodium(
                         entry = entry,
                         equippedAvatarId = equippedAvatarId,
                         rank = 1,
-                        pedestalHeight = 80.dp,
+                        pedestalHeight = 88.dp,
                         accentColor = Color(0xFFFFD700),
                         modifier = Modifier.weight(1.15f)
                     )
                 }
 
-                Spacer(modifier = Modifier.width(6.dp))
+                Spacer(modifier = Modifier.width(8.dp))
 
                 // #3 Bronze (Right)
                 top3?.let { entry ->
@@ -222,7 +222,7 @@ private fun LeaderboardPodium(
                         entry = entry,
                         equippedAvatarId = equippedAvatarId,
                         rank = 3,
-                        pedestalHeight = 42.dp,
+                        pedestalHeight = 48.dp,
                         accentColor = Color(0xFFCD7F32),
                         modifier = Modifier.weight(1f)
                     )
@@ -342,7 +342,7 @@ private fun LeaderboardRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 8.dp),
+                .padding(horizontal = 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Rank Badge or Number
