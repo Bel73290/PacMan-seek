@@ -51,12 +51,12 @@ fun BottomNavigationBar(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val isMenuSelected = currentScreen == Screen.SPLASH
+                val isLeaderboardSelected = currentScreen == Screen.LEADERBOARD
                 BottomNavIconItem(
-                    icon = Icons.Default.Menu,
-                    contentDescription = "Menu",
-                    isSelected = isMenuSelected,
-                    onClick = { onNavigate(Screen.SPLASH) }
+                    icon = Icons.Default.EmojiEvents,
+                    contentDescription = "Classement",
+                    isSelected = isLeaderboardSelected,
+                    onClick = { onNavigate(Screen.LEADERBOARD) }
                 )
 
                 val isShopSelected = currentScreen == Screen.SHOP

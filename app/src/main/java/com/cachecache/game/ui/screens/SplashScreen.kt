@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -32,7 +33,7 @@ import com.cachecache.game.ui.theme.*
 fun SplashScreen(
     state: GameState,
     onStartGame: () -> Unit,
-    onOpenLeaderboard: () -> Unit,
+    onOpenMenu: () -> Unit,
     onOpenGuide: () -> Unit,
     onOpenSettings: () -> Unit,
     onCloseSettings: () -> Unit,
@@ -129,9 +130,9 @@ fun SplashScreen(
                     )
                 }
 
-                // Button "Classement" (Dark Glass with Trophy Icon)
+                // Button "Menu" (Dark Glass with Menu Icon)
                 Button(
-                    onClick = onOpenLeaderboard,
+                    onClick = onOpenMenu,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp)
@@ -143,14 +144,14 @@ fun SplashScreen(
                     )
                 ) {
                     Icon(
-                        imageVector = Icons.Default.EmojiEvents,
-                        contentDescription = "Classement",
+                        imageVector = Icons.Default.Menu,
+                        contentDescription = "Menu",
                         tint = TextPrimary,
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = "Classement",
+                        text = "Menu",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextPrimary

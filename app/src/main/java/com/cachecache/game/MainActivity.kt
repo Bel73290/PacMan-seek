@@ -51,7 +51,7 @@ class MainActivity : ComponentActivity() {
                             SplashScreen(
                                 state = state,
                                 onStartGame = { viewModel.startGame() },
-                                onOpenLeaderboard = { viewModel.setScreen(Screen.LEADERBOARD) },
+                                onOpenMenu = { viewModel.setScreen(Screen.LEADERBOARD) },
                                 onOpenGuide = { viewModel.setScreen(Screen.GUIDE) },
                                 onOpenSettings = { viewModel.openSettingsDialog(true) },
                                 onCloseSettings = { viewModel.openSettingsDialog(false) },
