@@ -32,7 +32,7 @@ fun BottomNavigationBar(
         modifier = Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(horizontal = 38.dp, vertical = 12.dp),
+            .padding(horizontal = 48.dp, vertical = 12.dp),
         contentAlignment = Alignment.Center
     ) {
         Surface(
@@ -51,12 +51,12 @@ fun BottomNavigationBar(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val isMapSelected = currentScreen == Screen.GAME || currentScreen == Screen.RADAR_FILTERS
+                val isMenuSelected = currentScreen == Screen.SPLASH
                 BottomNavIconItem(
-                    icon = Icons.Default.Map,
-                    contentDescription = "Carte",
-                    isSelected = isMapSelected,
-                    onClick = { onNavigate(Screen.GAME) }
+                    icon = Icons.Default.Menu,
+                    contentDescription = "Menu",
+                    isSelected = isMenuSelected,
+                    onClick = { onNavigate(Screen.SPLASH) }
                 )
 
                 val isShopSelected = currentScreen == Screen.SHOP
@@ -65,14 +65,6 @@ fun BottomNavigationBar(
                     contentDescription = "Boutique",
                     isSelected = isShopSelected,
                     onClick = { onNavigate(Screen.SHOP) }
-                )
-
-                val isLeaderboardSelected = currentScreen == Screen.LEADERBOARD
-                BottomNavIconItem(
-                    icon = Icons.Default.EmojiEvents,
-                    contentDescription = "Classement",
-                    isSelected = isLeaderboardSelected,
-                    onClick = { onNavigate(Screen.LEADERBOARD) }
                 )
 
                 val isProfileSelected = currentScreen == Screen.PROFILE

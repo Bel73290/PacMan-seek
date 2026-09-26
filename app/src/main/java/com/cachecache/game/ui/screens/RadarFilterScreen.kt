@@ -21,7 +21,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cachecache.game.model.*
-import com.cachecache.game.ui.components.BottomNavigationBar
 import com.cachecache.game.ui.components.OsmMapView
 import com.cachecache.game.ui.theme.*
 
@@ -151,7 +150,7 @@ fun RadarFilterScreen(
             IconButton(
                 onClick = onRecenter,
                 modifier = Modifier
-                    .padding(end = 16.dp, bottom = 12.dp)
+                    .padding(end = 16.dp, bottom = 16.dp)
                     .size(50.dp)
                     .shadow(8.dp, CircleShape)
                     .clip(CircleShape)
@@ -165,12 +164,6 @@ fun RadarFilterScreen(
                     modifier = Modifier.size(24.dp)
                 )
             }
-
-            // Fixed Bottom Navigation Bar
-            BottomNavigationBar(
-                currentScreen = Screen.RADAR_FILTERS,
-                onNavigate = onNavigate
-            )
         }
     }
 }

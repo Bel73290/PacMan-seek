@@ -322,7 +322,7 @@ fun GameScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 6.dp),
+                    .padding(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 14.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Bottom
             ) {
@@ -371,14 +371,6 @@ fun GameScreen(
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            // Fixed Bottom Navigation Bar
-            BottomNavigationBar(
-                currentScreen = Screen.GAME,
-                onNavigate = onNavigate
-            )
         }
 
         // Arcade Ghost Absorption Animation (Blue Lines Dissolve + Fleeing Eyes + "+ 50 points")
