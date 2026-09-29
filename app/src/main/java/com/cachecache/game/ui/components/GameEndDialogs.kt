@@ -97,17 +97,6 @@ fun DancingPacman(
         label = "pacSwayAngle"
     )
 
-    // 4. Pulse des étincelles festives
-    val starPulse by infiniteTransition.animateFloat(
-        initialValue = 0.8f,
-        targetValue = 1.25f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 450, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "starPulse"
-    )
-
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -129,38 +118,6 @@ fun DancingPacman(
                 size = this.size
             )
         }
-
-        // Particules festives animées (notes et étoiles)
-        Text(
-            text = "🎵",
-            fontSize = (18 * starPulse).sp,
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .offset(x = 24.dp, y = (14 + jumpY * 0.3f).dp)
-        )
-        Text(
-            text = "✨",
-            fontSize = (22 * starPulse).sp,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .offset(x = (-24).dp, y = (10 - jumpY * 0.3f).dp)
-        )
-        Text(
-            text = "🎶",
-            fontSize = (18 * starPulse).sp,
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .offset(x = 14.dp, y = (16 - jumpY * 0.4f).dp)
-        )
-        Text(
-            text = "★",
-            fontSize = (20 * starPulse).sp,
-            color = PacmanYellow,
-            fontWeight = FontWeight.Black,
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .offset(x = (-16).dp, y = (16 + jumpY * 0.4f).dp)
-        )
 
         // Pac-Man dansant
         Box(
@@ -236,17 +193,6 @@ fun DancingGhostsTroupe(
         label = "ghostTiltB"
     )
 
-    // Pulse festive
-    val pulse by infiniteTransition.animateFloat(
-        initialValue = 0.85f,
-        targetValue = 1.25f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 400, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "pulse"
-    )
-
     val ghostData = listOf(
         Pair(GhostRed, false),
         Pair(GhostPink, true),
@@ -261,22 +207,6 @@ fun DancingGhostsTroupe(
             .height(155.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Émojis festifs des fantômes vainqueurs
-        Text(
-            text = "😈",
-            fontSize = (18 * pulse).sp,
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .offset(x = 10.dp, y = (10 + jumpA * 0.3f).dp)
-        )
-        Text(
-            text = "🔥",
-            fontSize = (18 * pulse).sp,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .offset(x = (-10).dp, y = (10 - jumpA * 0.3f).dp)
-        )
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -370,7 +300,7 @@ fun VictoryDialog(
                     border = androidx.compose.foundation.BorderStroke(1.2.dp, PacmanYellow)
                 ) {
                     Text(
-                        text = "★ TOUS LES CACHÉS CAPTURÉS ★",
+                        text = "TOUS LES CACHÉS CAPTURÉS",
                         color = PacmanYellow,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Black,

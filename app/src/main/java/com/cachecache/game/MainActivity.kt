@@ -61,7 +61,7 @@ class MainActivity : ComponentActivity() {
                                 state = state,
                                 onBackToHome = { viewModel.setScreen(Screen.SPLASH) },
                                 onNavigate = { screen -> viewModel.setScreen(screen) },
-                                onOpenStreetView = { viewModel.openStreetView() },
+                                onOpenStreetView = {},
                                 onGoToSuspectZone = { viewModel.goToSuspectZone() },
                                 onDismissSuspectZoneModal = { viewModel.dismissSuspectZoneModal() },
                                 onDismissProximityAlert = { viewModel.dismissProximityAlert() },
@@ -69,16 +69,13 @@ class MainActivity : ComponentActivity() {
                                 onPlayerTap = { player -> viewModel.onPlayerTapped(player) },
                                 onRecenter = { viewModel.recenterOnCampus() },
                                 onDismissCaptureDialog = { viewModel.dismissCaptureDialog() },
-                                onTestInstantCapture = { viewModel.triggerSimulatedCaptureTest() },
+                                onTestInstantCapture = {},
                                 onReplay = { viewModel.restartGame() }
                             )
                         }
                         Screen.STREET_VIEW -> {
-                            StreetViewScreen(
-                                state = state,
-                                onBack = { viewModel.closeStreetView() },
-                                onCaptureTrigger = { viewModel.triggerSimulatedCaptureTest() }
-                            )
+                            // Mode AR supprimé : redirection vers la carte du jeu
+                            viewModel.setScreen(Screen.GAME)
                         }
                         Screen.LEADERBOARD -> {
                             LeaderboardScreen(

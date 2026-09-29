@@ -310,23 +310,22 @@ fun GameScreen(
             }
         }
 
-        // 3. Floating Bottom Controls: Mini Street View Inset Card & Recenter GPS
+        // 3. Floating Bottom Controls: Proximity indicator
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .navigationBarsPadding(),
-            horizontalAlignment = Alignment.End
+            horizontalAlignment = Alignment.Start
         ) {
-            // Row with Proximity badge + Mini Street View Inset / Recenter button
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 14.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.Bottom
             ) {
-                // Left: Contact / Proximity indicator
+                // Left: Contact / Proximity indicator (information pure, aucun téléport au clic)
                 nearestPlayer?.let { nearest ->
                     val ghostColor = nearest.actualColor
                     Card(
@@ -336,7 +335,6 @@ fun GameScreen(
                         ),
                         modifier = Modifier
                             .border(1.dp, if (nearest.distanceMeters <= 25.0) ghostColor else BorderSubtle, RoundedCornerShape(16.dp))
-                            .clickable { onTestInstantCapture() }
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -356,19 +354,6 @@ fun GameScreen(
                             )
                         }
                     }
-                } ?: Spacer(modifier = Modifier.weight(1f))
-
-                // Right: Mini Street View Inset Card (Écran 3)
-                if (isNearGhost && state.isStreetViewMiniVisible) {
-                    // Floating Mini Street View Card
-                    StreetViewComposable(
-                        modifier = Modifier
-                            .size(width = 175.dp, height = 135.dp)
-                            .shadow(12.dp, RoundedCornerShape(16.dp)),
-                        isMini = true,
-                        timerText = "02:18",
-                        onExpand = onOpenStreetView
-                    )
                 }
             }
         }
