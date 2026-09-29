@@ -42,7 +42,6 @@ import java.text.NumberFormat
 import java.util.Locale
 
 enum class ShopTab(val label: String) {
-    PACMAN("Pac-Man"),
     CLASSIC("Fantômes"),
     PREMIUM("Premium"),
     INVENTORY("Inventaire")
@@ -56,7 +55,7 @@ fun ShopScreen(
     onEquipAvatar: (String) -> Unit,
     onUnlockAvatar: (AvatarItem) -> Unit
 ) {
-    var selectedTab by remember { mutableStateOf(ShopTab.PACMAN) }
+    var selectedTab by remember { mutableStateOf(ShopTab.CLASSIC) }
     var previewAvatarId by remember(state.equippedAvatarId) { mutableStateOf(state.equippedAvatarId) }
 
     val currentCatalog = MockData.AvatarItemsCatalog
@@ -289,7 +288,6 @@ fun ShopScreen(
 
             // 4. Grid of Avatar Selection Cards (3 per line)
             val filteredAvatars = when (selectedTab) {
-                ShopTab.PACMAN -> currentCatalog.filter { it.category == AvatarCategory.PACMAN }
                 ShopTab.CLASSIC -> currentCatalog.filter { it.category == AvatarCategory.CLASSIC }
                 ShopTab.PREMIUM -> currentCatalog.filter { it.category == AvatarCategory.PREMIUM }
                 ShopTab.INVENTORY -> currentCatalog.filter { state.unlockedAvatarIds.contains(it.id) }

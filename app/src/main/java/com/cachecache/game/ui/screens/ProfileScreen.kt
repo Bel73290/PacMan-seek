@@ -9,20 +9,31 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.Stars
+import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontStyle
+import kotlinx.coroutines.launch
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -68,6 +79,17 @@ fun ProfileScreen(
         ) {
             val equippedAvatar = MockData.AvatarItemsCatalog.firstOrNull { it.id == state.equippedAvatarId }
                 ?: MockData.AvatarItemsCatalog.first()
+
+            val currentTiers = MockData.BattlePassTiers
+            val nextMilestoneIndex = currentTiers.indexOfFirst { it.level > state.userLevel }
+                .let { if (it >= 0) it else currentTiers.size - 1 }
+            var selectedTierIndex by remember { mutableStateOf(nextMilestoneIndex) }
+            val listState = rememberLazyListState(initialFirstVisibleItemIndex = (nextMilestoneIndex - 1).coerceAtLeast(0))
+            val coroutineScope = rememberCoroutineScope()
+            val selectedTier = currentTiers.getOrElse(selectedTierIndex) { currentTiers.first() }
+            val selectedAvatar = MockData.AvatarItemsCatalog.firstOrNull { it.id == selectedTier.avatarId }
+            val isSelectedTierUnlocked = state.userLevel >= selectedTier.level
+            val isSelectedTierEquipped = state.equippedAvatarId == selectedTier.avatarId
 
             // Header: Back Arrow + Skin Avatar + Level & Responsive XP Bar (fills width)
             Row(
@@ -218,149 +240,321 @@ fun ProfileScreen(
             Spacer(modifier = Modifier.height(14.dp))
 
             // =========================================================================
-            // 3. PASS DE COMBAT / BATTLE PASS (Tous les 10 niveaux)
+            // 3. PASS DE COMBAT / OVERWATCH STYLE BATTLE PASS
             // =========================================================================
+            // 3.1 Header (Season, Countdown, Pass Status)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "PASS DE COMBAT",
+                            color = Color.White,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 0.5.sp
+                        )
+                    }
+                    Text(
+                        text = "SAISON 1 • 84 JOURS RESTANTS",
+                        color = TextSecondary,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.5.sp
+                    )
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = Color(0xFFFA9C1E).copy(alpha = 0.15f),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFA9C1E))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.WorkspacePremium,
+                            contentDescription = null,
+                            tint = Color(0xFFFA9C1E),
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "NIV. ${state.userLevel}",
+                            color = Color(0xFFFA9C1E),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Black
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // 3.2 Hero Showcase Stage (Overwatch Centerpiece)
+            val rarityColor = when (selectedTier.rarity.uppercase()) {
+                "MYTHIQUE" -> Color(0xFFFF4081)
+                "LÉGENDAIRE" -> Color(0xFFFA9C1E)
+                "ÉPIQUE" -> Color(0xFFAB47BC)
+                else -> Color(0xFF29B6F6)
+            }
+
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(1.5.dp, Color(0xFFFFD700).copy(alpha = 0.5f), RoundedCornerShape(20.dp)),
+                    .border(
+                        1.5.dp,
+                        Brush.verticalGradient(
+                            listOf(
+                                rarityColor.copy(alpha = 0.8f),
+                                Color(0xFF1E293B)
+                            )
+                        ),
+                        RoundedCornerShape(20.dp)
+                    ),
                 shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = NavyIntermediate)
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF0F172A))
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(14.dp)
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    // Top Info Row: Tier Level Title & Rarity Tag
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Stars,
-                                contentDescription = null,
-                                tint = Color(0xFFFFD700),
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
+                        Column {
                             Text(
-                                text = "Pass de Combat",
-                                color = Color(0xFFFFE066),
-                                fontSize = 17.sp,
+                                text = "PALIER ${selectedTier.level}",
+                                color = rarityColor,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 1.sp
+                            )
+                            Text(
+                                text = selectedTier.title,
+                                color = Color.White,
+                                fontSize = 18.sp,
                                 fontWeight = FontWeight.Black
                             )
                         }
 
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = Color(0xFFFFD700).copy(alpha = 0.2f),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFFD700))
-                        ) {
-                            Text(
-                                text = "Saison 1",
-                                color = Color(0xFFFFD700),
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    Text(
-                        text = "Gagne de l'expérience et débloque 1 skin exclusif tous les 10 niveaux !",
-                        color = TextSecondary,
-                        fontSize = 11.sp,
-                        lineHeight = 15.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    // Next Unlock Callout
-                    val nextTier = MockData.BattlePassTiers.firstOrNull { it.level > state.userLevel }
-                    if (nextTier != null) {
-                        val levelsRemaining = nextTier.level - state.userLevel
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = CardSurface,
-                            border = androidx.compose.foundation.BorderStroke(1.dp, BorderSubtle),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 10.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = rarityColor.copy(alpha = 0.2f),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, rarityColor)
                             ) {
                                 Text(
-                                    text = "🎁 Prochain palier : ",
-                                    color = TextSecondary,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = "${nextTier.title} (Niv. ${nextTier.level})",
-                                    color = PacmanYellow,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Black
-                                )
-                                Spacer(modifier = Modifier.weight(1f))
-                                Text(
-                                    text = "-$levelsRemaining niv.",
-                                    color = Color(0xFFFFD700),
+                                    text = selectedTier.rarity,
+                                    color = rarityColor,
                                     fontSize = 10.sp,
-                                    fontWeight = FontWeight.ExtraBold
+                                    fontWeight = FontWeight.Black,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                )
+                            }
+
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = if (selectedTier.isPremium) Color(0xFFFA9C1E) else Color.White,
+                            ) {
+                                Text(
+                                    text = if (selectedTier.isPremium) "PREMIUM" else "GRATUIT",
+                                    color = if (selectedTier.isPremium) Color.White else Color(0xFF0F172A),
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Black,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                                 )
                             }
                         }
-                    } else {
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Character Podium / Spotlight Stage
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(175.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        // Floor Pedestal Glow (Radial spotlight)
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .fillMaxWidth(0.75f)
+                                .height(50.dp)
+                                .background(
+                                    Brush.radialGradient(
+                                        colors = listOf(
+                                            rarityColor.copy(alpha = 0.55f),
+                                            rarityColor.copy(alpha = 0.15f),
+                                            Color.Transparent
+                                        )
+                                    )
+                                )
+                        )
+
+                        // Avatar Model
+                        if (selectedAvatar != null) {
+                            AvatarVisual(
+                                avatar = selectedAvatar,
+                                size = 135.dp
+                            )
+                        } else {
+                            GhostComposable(
+                                size = 130.dp,
+                                baseColor = GhostCyan,
+                                isScared = false
+                            )
+                        }
+
+                        // Lock Badge if not unlocked
+                        if (!isSelectedTierUnlocked) {
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = Color(0xCC000000),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.3f)),
+                                modifier = Modifier.align(Alignment.TopEnd)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Lock,
+                                        contentDescription = null,
+                                        tint = Color.White,
+                                        modifier = Modifier.size(12.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = "Niv. ${selectedTier.level}",
+                                        color = Color.White,
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Description & XP Requirements
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
-                            text = "👑 Félicitations ! Tu as conquis tous les paliers du Pass !",
-                            color = Color(0xFFFFD700),
-                            fontSize = 12.sp,
+                            text = selectedAvatar?.description ?: "Récompense de palier",
+                            color = TextSecondary,
+                            fontSize = 11.sp,
+                            maxLines = 1,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = if (isSelectedTierUnlocked) "✓ Débloqué" else "XP : ${state.userXp % 100}/100",
+                            color = if (isSelectedTierUnlocked) Color(0xFF10B981) else TextSecondary,
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                    // Interactive test buttons for user XP & Leveling
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Button(
-                            onClick = { onAddXp(150) },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(34.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = CardSurface,
-                                contentColor = PacmanYellow
-                            ),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, BorderSubtle),
-                            contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp)
-                        ) {
-                            Text(text = "+150 XP", fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                    // Action Button (Equip / Equipped / Locked)
+                    when {
+                        isSelectedTierEquipped -> {
+                            Button(
+                                onClick = { },
+                                enabled = false,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(46.dp),
+                                shape = RoundedCornerShape(14.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    disabledContainerColor = Color(0xFF10B981).copy(alpha = 0.2f),
+                                    disabledContentColor = Color(0xFF10B981)
+                                ),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF10B981))
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "SKIN ACTUELLEMENT ÉQUIPÉ",
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 13.sp,
+                                    letterSpacing = 0.5.sp
+                                )
+                            }
                         }
-
-                        Button(
-                            onClick = { onAddLevel(10) },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(34.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFFFFD700),
-                                contentColor = DarkContrast
-                            ),
-                            contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp)
-                        ) {
-                            Text(text = "+10 Niveaux ⚡", fontWeight = FontWeight.Black, fontSize = 11.sp)
+                        isSelectedTierUnlocked -> {
+                            Button(
+                                onClick = { onEquipAvatar(selectedTier.avatarId) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(46.dp),
+                                shape = RoundedCornerShape(14.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFFFA9C1E),
+                                    contentColor = Color.White
+                                )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Bolt,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "ÉQUIPER CE SKIN",
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 13.sp,
+                                    letterSpacing = 0.5.sp
+                                )
+                            }
+                        }
+                        else -> {
+                            Button(
+                                onClick = { },
+                                enabled = false,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(46.dp),
+                                shape = RoundedCornerShape(14.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    disabledContainerColor = Color(0xFF1E293B).copy(alpha = 0.6f),
+                                    disabledContentColor = TextSecondary
+                                ),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, BorderSubtle)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Lock,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "DÉVERROUILLÉ AU NIVEAU ${selectedTier.level}",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.sp,
+                                    letterSpacing = 0.5.sp
+                                )
+                            }
                         }
                     }
                 }
@@ -368,16 +562,126 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Battle Pass Tiers Track (10 Paliers)
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                MockData.BattlePassTiers.forEach { tier ->
-                    val isEquipped = state.equippedAvatarId == tier.avatarId
-                    BattlePassTierCard(
-                        tier = tier,
-                        userLevel = state.userLevel,
-                        isEquipped = isEquipped,
-                        onEquip = { onEquipAvatar(tier.avatarId) }
+            // 3.3 Horizontal Carousel Ribbon Track (Overwatch Bottom Track)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Left Arrow
+                IconButton(
+                    onClick = {
+                        if (selectedTierIndex > 0) {
+                            selectedTierIndex--
+                            coroutineScope.launch {
+                                listState.animateScrollToItem((selectedTierIndex - 1).coerceAtLeast(0))
+                            }
+                        }
+                    },
+                    enabled = selectedTierIndex > 0,
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(if (selectedTierIndex > 0) Color(0xFF1E293B) else Color.Transparent)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ChevronLeft,
+                        contentDescription = "Précédent",
+                        tint = if (selectedTierIndex > 0) Color.White else Color.Gray.copy(alpha = 0.4f),
+                        modifier = Modifier.size(24.dp)
                     )
+                }
+
+                // LazyRow Track
+                LazyRow(
+                    state = listState,
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(horizontal = 4.dp)
+                ) {
+                    itemsIndexed(currentTiers) { idx, tier ->
+                        val avatar = MockData.AvatarItemsCatalog.firstOrNull { it.id == tier.avatarId }
+                        val isUnlocked = state.userLevel >= tier.level
+                        OverwatchTierCard(
+                            tier = tier,
+                            avatar = avatar,
+                            isUnlocked = isUnlocked,
+                            isSelected = selectedTierIndex == idx,
+                            userLevel = state.userLevel,
+                            onClick = {
+                                selectedTierIndex = idx
+                                coroutineScope.launch {
+                                    listState.animateScrollToItem((idx - 1).coerceAtLeast(0))
+                                }
+                            }
+                        )
+                    }
+                }
+
+                // Right Arrow
+                IconButton(
+                    onClick = {
+                        if (selectedTierIndex < currentTiers.size - 1) {
+                            selectedTierIndex++
+                            coroutineScope.launch {
+                                listState.animateScrollToItem((selectedTierIndex - 1).coerceAtLeast(0))
+                            }
+                        }
+                    },
+                    enabled = selectedTierIndex < currentTiers.size - 1,
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(if (selectedTierIndex < currentTiers.size - 1) Color(0xFF1E293B) else Color.Transparent)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ChevronRight,
+                        contentDescription = "Suivant",
+                        tint = if (selectedTierIndex < currentTiers.size - 1) Color.White else Color.Gray.copy(alpha = 0.4f),
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // 3.4 Page Indicators (1 2 3 ... 10)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                currentTiers.forEachIndexed { idx, _ ->
+                    val isCurrent = selectedTierIndex == idx
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .clickable {
+                                selectedTierIndex = idx
+                                coroutineScope.launch {
+                                    listState.animateScrollToItem((idx - 1).coerceAtLeast(0))
+                                }
+                            }
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "${idx + 1}",
+                                color = if (isCurrent) Color.White else TextSecondary.copy(alpha = 0.6f),
+                                fontWeight = if (isCurrent) FontWeight.Black else FontWeight.Bold,
+                                fontSize = 12.sp
+                            )
+                            if (isCurrent) {
+                                Box(
+                                    modifier = Modifier
+                                        .width(14.dp)
+                                        .height(2.dp)
+                                        .background(Color(0xFFFA9C1E))
+                                )
+                            }
+                        }
+                    }
                 }
             }
 
@@ -443,211 +747,114 @@ fun ProfileScreen(
 }
 
 @Composable
-private fun BattlePassTierCard(
+private fun OverwatchTierCard(
     tier: BattlePassTier,
+    avatar: AvatarItem?,
+    isUnlocked: Boolean,
+    isSelected: Boolean,
     userLevel: Int,
-    isEquipped: Boolean,
-    onEquip: () -> Unit
+    onClick: () -> Unit
 ) {
-    val avatar = MockData.AvatarItemsCatalog.firstOrNull { it.id == tier.avatarId }
-    val isUnlocked = userLevel >= tier.level
-    val borderColor = when {
-        isEquipped -> PacmanYellow
-        isUnlocked -> Color(0xFFFFD700).copy(alpha = 0.6f)
+    val cardBorderColor = when {
+        isSelected -> Color.White
+        isUnlocked -> Color(0xFFFFD700).copy(alpha = 0.5f)
+        tier.isPremium -> Color(0xFFFA9C1E).copy(alpha = 0.35f)
         else -> BorderSubtle
     }
 
-    Card(
+    Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .border(1.2.dp, borderColor, RoundedCornerShape(16.dp)),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isEquipped) SelectedSurface else if (isUnlocked) CardSurface else CardSurface.copy(alpha = 0.7f)
-        )
+            .width(82.dp)
+            .height(126.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(Color(0xFF131B2C))
+            .border(
+                width = if (isSelected) 2.5.dp else 1.dp,
+                color = cardBorderColor,
+                shape = RoundedCornerShape(10.dp)
+            )
+            .clickable { onClick() }
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Level badge pill (e.g. "NIV 10")
-            Surface(
-                shape = RoundedCornerShape(10.dp),
-                color = if (isUnlocked) Color(0xFFFFD700).copy(alpha = 0.2f) else NavyIntermediate,
-                border = androidx.compose.foundation.BorderStroke(
-                    1.dp,
-                    if (isUnlocked) Color(0xFFFFD700) else BorderSubtle
-                )
+            // 1. Top Ribbon Badge: GRATUIT or PREMIUM
+            val bannerBg = if (tier.isPremium) Color(0xFFFA9C1E) else Color.White
+            val bannerTextColor = if (tier.isPremium) Color.White else Color(0xFF111827)
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(20.dp)
+                    .background(bannerBg),
+                contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "NIV ${tier.level}",
-                    color = if (isUnlocked) Color(0xFFFFD700) else TextSecondary,
+                    text = if (tier.isPremium) "PREMIUM" else "GRATUIT",
+                    color = bannerTextColor,
                     fontWeight = FontWeight.Black,
-                    fontSize = 11.sp,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    fontSize = 9.sp,
+                    letterSpacing = 0.5.sp
                 )
             }
 
-            Spacer(modifier = Modifier.width(10.dp))
-
-            // Avatar Preview with Lock overlay if locked
+            // 2. Middle Body: Ghost Thumbnail + Lock Watermark
             Box(
                 modifier = Modifier
-                    .size(46.dp)
-                    .clip(CircleShape)
-                    .background(NavyIntermediate)
-                    .border(
-                        1.5.dp,
-                        if (isEquipped) PacmanYellow else if (isUnlocked) Color(0xFFFFD700).copy(alpha = 0.6f) else BorderSubtle,
-                        CircleShape
-                    ),
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(4.dp),
                 contentAlignment = Alignment.Center
             ) {
                 if (avatar != null) {
-                    AvatarVisual(avatar = avatar, size = 36.dp)
+                    AvatarVisual(avatar = avatar, size = 44.dp)
                 } else {
-                    GhostComposable(size = 32.dp, baseColor = GhostCyan, isScared = false)
+                    GhostComposable(size = 40.dp, baseColor = GhostCyan, isScared = false)
                 }
 
                 if (!isUnlocked) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.50f)),
+                            .background(Color(0x73000000)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Lock,
                             contentDescription = "Verrouillé",
-                            tint = Color.White.copy(alpha = 0.85f),
-                            modifier = Modifier.size(16.dp)
+                            tint = Color.White.copy(alpha = 0.8f),
+                            modifier = Modifier.size(15.dp)
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.width(10.dp))
-
-            // Details & Progress
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = tier.title,
-                    color = if (isUnlocked) Color(0xFFFFE066) else TextPrimary,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1
-                )
-
-                Spacer(modifier = Modifier.height(2.dp))
-
-                Text(
-                    text = tier.description,
-                    color = TextSecondary,
-                    fontSize = 10.sp,
-                    lineHeight = 13.sp,
-                    maxLines = 2
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                if (!isUnlocked) {
-                    val prevLevel = (tier.level - 10).coerceAtLeast(0)
-                    val progressRatio = ((userLevel - prevLevel).toFloat() / 10f).coerceIn(0f, 1f)
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        LinearProgressIndicator(
-                            progress = { progressRatio },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(5.dp)
-                                .clip(RoundedCornerShape(3.dp)),
-                            color = PacmanYellow,
-                            trackColor = NavyIntermediate
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "Niveau $userLevel / ${tier.level}",
-                            color = TextSecondary,
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                }
+            // 3. Bottom Footer: Tier Number Pill
+            val footerBg = when {
+                isSelected -> Color.White.copy(alpha = 0.15f)
+                isUnlocked -> Color(0x33FFD700)
+                else -> Color(0xFF0B101D)
+            }
+            val footerTextColor = when {
+                isSelected -> Color.White
+                isUnlocked -> Color(0xFFFFE066)
+                else -> TextSecondary
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
-
-            // Action / Status
-            when {
-                isEquipped -> {
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = PacmanYellow,
-                        modifier = Modifier.height(34.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier.padding(horizontal = 10.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "ÉQUIPÉ",
-                                color = DarkContrast,
-                                fontWeight = FontWeight.Black,
-                                fontSize = 11.sp
-                            )
-                        }
-                    }
-                }
-                isUnlocked -> {
-                    Button(
-                        onClick = onEquip,
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFFFD700),
-                            contentColor = DarkContrast
-                        ),
-                        modifier = Modifier.height(34.dp),
-                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp)
-                    ) {
-                        Text(
-                            text = "Équiper",
-                            fontWeight = FontWeight.Black,
-                            fontSize = 12.sp
-                        )
-                    }
-                }
-                else -> {
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = NavyIntermediate,
-                        border = androidx.compose.foundation.BorderStroke(1.dp, BorderSubtle),
-                        modifier = Modifier.height(34.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Lock,
-                                contentDescription = null,
-                                tint = TextSecondary,
-                                modifier = Modifier.size(12.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "Niv. ${tier.level}",
-                                color = TextSecondary,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 10.sp
-                            )
-                        }
-                    }
-                }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(24.dp)
+                    .background(footerBg),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "${tier.level}",
+                    color = footerTextColor,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 12.sp
+                )
             }
         }
     }

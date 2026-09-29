@@ -204,269 +204,103 @@ object MockData {
         )
     )
 
-    // === BATTLE PASS : PALIERS TOUS LES 10 NIVEAUX ===
+    // === BATTLE PASS : PALIERS TOUS LES 10 NIVEAUX (STYLE OVERWATCH) ===
     val BattlePassTiers = listOf(
         BattlePassTier(
             level = 10,
-            avatarId = "avatar_pacman_gamer",
-            title = "Pac-Man Pro Gamer",
-            description = "Casque gaming RGB et micro haute fidélité !"
+            avatarId = "ghost_red_headphones",
+            title = "Blinky Gamer DJ",
+            description = "Casque gaming immersif circum-aural pour mixer et traquer.",
+            isPremium = false,
+            rarity = "RARE",
+            xpRequired = 500
         ),
         BattlePassTier(
             level = 20,
             avatarId = "avatar_ghost_cowboy",
-            title = "Shérif du Campus",
-            description = "Stetson texan pour faire régner l'ordre dans les allées."
+            title = "Shérif de l'Ouest",
+            description = "Stetson texan paré pour le duel au coucher du soleil.",
+            isPremium = false,
+            rarity = "RARE",
+            xpRequired = 500
         ),
         BattlePassTier(
             level = 30,
-            avatarId = "avatar_pacman_biker",
-            title = "Pac-Man Motard V8",
-            description = "Bandana noir et blouson de cuir de rider urbain."
+            avatarId = "ghost_cyan_cap",
+            title = "Inky Rider Urbain",
+            description = "Casquette street portée à l'envers pour le parkour urbain.",
+            isPremium = false,
+            rarity = "ÉPIQUE",
+            xpRequired = 500
         ),
         BattlePassTier(
             level = 40,
             avatarId = "avatar_ghost_pirate",
-            title = "Fantôme Corsaire",
-            description = "Cache-œil, boucle d'or et pavillon pirate."
+            title = "Fantôme Pirate",
+            description = "Tricorne, cache-œil et esprit d'aventure sur les allées.",
+            isPremium = false,
+            rarity = "ÉPIQUE",
+            xpRequired = 500
         ),
         BattlePassTier(
             level = 50,
-            avatarId = "avatar_pacman_wizard",
-            title = "Pac-Man Grand Mage",
-            description = "Chapeau pointu magique et sorts de radar mystique."
+            avatarId = "avatar_ghost_wizard",
+            title = "Archimage Spectral",
+            description = "Chapeau pointu mystique et arcanes de téléportation.",
+            isPremium = false,
+            rarity = "ÉPIQUE",
+            xpRequired = 500
         ),
         BattlePassTier(
             level = 60,
             avatarId = "premium_ghost_crystal_ice",
             title = "Cristal de Givre",
             description = "Taillé dans la glace éternelle boréale scintillante.",
-            isPremium = true
+            isPremium = true,
+            rarity = "LÉGENDAIRE",
+            xpRequired = 500
         ),
         BattlePassTier(
             level = 70,
-            avatarId = "avatar_pacman_neon",
-            title = "Pac-Man Cyber Néon",
-            description = "Aura fluo électrisante irradiant dans la nuit.",
-            isPremium = false
+            avatarId = "premium_ghost_cyberpunk",
+            title = "Cyberpunk 2099",
+            description = "Visière HUD cybernétique et circuits imprimés néon.",
+            isPremium = true,
+            rarity = "LÉGENDAIRE",
+            xpRequired = 500
         ),
         BattlePassTier(
             level = 80,
             avatarId = "premium_ghost_fire_flame",
             title = "Flamme Infernale",
             description = "Brasier incandescent issu des entrailles volcaniques.",
-            isPremium = true
+            isPremium = true,
+            rarity = "LÉGENDAIRE",
+            xpRequired = 500
         ),
         BattlePassTier(
             level = 90,
             avatarId = "premium_ghost_angel_wings",
             title = "Séraphin Ailé",
             description = "Ailes d'or célestes et rayonnement divin majestueux.",
-            isPremium = true
+            isPremium = true,
+            rarity = "LÉGENDAIRE",
+            xpRequired = 500
         ),
         BattlePassTier(
             level = 100,
             avatarId = "premium_ghost_gold_king",
             title = "Roi Doré Suprême",
             description = "Le skin Ultime : couronne en or massif 24 carats sertie de joyaux !",
-            isPremium = true
+            isPremium = true,
+            rarity = "MYTHIQUE",
+            xpRequired = 500
         )
     )
 
     val AvatarItemsCatalog = listOf(
         // =========================================================================
-        // === 1. TOUS LES SKINS PAC-MAN (17 SKINS) ===
-        // =========================================================================
-        AvatarItem(
-            id = "pacman_animated",
-            name = "Pac-Man Rétro (Animé)",
-            category = AvatarCategory.PACMAN,
-            description = "L'authentique Pac-Man arcade avec animation fluide de la mâchoire.",
-            price = 0,
-            ghostColor = null,
-            isAnimatedPacman = true,
-            drawableResId = null,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "avatar_pacman_gamer",
-            name = "Pac-Man Pro Gamer",
-            category = AvatarCategory.PACMAN,
-            description = "Casque gaming RGB et micro pour la compétition e-sport du campus.",
-            price = 500,
-            ghostColor = null,
-            isAnimatedPacman = false,
-            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_gamer,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "avatar_pacman_3d",
-            name = "Pac-Man 3D Sphère",
-            category = AvatarCategory.PACMAN,
-            description = "Rendu 3D avec ombre volumétrique et brillance dorée.",
-            price = 350,
-            ghostColor = null,
-            isAnimatedPacman = false,
-            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_3d,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "avatar_pacman_biker",
-            name = "Pac-Man Motard V8",
-            category = AvatarCategory.PACMAN,
-            description = "Bandana noir et lunettes de biker sur les grands boulevards.",
-            price = 450,
-            ghostColor = null,
-            isAnimatedPacman = false,
-            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_biker,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "avatar_pacman_cowboy",
-            name = "Pac-Man Cowboy Shérif",
-            category = AvatarCategory.PACMAN,
-            description = "Chapeau de cow-boy en cuir pour traquer les hors-la-loi.",
-            price = 450,
-            ghostColor = null,
-            isAnimatedPacman = false,
-            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_cowboy,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "avatar_pacman_crown",
-            name = "Pac-Man Roi Doré",
-            category = AvatarCategory.PACMAN,
-            description = "Couronne impériale d'or pur sertie de gemmes royales.",
-            price = 800,
-            ghostColor = null,
-            isAnimatedPacman = false,
-            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_crown,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "avatar_pacman_devil",
-            name = "Pac-Man Diablotin",
-            category = AvatarCategory.PACMAN,
-            description = "Cornes malicieuses et sourire espiègle infernal.",
-            price = 450,
-            ghostColor = null,
-            isAnimatedPacman = false,
-            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_devil,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "avatar_pacman_flower",
-            name = "Pac-Man Flower Power",
-            category = AvatarCategory.PACMAN,
-            description = "Fleur fraîche cueillie sur les pelouses du campus.",
-            price = 300,
-            ghostColor = null,
-            isAnimatedPacman = false,
-            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_flower,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "avatar_pacman_glasses",
-            name = "Pac-Man Lunettes Noires",
-            category = AvatarCategory.PACMAN,
-            description = "Look agent secret sous couverture avec verres teintés.",
-            price = 350,
-            ghostColor = null,
-            isAnimatedPacman = false,
-            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_glasses,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "avatar_pacman_halo",
-            name = "Pac-Man Ange Céleste",
-            category = AvatarCategory.PACMAN,
-            description = "Auréole sainte et pureté angélique au-dessus de la tête.",
-            price = 500,
-            ghostColor = null,
-            isAnimatedPacman = false,
-            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_halo,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "avatar_pacman_love",
-            name = "Pac-Man Romantique",
-            category = AvatarCategory.PACMAN,
-            description = "Cœurs scintillants et douceur infinie.",
-            price = 300,
-            ghostColor = null,
-            isAnimatedPacman = false,
-            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_love,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "avatar_pacman_neon",
-            name = "Pac-Man Cyber Néon",
-            category = AvatarCategory.PACMAN,
-            description = "Lueurs fluorescentes électrisantes dans l'obscurité.",
-            price = 600,
-            ghostColor = null,
-            isAnimatedPacman = false,
-            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_neon,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "avatar_pacman_pirate",
-            name = "Pac-Man Corsaire",
-            category = AvatarCategory.PACMAN,
-            description = "Bicorne de pirate et pavillon noir légendaire.",
-            price = 550,
-            ghostColor = null,
-            isAnimatedPacman = false,
-            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_pirate,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "avatar_pacman_wizard",
-            name = "Pac-Man Grand Mage",
-            category = AvatarCategory.PACMAN,
-            description = "Chapeau d'enchanteur étoilé et sorts de pistage.",
-            price = 650,
-            ghostColor = null,
-            isAnimatedPacman = false,
-            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_wizard,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "avatar_pacman_cap_blue",
-            name = "Pac-Man Casquette Bleue",
-            category = AvatarCategory.PACMAN,
-            description = "Casquette bleue urbaine streetwear branchée.",
-            price = 250,
-            ghostColor = null,
-            isAnimatedPacman = false,
-            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_cap_blue,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "avatar_pacman_cap_red",
-            name = "Pac-Man Casquette Rouge",
-            category = AvatarCategory.PACMAN,
-            description = "Casquette rouge sportive dynamique.",
-            price = 250,
-            ghostColor = null,
-            isAnimatedPacman = false,
-            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_cap_red,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "avatar_pacman_cap_white",
-            name = "Pac-Man Casquette Blanche",
-            category = AvatarCategory.PACMAN,
-            description = "Casquette blanche minimale et épurée.",
-            price = 250,
-            ghostColor = null,
-            isAnimatedPacman = false,
-            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_cap_white,
-            isPremium = false
-        ),
-
-        // =========================================================================
-        // === 2. TOUS LES FANTÔMES CLASSIQUES & THÉMATIQUES (22 SKINS) ===
+        // === 1. TOUS LES FANTÔMES CLASSIQUES & THÉMATIQUES (22 SKINS) ===
         // =========================================================================
         AvatarItem(
             id = "ghost_red_classic",

@@ -131,7 +131,6 @@ enum class Screen {
 }
 
 enum class AvatarCategory(val label: String) {
-    PACMAN("Pac-Man"),
     CLASSIC("Fantômes"),
     PREMIUM("Premium")
 }
@@ -141,7 +140,9 @@ data class BattlePassTier(
     val avatarId: String,
     val title: String,
     val description: String,
-    val isPremium: Boolean = false
+    val isPremium: Boolean = false,
+    val rarity: String = "LÉGENDAIRE",
+    val xpRequired: Int = 500
 )
 
 data class AvatarItem(
@@ -196,12 +197,11 @@ data class GameState(
     val maxXp: Int = 500,
     val totalGamesPlayed: Int = 12,
     val totalVictories: Int = 7,
-    val equippedAvatarId: String = "avatar_pacman_gamer",
+    val equippedAvatarId: String = "ghost_red_headphones",
     val unlockedAvatarIds: Set<String> = setOf(
-        "pacman_animated",
         "ghost_red_classic",
         "ghost_pink_classic",
-        "avatar_pacman_gamer",
+        "ghost_red_headphones",
         "avatar_ghost_cowboy",
         "premium_ghost_gold_king",
         "premium_ghost_samurai"
