@@ -32,6 +32,12 @@ class GameViewModel : ViewModel() {
     init {
         // Initial distance calculation
         recalculateDistances(_uiState.value.seekerLocation)
+        // Ensure battle pass skins matching initial level are unlocked
+        val initialBattlePassSkins = MockData.BattlePassTiers
+            .filter { it.level <= _uiState.value.userLevel }
+            .map { it.avatarId }
+            .toSet()
+        _uiState.update { it.copy(unlockedAvatarIds = it.unlockedAvatarIds + initialBattlePassSkins) }
     }
 
     fun startGame() {
@@ -338,12 +344,26 @@ class GameViewModel : ViewModel() {
             val nextPhase = if (allFound) GamePhase.VICTORY else GamePhase.SEARCHING
 
             _uiState.update { state ->
+                var currentXp = newXp
+                var currentLevel = state.userLevel
+                var currentMaxXp = state.maxXp
+                while (currentXp >= currentMaxXp) {
+                    currentXp -= currentMaxXp
+                    currentLevel++
+                }
+                val newBattlePassUnlocked = MockData.BattlePassTiers
+                    .filter { it.level <= currentLevel }
+                    .map { it.avatarId }
+                    .toSet()
+
                 state.copy(
                     hiddenPlayers = updatedPlayers,
                     gamePhase = nextPhase,
                     userScore = newScore,
-                    userXp = if (newXp >= state.maxXp) newXp - state.maxXp else newXp,
-                    userLevel = if (newXp >= state.maxXp) state.userLevel + 1 else state.userLevel,
+                    userXp = currentXp,
+                    userLevel = currentLevel,
+                    maxXp = currentMaxXp,
+                    unlockedAvatarIds = state.unlockedAvatarIds + newBattlePassUnlocked,
                     capturedDialogPlayer = null,
                     capturingGhost = null,
                     recentHistory = listOf(newHistoryItem) + state.recentHistory
@@ -402,6 +422,44 @@ class GameViewModel : ViewModel() {
             } else {
                 state
             }
+        }
+    }
+
+    fun addXp(amount: Int) {
+        _uiState.update { state ->
+            var currentXp = state.userXp + amount
+            var currentLevel = state.userLevel
+            var currentMaxXp = state.maxXp
+            while (currentXp >= currentMaxXp) {
+                currentXp -= currentMaxXp
+                currentLevel++
+            }
+            val newBattlePassUnlocked = MockData.BattlePassTiers
+                .filter { it.level <= currentLevel }
+                .map { it.avatarId }
+                .toSet()
+
+            state.copy(
+                userXp = currentXp,
+                userLevel = currentLevel,
+                maxXp = currentMaxXp,
+                unlockedAvatarIds = state.unlockedAvatarIds + newBattlePassUnlocked
+            )
+        }
+    }
+
+    fun addLevel(count: Int = 1) {
+        _uiState.update { state ->
+            val currentLevel = state.userLevel + count
+            val newBattlePassUnlocked = MockData.BattlePassTiers
+                .filter { it.level <= currentLevel }
+                .map { it.avatarId }
+                .toSet()
+
+            state.copy(
+                userLevel = currentLevel,
+                unlockedAvatarIds = state.unlockedAvatarIds + newBattlePassUnlocked
+            )
         }
     }
 

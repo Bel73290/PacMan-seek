@@ -131,9 +131,18 @@ enum class Screen {
 }
 
 enum class AvatarCategory(val label: String) {
-    CLASSIC("Classiques"),
+    PACMAN("Pac-Man"),
+    CLASSIC("Fantômes"),
     PREMIUM("Premium")
 }
+
+data class BattlePassTier(
+    val level: Int,
+    val avatarId: String,
+    val title: String,
+    val description: String,
+    val isPremium: Boolean = false
+)
 
 data class AvatarItem(
     val id: String,
@@ -182,18 +191,20 @@ data class GameState(
     val activeFilter: FilterType = FilterType.ALL,
     val activeLeaderboardTab: LeaderboardTab = LeaderboardTab.GENERAL,
     val userScore: Int = 1_000_000,
-    val userLevel: Int = 5,
-    val userXp: Int = 320,
+    val userLevel: Int = 12,
+    val userXp: Int = 250,
     val maxXp: Int = 500,
     val totalGamesPlayed: Int = 12,
     val totalVictories: Int = 7,
-    val equippedAvatarId: String = "ghost_red_classic",
+    val equippedAvatarId: String = "avatar_pacman_gamer",
     val unlockedAvatarIds: Set<String> = setOf(
+        "pacman_animated",
         "ghost_red_classic",
         "ghost_pink_classic",
+        "avatar_pacman_gamer",
+        "avatar_ghost_cowboy",
         "premium_ghost_gold_king",
-        "premium_ghost_samurai",
-        "ghost_blue_devil"
+        "premium_ghost_samurai"
     ),
     val isGhostProximityAlertVisible: Boolean = true,
     val isStreetViewMiniVisible: Boolean = true,

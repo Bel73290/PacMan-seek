@@ -42,7 +42,8 @@ import java.text.NumberFormat
 import java.util.Locale
 
 enum class ShopTab(val label: String) {
-    CLASSIC("Classiques"),
+    PACMAN("Pac-Man"),
+    CLASSIC("Fantômes"),
     PREMIUM("Premium"),
     INVENTORY("Inventaire")
 }
@@ -55,7 +56,7 @@ fun ShopScreen(
     onEquipAvatar: (String) -> Unit,
     onUnlockAvatar: (AvatarItem) -> Unit
 ) {
-    var selectedTab by remember { mutableStateOf(ShopTab.CLASSIC) }
+    var selectedTab by remember { mutableStateOf(ShopTab.PACMAN) }
     var previewAvatarId by remember(state.equippedAvatarId) { mutableStateOf(state.equippedAvatarId) }
 
     val currentCatalog = MockData.AvatarItemsCatalog
@@ -238,12 +239,12 @@ fun ShopScreen(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // 3. Category Filter Tabs: "Classiques", "Premium", "Inventaire"
+            // 3. Category Filter Tabs: "Pac-Man", "Fantômes", "Premium", "Inventaire"
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 14.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    .padding(horizontal = 10.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 ShopTab.entries.forEach { tab ->
                     val isSelected = selectedTab == tab
@@ -264,13 +265,13 @@ fun ShopScreen(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(42.dp)
-                            .clip(RoundedCornerShape(21.dp))
+                            .height(38.dp)
+                            .clip(RoundedCornerShape(19.dp))
                             .background(if (isSelected) activeColor else CardSurface)
                             .border(
                                 1.dp,
                                 if (isSelected) activeColor else if (isPremiumTab) Color(0xFFFFD700).copy(alpha = 0.4f) else BorderSubtle,
-                                RoundedCornerShape(21.dp)
+                                RoundedCornerShape(19.dp)
                             )
                             .clickable { selectedTab = tab },
                         contentAlignment = Alignment.Center
@@ -279,7 +280,8 @@ fun ShopScreen(
                             text = tab.label,
                             color = textColor,
                             fontWeight = if (isSelected) FontWeight.Black else FontWeight.SemiBold,
-                            fontSize = 13.sp
+                            fontSize = 11.5.sp,
+                            maxLines = 1
                         )
                     }
                 }
@@ -287,6 +289,7 @@ fun ShopScreen(
 
             // 4. Grid of Avatar Selection Cards (3 per line)
             val filteredAvatars = when (selectedTab) {
+                ShopTab.PACMAN -> currentCatalog.filter { it.category == AvatarCategory.PACMAN }
                 ShopTab.CLASSIC -> currentCatalog.filter { it.category == AvatarCategory.CLASSIC }
                 ShopTab.PREMIUM -> currentCatalog.filter { it.category == AvatarCategory.PREMIUM }
                 ShopTab.INVENTORY -> currentCatalog.filter { state.unlockedAvatarIds.contains(it.id) }
@@ -384,7 +387,19 @@ fun ShopScreen(
                                 overflow = TextOverflow.Ellipsis
                             )
 
-                            Spacer(modifier = Modifier.height(4.dp))
+                            val bpTier = MockData.BattlePassTiers.firstOrNull { it.avatarId == avatar.id }
+                            if (bpTier != null && !isUnlocked) {
+                                Text(
+                                    text = "Pass Niv. ${bpTier.level}",
+                                    color = Color(0xFFFFD700),
+                                    fontSize = 8.5.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    maxLines = 1
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                            } else {
+                                Spacer(modifier = Modifier.height(4.dp))
+                            }
 
                             // Status or Action Button
                             when {

@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SportsEsports
+import androidx.compose.material.icons.filled.Stars
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -43,7 +44,9 @@ fun ProfileScreen(
     onOpenSettings: () -> Unit = {},
     onEquipAvatar: (String) -> Unit = {},
     onSelectAchievementSkin: (AchievementSkinItem?) -> Unit = {},
-    onSelectBadge: (BadgeItem?) -> Unit = {}
+    onSelectBadge: (BadgeItem?) -> Unit = {},
+    onAddXp: (Int) -> Unit = {},
+    onAddLevel: (Int) -> Unit = {}
 ) {
     Scaffold(
         containerColor = DeepNavy,
@@ -212,9 +215,175 @@ fun ProfileScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-            // 3. Section "Skins à débloquer" (replaces static Badges)
+            // =========================================================================
+            // 3. PASS DE COMBAT / BATTLE PASS (Tous les 10 niveaux)
+            // =========================================================================
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.5.dp, Color(0xFFFFD700).copy(alpha = 0.5f), RoundedCornerShape(20.dp)),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = NavyIntermediate)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(14.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Stars,
+                                contentDescription = null,
+                                tint = Color(0xFFFFD700),
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Pass de Combat",
+                                color = Color(0xFFFFE066),
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.Black
+                            )
+                        }
+
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = Color(0xFFFFD700).copy(alpha = 0.2f),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFFD700))
+                        ) {
+                            Text(
+                                text = "Saison 1",
+                                color = Color(0xFFFFD700),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Text(
+                        text = "Gagne de l'expérience et débloque 1 skin exclusif tous les 10 niveaux !",
+                        color = TextSecondary,
+                        fontSize = 11.sp,
+                        lineHeight = 15.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Next Unlock Callout
+                    val nextTier = MockData.BattlePassTiers.firstOrNull { it.level > state.userLevel }
+                    if (nextTier != null) {
+                        val levelsRemaining = nextTier.level - state.userLevel
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = CardSurface,
+                            border = androidx.compose.foundation.BorderStroke(1.dp, BorderSubtle),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "🎁 Prochain palier : ",
+                                    color = TextSecondary,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "${nextTier.title} (Niv. ${nextTier.level})",
+                                    color = PacmanYellow,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Black
+                                )
+                                Spacer(modifier = Modifier.weight(1f))
+                                Text(
+                                    text = "-$levelsRemaining niv.",
+                                    color = Color(0xFFFFD700),
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
+                            }
+                        }
+                    } else {
+                        Text(
+                            text = "👑 Félicitations ! Tu as conquis tous les paliers du Pass !",
+                            color = Color(0xFFFFD700),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Interactive test buttons for user XP & Leveling
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Button(
+                            onClick = { onAddXp(150) },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(34.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = CardSurface,
+                                contentColor = PacmanYellow
+                            ),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, BorderSubtle),
+                            contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp)
+                        ) {
+                            Text(text = "+150 XP", fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                        }
+
+                        Button(
+                            onClick = { onAddLevel(10) },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(34.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFFFD700),
+                                contentColor = DarkContrast
+                            ),
+                            contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp)
+                        ) {
+                            Text(text = "+10 Niveaux ⚡", fontWeight = FontWeight.Black, fontSize = 11.sp)
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // Battle Pass Tiers Track (10 Paliers)
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                MockData.BattlePassTiers.forEach { tier ->
+                    val isEquipped = state.equippedAvatarId == tier.avatarId
+                    BattlePassTierCard(
+                        tier = tier,
+                        userLevel = state.userLevel,
+                        isEquipped = isEquipped,
+                        onEquip = { onEquipAvatar(tier.avatarId) }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // 4. Section "Skins de Défis & Exploits"
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -222,20 +391,20 @@ fun ProfileScreen(
             ) {
                 Column {
                     Text(
-                        text = "Skins à débloquer",
+                        text = "Skins de Défis",
                         color = TextPrimary,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Accomplis des exploits pour débloquer ces skins exclusifs",
+                        text = "Accomplis des exploits spéciaux pour débloquer ces skins",
                         color = TextSecondary,
                         fontSize = 11.sp
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 MockData.AchievementSkinsList.forEach { achievement ->
@@ -246,24 +415,6 @@ fun ProfileScreen(
                         onEquip = { onEquipAvatar(achievement.avatarId) },
                         onClick = { onSelectAchievementSkin(achievement) }
                     )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // 4. Section "Historique récent"
-            Text(
-                text = "Historique récent",
-                color = TextPrimary,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                state.recentHistory.forEach { historyItem ->
-                    HistoryRow(item = historyItem)
                 }
             }
 
@@ -287,6 +438,217 @@ fun ProfileScreen(
                 badge = badge,
                 onDismiss = { onSelectBadge(null) }
             )
+        }
+    }
+}
+
+@Composable
+private fun BattlePassTierCard(
+    tier: BattlePassTier,
+    userLevel: Int,
+    isEquipped: Boolean,
+    onEquip: () -> Unit
+) {
+    val avatar = MockData.AvatarItemsCatalog.firstOrNull { it.id == tier.avatarId }
+    val isUnlocked = userLevel >= tier.level
+    val borderColor = when {
+        isEquipped -> PacmanYellow
+        isUnlocked -> Color(0xFFFFD700).copy(alpha = 0.6f)
+        else -> BorderSubtle
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .border(1.2.dp, borderColor, RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isEquipped) SelectedSurface else if (isUnlocked) CardSurface else CardSurface.copy(alpha = 0.7f)
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Level badge pill (e.g. "NIV 10")
+            Surface(
+                shape = RoundedCornerShape(10.dp),
+                color = if (isUnlocked) Color(0xFFFFD700).copy(alpha = 0.2f) else NavyIntermediate,
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    if (isUnlocked) Color(0xFFFFD700) else BorderSubtle
+                )
+            ) {
+                Text(
+                    text = "NIV ${tier.level}",
+                    color = if (isUnlocked) Color(0xFFFFD700) else TextSecondary,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(10.dp))
+
+            // Avatar Preview with Lock overlay if locked
+            Box(
+                modifier = Modifier
+                    .size(46.dp)
+                    .clip(CircleShape)
+                    .background(NavyIntermediate)
+                    .border(
+                        1.5.dp,
+                        if (isEquipped) PacmanYellow else if (isUnlocked) Color(0xFFFFD700).copy(alpha = 0.6f) else BorderSubtle,
+                        CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                if (avatar != null) {
+                    AvatarVisual(avatar = avatar, size = 36.dp)
+                } else {
+                    GhostComposable(size = 32.dp, baseColor = GhostCyan, isScared = false)
+                }
+
+                if (!isUnlocked) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.50f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Lock,
+                            contentDescription = "Verrouillé",
+                            tint = Color.White.copy(alpha = 0.85f),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.width(10.dp))
+
+            // Details & Progress
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = tier.title,
+                    color = if (isUnlocked) Color(0xFFFFE066) else TextPrimary,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
+                )
+
+                Spacer(modifier = Modifier.height(2.dp))
+
+                Text(
+                    text = tier.description,
+                    color = TextSecondary,
+                    fontSize = 10.sp,
+                    lineHeight = 13.sp,
+                    maxLines = 2
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                if (!isUnlocked) {
+                    val prevLevel = (tier.level - 10).coerceAtLeast(0)
+                    val progressRatio = ((userLevel - prevLevel).toFloat() / 10f).coerceIn(0f, 1f)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        LinearProgressIndicator(
+                            progress = { progressRatio },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(5.dp)
+                                .clip(RoundedCornerShape(3.dp)),
+                            color = PacmanYellow,
+                            trackColor = NavyIntermediate
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Niveau $userLevel / ${tier.level}",
+                            color = TextSecondary,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Action / Status
+            when {
+                isEquipped -> {
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = PacmanYellow,
+                        modifier = Modifier.height(34.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier.padding(horizontal = 10.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "ÉQUIPÉ",
+                                color = DarkContrast,
+                                fontWeight = FontWeight.Black,
+                                fontSize = 11.sp
+                            )
+                        }
+                    }
+                }
+                isUnlocked -> {
+                    Button(
+                        onClick = onEquip,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFFFD700),
+                            contentColor = DarkContrast
+                        ),
+                        modifier = Modifier.height(34.dp),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp)
+                    ) {
+                        Text(
+                            text = "Équiper",
+                            fontWeight = FontWeight.Black,
+                            fontSize = 12.sp
+                        )
+                    }
+                }
+                else -> {
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = NavyIntermediate,
+                        border = androidx.compose.foundation.BorderStroke(1.dp, BorderSubtle),
+                        modifier = Modifier.height(34.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = null,
+                                tint = TextSecondary,
+                                modifier = Modifier.size(12.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "Niv. ${tier.level}",
+                                color = TextSecondary,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 10.sp
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -692,53 +1054,3 @@ private fun StatCard(
     }
 }
 
-@Composable
-private fun HistoryRow(item: HistoryItem) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(1.dp, BorderSubtle, RoundedCornerShape(16.dp)),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = CardSurface)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(NavyIntermediate),
-                contentAlignment = Alignment.Center
-            ) {
-                when (item.iconType) {
-                    "ghost" -> GhostComposable(size = 20.dp, baseColor = GhostPurple, isScared = false)
-                    "ranking" -> TrophyComposable(size = 18.dp, rank = 2)
-                    "trophy" -> StarComposable(size = 18.dp, color = GhostOrange)
-                    else -> GhostComposable(size = 20.dp, baseColor = GhostCyan, isScared = false)
-                }
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "${item.date} ${item.title}",
-                    color = TextPrimary,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
-            Text(
-                text = "+${formatCompactScore(item.deltaScore)} pts",
-                color = PacmanYellow,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Black
-            )
-        }
-    }
-}

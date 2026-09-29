@@ -111,7 +111,9 @@ class MainActivity : ComponentActivity() {
                                 onOpenSettings = { viewModel.openSettingsDialog(true) },
                                 onEquipAvatar = { avatarId -> viewModel.equipAvatar(avatarId) },
                                 onSelectAchievementSkin = { ach -> viewModel.selectAchievementSkin(ach) },
-                                onSelectBadge = { badge -> viewModel.selectBadge(badge) }
+                                onSelectBadge = { badge -> viewModel.selectBadge(badge) },
+                                onAddXp = { xp -> viewModel.addXp(xp) },
+                                onAddLevel = { count -> viewModel.addLevel(count) }
                             )
                         }
                         Screen.SHOP -> {

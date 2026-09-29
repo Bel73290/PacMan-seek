@@ -204,8 +204,270 @@ object MockData {
         )
     )
 
+    // === BATTLE PASS : PALIERS TOUS LES 10 NIVEAUX ===
+    val BattlePassTiers = listOf(
+        BattlePassTier(
+            level = 10,
+            avatarId = "avatar_pacman_gamer",
+            title = "Pac-Man Pro Gamer",
+            description = "Casque gaming RGB et micro haute fidélité !"
+        ),
+        BattlePassTier(
+            level = 20,
+            avatarId = "avatar_ghost_cowboy",
+            title = "Shérif du Campus",
+            description = "Stetson texan pour faire régner l'ordre dans les allées."
+        ),
+        BattlePassTier(
+            level = 30,
+            avatarId = "avatar_pacman_biker",
+            title = "Pac-Man Motard V8",
+            description = "Bandana noir et blouson de cuir de rider urbain."
+        ),
+        BattlePassTier(
+            level = 40,
+            avatarId = "avatar_ghost_pirate",
+            title = "Fantôme Corsaire",
+            description = "Cache-œil, boucle d'or et pavillon pirate."
+        ),
+        BattlePassTier(
+            level = 50,
+            avatarId = "avatar_pacman_wizard",
+            title = "Pac-Man Grand Mage",
+            description = "Chapeau pointu magique et sorts de radar mystique."
+        ),
+        BattlePassTier(
+            level = 60,
+            avatarId = "premium_ghost_crystal_ice",
+            title = "Cristal de Givre",
+            description = "Taillé dans la glace éternelle boréale scintillante.",
+            isPremium = true
+        ),
+        BattlePassTier(
+            level = 70,
+            avatarId = "avatar_pacman_neon",
+            title = "Pac-Man Cyber Néon",
+            description = "Aura fluo électrisante irradiant dans la nuit.",
+            isPremium = false
+        ),
+        BattlePassTier(
+            level = 80,
+            avatarId = "premium_ghost_fire_flame",
+            title = "Flamme Infernale",
+            description = "Brasier incandescent issu des entrailles volcaniques.",
+            isPremium = true
+        ),
+        BattlePassTier(
+            level = 90,
+            avatarId = "premium_ghost_angel_wings",
+            title = "Séraphin Ailé",
+            description = "Ailes d'or célestes et rayonnement divin majestueux.",
+            isPremium = true
+        ),
+        BattlePassTier(
+            level = 100,
+            avatarId = "premium_ghost_gold_king",
+            title = "Roi Doré Suprême",
+            description = "Le skin Ultime : couronne en or massif 24 carats sertie de joyaux !",
+            isPremium = true
+        )
+    )
+
     val AvatarItemsCatalog = listOf(
-        // === CATÉGORIE 1 : CLASSIQUES ICONIQUES & DISTINCTIFS ===
+        // =========================================================================
+        // === 1. TOUS LES SKINS PAC-MAN (17 SKINS) ===
+        // =========================================================================
+        AvatarItem(
+            id = "pacman_animated",
+            name = "Pac-Man Rétro (Animé)",
+            category = AvatarCategory.PACMAN,
+            description = "L'authentique Pac-Man arcade avec animation fluide de la mâchoire.",
+            price = 0,
+            ghostColor = null,
+            isAnimatedPacman = true,
+            drawableResId = null,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "avatar_pacman_gamer",
+            name = "Pac-Man Pro Gamer",
+            category = AvatarCategory.PACMAN,
+            description = "Casque gaming RGB et micro pour la compétition e-sport du campus.",
+            price = 500,
+            ghostColor = null,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_gamer,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "avatar_pacman_3d",
+            name = "Pac-Man 3D Sphère",
+            category = AvatarCategory.PACMAN,
+            description = "Rendu 3D avec ombre volumétrique et brillance dorée.",
+            price = 350,
+            ghostColor = null,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_3d,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "avatar_pacman_biker",
+            name = "Pac-Man Motard V8",
+            category = AvatarCategory.PACMAN,
+            description = "Bandana noir et lunettes de biker sur les grands boulevards.",
+            price = 450,
+            ghostColor = null,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_biker,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "avatar_pacman_cowboy",
+            name = "Pac-Man Cowboy Shérif",
+            category = AvatarCategory.PACMAN,
+            description = "Chapeau de cow-boy en cuir pour traquer les hors-la-loi.",
+            price = 450,
+            ghostColor = null,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_cowboy,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "avatar_pacman_crown",
+            name = "Pac-Man Roi Doré",
+            category = AvatarCategory.PACMAN,
+            description = "Couronne impériale d'or pur sertie de gemmes royales.",
+            price = 800,
+            ghostColor = null,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_crown,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "avatar_pacman_devil",
+            name = "Pac-Man Diablotin",
+            category = AvatarCategory.PACMAN,
+            description = "Cornes malicieuses et sourire espiègle infernal.",
+            price = 450,
+            ghostColor = null,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_devil,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "avatar_pacman_flower",
+            name = "Pac-Man Flower Power",
+            category = AvatarCategory.PACMAN,
+            description = "Fleur fraîche cueillie sur les pelouses du campus.",
+            price = 300,
+            ghostColor = null,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_flower,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "avatar_pacman_glasses",
+            name = "Pac-Man Lunettes Noires",
+            category = AvatarCategory.PACMAN,
+            description = "Look agent secret sous couverture avec verres teintés.",
+            price = 350,
+            ghostColor = null,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_glasses,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "avatar_pacman_halo",
+            name = "Pac-Man Ange Céleste",
+            category = AvatarCategory.PACMAN,
+            description = "Auréole sainte et pureté angélique au-dessus de la tête.",
+            price = 500,
+            ghostColor = null,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_halo,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "avatar_pacman_love",
+            name = "Pac-Man Romantique",
+            category = AvatarCategory.PACMAN,
+            description = "Cœurs scintillants et douceur infinie.",
+            price = 300,
+            ghostColor = null,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_love,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "avatar_pacman_neon",
+            name = "Pac-Man Cyber Néon",
+            category = AvatarCategory.PACMAN,
+            description = "Lueurs fluorescentes électrisantes dans l'obscurité.",
+            price = 600,
+            ghostColor = null,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_neon,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "avatar_pacman_pirate",
+            name = "Pac-Man Corsaire",
+            category = AvatarCategory.PACMAN,
+            description = "Bicorne de pirate et pavillon noir légendaire.",
+            price = 550,
+            ghostColor = null,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_pirate,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "avatar_pacman_wizard",
+            name = "Pac-Man Grand Mage",
+            category = AvatarCategory.PACMAN,
+            description = "Chapeau d'enchanteur étoilé et sorts de pistage.",
+            price = 650,
+            ghostColor = null,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_wizard,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "avatar_pacman_cap_blue",
+            name = "Pac-Man Casquette Bleue",
+            category = AvatarCategory.PACMAN,
+            description = "Casquette bleue urbaine streetwear branchée.",
+            price = 250,
+            ghostColor = null,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_cap_blue,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "avatar_pacman_cap_red",
+            name = "Pac-Man Casquette Rouge",
+            category = AvatarCategory.PACMAN,
+            description = "Casquette rouge sportive dynamique.",
+            price = 250,
+            ghostColor = null,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_cap_red,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "avatar_pacman_cap_white",
+            name = "Pac-Man Casquette Blanche",
+            category = AvatarCategory.PACMAN,
+            description = "Casquette blanche minimale et épurée.",
+            price = 250,
+            ghostColor = null,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.avatar_pacman_cap_white,
+            isPremium = false
+        ),
+
+        // =========================================================================
+        // === 2. TOUS LES FANTÔMES CLASSIQUES & THÉMATIQUES (22 SKINS) ===
+        // =========================================================================
         AvatarItem(
             id = "ghost_red_classic",
             name = "Blinky L'Ombre",
@@ -213,6 +475,7 @@ object MockData {
             description = "Le fantôme rouge légendaire, rapide et redoutable.",
             price = 0,
             ghostColor = GhostRed,
+            isAnimatedPacman = false,
             drawableResId = com.cachecache.game.R.drawable.avatar_ghost_red_classic,
             isPremium = false
         ),
@@ -223,6 +486,7 @@ object MockData {
             description = "Embusquée dans les ruelles, elle anticipe chaque virage.",
             price = 150,
             ghostColor = GhostPink,
+            isAnimatedPacman = false,
             drawableResId = com.cachecache.game.R.drawable.avatar_ghost_pink_classic,
             isPremium = false
         ),
@@ -233,6 +497,7 @@ object MockData {
             description = "Imprévisible et facétieux avec sa robe turquoise.",
             price = 200,
             ghostColor = GhostCyan,
+            isAnimatedPacman = false,
             drawableResId = com.cachecache.game.R.drawable.avatar_ghost_cyan_classic,
             isPremium = false
         ),
@@ -243,7 +508,19 @@ object MockData {
             description = "Un esprit solitaire et contemplatif à la robe orangée.",
             price = 200,
             ghostColor = GhostOrange,
+            isAnimatedPacman = false,
             drawableResId = com.cachecache.game.R.drawable.avatar_ghost_orange_classic,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "ghost_purple_classic",
+            name = "Sue La Mystique",
+            category = AvatarCategory.CLASSIC,
+            description = "Fantôme nocturne drapée de violet sombre et énigmatique.",
+            price = 250,
+            ghostColor = GhostPurple,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_dark_blue,
             isPremium = false
         ),
         AvatarItem(
@@ -253,6 +530,7 @@ object MockData {
             description = "Impassible et ultra-stylé avec ses verres teintés sombres.",
             price = 350,
             ghostColor = GhostPurple,
+            isAnimatedPacman = false,
             drawableResId = com.cachecache.game.R.drawable.avatar_ghost_blue_sunglasses,
             isPremium = false
         ),
@@ -263,6 +541,7 @@ object MockData {
             description = "Casque circum-aural pour mixer et traquer sur le meilleur son.",
             price = 450,
             ghostColor = GhostRed,
+            isAnimatedPacman = false,
             drawableResId = com.cachecache.game.R.drawable.avatar_ghost_red_headphones,
             isPremium = false
         ),
@@ -273,6 +552,7 @@ object MockData {
             description = "Ornée d'une fleur printanière cueillie au bord du lac.",
             price = 400,
             ghostColor = GhostPink,
+            isAnimatedPacman = false,
             drawableResId = com.cachecache.game.R.drawable.avatar_ghost_pink_flower,
             isPremium = false
         ),
@@ -283,6 +563,7 @@ object MockData {
             description = "Casquette street portée à l'envers pour le parkour du campus.",
             price = 450,
             ghostColor = GhostCyan,
+            isAnimatedPacman = false,
             drawableResId = com.cachecache.game.R.drawable.avatar_ghost_cyan_cap,
             isPremium = false
         ),
@@ -293,6 +574,7 @@ object MockData {
             description = "Couronné de rubis pour régner sur les couloirs universitaires.",
             price = 600,
             ghostColor = GhostRed,
+            isAnimatedPacman = false,
             drawableResId = com.cachecache.game.R.drawable.avatar_ghost_red_crown,
             isPremium = false
         ),
@@ -303,6 +585,7 @@ object MockData {
             description = "Grosses montures d'intello pour décoder la carte GPS en temps réel.",
             price = 500,
             ghostColor = GhostPurple,
+            isAnimatedPacman = false,
             drawableResId = com.cachecache.game.R.drawable.avatar_ghost_blue_glasses,
             isPremium = false
         ),
@@ -313,6 +596,7 @@ object MockData {
             description = "Lunettes anaglyphes rétro rouge et cyan pour voir à travers les murs.",
             price = 550,
             ghostColor = GhostRed,
+            isAnimatedPacman = false,
             drawableResId = com.cachecache.game.R.drawable.avatar_ghost_red_3d,
             isPremium = false
         ),
@@ -321,85 +605,115 @@ object MockData {
             name = "Shérif de l'Ouest",
             category = AvatarCategory.CLASSIC,
             description = "Stetson texan paré pour le duel au coucher du soleil.",
-            price = 700,
+            price = 500,
             ghostColor = GhostOrange,
+            isAnimatedPacman = false,
             drawableResId = com.cachecache.game.R.drawable.avatar_ghost_cowboy,
             isPremium = false
         ),
         AvatarItem(
             id = "avatar_ghost_wizard",
-            name = "Archimage Spectrale",
+            name = "Archimage Spectral",
             category = AvatarCategory.CLASSIC,
             description = "Chapeau pointu infusé d'arcanes de téléportation furtive.",
-            price = 800,
+            price = 600,
             ghostColor = GhostPurple,
+            isAnimatedPacman = false,
             drawableResId = com.cachecache.game.R.drawable.avatar_ghost_wizard,
             isPremium = false
         ),
-
-        // === SKINS DE SUCCÈS (DÉBLOQUÉS PAR DES EXPLOITS DANS LE PROFIL) ===
         AvatarItem(
-            id = "premium_ghost_gold_king",
-            name = "Roi Doré Suprême",
-            category = AvatarCategory.PREMIUM,
-            description = "Souverain auréolé d'or pur. Débloqué en atteignant 1Mill de points !",
-            price = 0,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.premium_ghost_gold_king,
-            isPremium = true
+            id = "avatar_ghost_pirate",
+            name = "Fantôme Pirate",
+            category = AvatarCategory.CLASSIC,
+            description = "Tricorne, cache-œil et esprit d'aventure sur les mers.",
+            price = 600,
+            ghostColor = GhostCyan,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_pirate,
+            isPremium = false
         ),
         AvatarItem(
-            id = "premium_ghost_samurai",
-            name = "Samouraï Kabuto",
-            category = AvatarCategory.PREMIUM,
-            description = "Guerrier d'honneur. Débloqué en découvrant 20 cachettes secrètes.",
-            price = 0,
+            id = "avatar_ghost_santa",
+            name = "Père Noël Spectral",
+            category = AvatarCategory.CLASSIC,
+            description = "Bonnet à pompon rouge et cadeaux cachés dans la hotte.",
+            price = 550,
             ghostColor = GhostRed,
-            drawableResId = com.cachecache.game.R.drawable.premium_ghost_samurai,
-            isPremium = true
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_santa,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "avatar_ghost_snorkel",
+            name = "Plongeur Sous-Marin",
+            category = AvatarCategory.CLASSIC,
+            description = "Masque et tuba pour explorer le fond du lac du Bourget.",
+            price = 450,
+            ghostColor = GhostCyan,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_snorkel,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "avatar_ghost_mustache",
+            name = "Gentleman Moustache",
+            category = AvatarCategory.CLASSIC,
+            description = "Moustache soignée avec distinction et flegme britannique.",
+            price = 400,
+            ghostColor = GhostOrange,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_mustache,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "avatar_ghost_headphones",
+            name = "Spectre Beats Audio",
+            category = AvatarCategory.CLASSIC,
+            description = "Basse puissante et immersion sonore sans fil.",
+            price = 450,
+            ghostColor = GhostPurple,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_headphones,
+            isPremium = false
         ),
         AvatarItem(
             id = "ghost_blue_devil",
             name = "Diablotin Farceur",
             category = AvatarCategory.CLASSIC,
-            description = "Cornes écarlates et malice infernale. Débloqué en capturant Sue.",
-            price = 0,
+            description = "Cornes écarlates et malice infernale légendaire.",
+            price = 500,
             ghostColor = GhostPurple,
+            isAnimatedPacman = false,
             drawableResId = com.cachecache.game.R.drawable.avatar_ghost_blue_devil,
             isPremium = false
         ),
         AvatarItem(
-            id = "premium_ghost_cyberpunk",
-            name = "Cyberpunk 2099",
-            category = AvatarCategory.PREMIUM,
-            description = "Visière néon HUD cybernétique. Déblocable en gagnant 10 parties !",
-            price = 2100,
+            id = "ghost_blue_halo",
+            name = "Ange Pur",
+            category = AvatarCategory.CLASSIC,
+            description = "Aura immaculée et anneau céleste brillant.",
+            price = 500,
             ghostColor = GhostCyan,
-            drawableResId = com.cachecache.game.R.drawable.premium_ghost_cyberpunk,
-            isPremium = true
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_blue_halo,
+            isPremium = false
         ),
         AvatarItem(
-            id = "premium_ghost_pirate_captain",
-            name = "Vieux Loup de Mer",
-            category = AvatarCategory.PREMIUM,
-            description = "Capitaine corsaire légendaire. Déblocable en capturant 5 fantômes rapidement.",
-            price = 1800,
-            ghostColor = GhostOrange,
-            drawableResId = com.cachecache.game.R.drawable.premium_ghost_pirate_captain,
-            isPremium = true
-        ),
-        AvatarItem(
-            id = "premium_ghost_angel_wings",
-            name = "Séraphin Ailé",
-            category = AvatarCategory.PREMIUM,
-            description = "Ailes d'or divines et auréole céleste. Déblocable sans radar ni boussole.",
-            price = 2400,
-            ghostColor = GhostPink,
-            drawableResId = com.cachecache.game.R.drawable.premium_ghost_angel_wings,
-            isPremium = true
+            id = "ghost_scared",
+            name = "Fantôme Apeuré Bleu",
+            category = AvatarCategory.CLASSIC,
+            description = "Le spectre bleu tremblant lorsqu'une super pac-gomme est avalée !",
+            price = 300,
+            ghostColor = ScaredBlue,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.ghost_scared_blue,
+            isPremium = false
         ),
 
-        // === CATÉGORIE 2 : SKINS PREMIUM DE LA BOUTIQUE ===
+        // =========================================================================
+        // === 3. TOUS LES SKINS PREMIUM (20 SKINS ÉPIQUES) ===
+        // =========================================================================
         AvatarItem(
             id = "premium_ghost_crystal_ice",
             name = "Cristal de Givre",
@@ -407,6 +721,7 @@ object MockData {
             description = "Taillé dans la glace éternelle avec des reflets prismatiques scintillants.",
             price = 2000,
             ghostColor = GhostCyan,
+            isAnimatedPacman = false,
             drawableResId = com.cachecache.game.R.drawable.premium_ghost_crystal_ice,
             isPremium = true
         ),
@@ -417,7 +732,41 @@ object MockData {
             description = "Brasier incandescent pulsant d'une énergie volcanique bouillonnante.",
             price = 2200,
             ghostColor = GhostRed,
+            isAnimatedPacman = false,
             drawableResId = com.cachecache.game.R.drawable.premium_ghost_fire_flame,
+            isPremium = true
+        ),
+        AvatarItem(
+            id = "premium_ghost_gold_king",
+            name = "Roi Doré Suprême",
+            category = AvatarCategory.PREMIUM,
+            description = "Souverain auréolé d'or pur. Le prestige absolu du Palier 100 !",
+            price = 3000,
+            ghostColor = GhostOrange,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_gold_king,
+            isPremium = true
+        ),
+        AvatarItem(
+            id = "premium_ghost_samurai",
+            name = "Samouraï Kabuto",
+            category = AvatarCategory.PREMIUM,
+            description = "Armure d'honneur avec casque kabuto et sabre spectral tranchant.",
+            price = 2500,
+            ghostColor = GhostRed,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_samurai,
+            isPremium = true
+        ),
+        AvatarItem(
+            id = "premium_ghost_cyberpunk",
+            name = "Cyberpunk 2099",
+            category = AvatarCategory.PREMIUM,
+            description = "Visière HUD cybernétique et circuits imprimés néon haute technologie.",
+            price = 2100,
+            ghostColor = GhostCyan,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_cyberpunk,
             isPremium = true
         ),
         AvatarItem(
@@ -427,7 +776,19 @@ object MockData {
             description = "Seigneur des ténèbres couronné d'améthyste et de flammes sombres.",
             price = 2600,
             ghostColor = GhostPurple,
+            isAnimatedPacman = false,
             drawableResId = com.cachecache.game.R.drawable.premium_ghost_dark_void,
+            isPremium = true
+        ),
+        AvatarItem(
+            id = "premium_ghost_angel_wings",
+            name = "Séraphin Ailé",
+            category = AvatarCategory.PREMIUM,
+            description = "Ailes d'or divines et auréole céleste majestueuse.",
+            price = 2400,
+            ghostColor = GhostPink,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_angel_wings,
             isPremium = true
         ),
         AvatarItem(
@@ -437,6 +798,7 @@ object MockData {
             description = "Cape volante rouge et blason héroïque invincible.",
             price = 1900,
             ghostColor = GhostCyan,
+            isAnimatedPacman = false,
             drawableResId = com.cachecache.game.R.drawable.premium_ghost_superhero,
             isPremium = true
         ),
@@ -447,6 +809,7 @@ object MockData {
             description = "Ambiance néon rétro 80s et lunettes à persiennes dorées.",
             price = 2300,
             ghostColor = GhostPink,
+            isAnimatedPacman = false,
             drawableResId = com.cachecache.game.R.drawable.premium_ghost_disco_synthwave,
             isPremium = true
         ),
@@ -457,6 +820,7 @@ object MockData {
             description = "Cape de velours rouge, canines acérées et nœud papillon.",
             price = 2000,
             ghostColor = GhostPurple,
+            isAnimatedPacman = false,
             drawableResId = com.cachecache.game.R.drawable.premium_ghost_vampire,
             isPremium = true
         ),
@@ -467,6 +831,7 @@ object MockData {
             description = "Lunettes de pilote en laiton et engrenages mécaniques ouvragés.",
             price = 2100,
             ghostColor = GhostOrange,
+            isAnimatedPacman = false,
             drawableResId = com.cachecache.game.R.drawable.premium_ghost_steampunk,
             isPremium = true
         ),
@@ -477,6 +842,7 @@ object MockData {
             description = "Chapeau mystique brodé d'étoiles filantes et croissant lunaire.",
             price = 2500,
             ghostColor = GhostCyan,
+            isAnimatedPacman = false,
             drawableResId = com.cachecache.game.R.drawable.premium_ghost_astral_mage,
             isPremium = true
         ),
@@ -487,7 +853,85 @@ object MockData {
             description = "Astres étincelants et couronne de triomphe d'or massif.",
             price = 3000,
             ghostColor = PacmanYellow,
+            isAnimatedPacman = false,
             drawableResId = com.cachecache.game.R.drawable.premium_ghost_divine_sun,
+            isPremium = true
+        ),
+        AvatarItem(
+            id = "premium_ghost_pirate_captain",
+            name = "Vieux Loup de Mer",
+            category = AvatarCategory.PREMIUM,
+            description = "Capitaine corsaire légendaire avec barbe blanche et bicorne d'or.",
+            price = 1800,
+            ghostColor = GhostOrange,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_pirate_captain,
+            isPremium = true
+        ),
+        AvatarItem(
+            id = "premium_ghost_flower_spring",
+            name = "Fleur Printanière",
+            category = AvatarCategory.PREMIUM,
+            description = "Pétales fleuris et couronne florale parfumée des Alpes.",
+            price = 1900,
+            ghostColor = GhostPink,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_flower_spring,
+            isPremium = true
+        ),
+        AvatarItem(
+            id = "premium_ghost_mummy",
+            name = "Momie Millénaire",
+            category = AvatarCategory.PREMIUM,
+            description = "Bandelettes antiques enveloppant un esprit venu du fond des âges.",
+            price = 2000,
+            ghostColor = GhostOrange,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_mummy,
+            isPremium = true
+        ),
+        AvatarItem(
+            id = "premium_ghost_pharaoh",
+            name = "Pharaon d'Égypte",
+            category = AvatarCategory.PREMIUM,
+            description = "Coiffe royale némès d'or et de lapis-lazuli des souverains du Nil.",
+            price = 2500,
+            ghostColor = GhostOrange,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_pharaoh,
+            isPremium = true
+        ),
+        AvatarItem(
+            id = "premium_ghost_princess",
+            name = "Princesse Royale",
+            category = AvatarCategory.PREMIUM,
+            description = "Diadème de princesse étincelant de mille feux et ruban rose.",
+            price = 2100,
+            ghostColor = GhostPink,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_princess,
+            isPremium = true
+        ),
+        AvatarItem(
+            id = "premium_ghost_punk_rock",
+            name = "Punk Rockeur",
+            category = AvatarCategory.PREMIUM,
+            description = "Crête iroquoise violette et attitude rebelle électrique.",
+            price = 2200,
+            ghostColor = GhostPurple,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_punk_rock,
+            isPremium = true
+        ),
+        AvatarItem(
+            id = "premium_ghost_santa_deluxe",
+            name = "Père Noël Deluxe",
+            category = AvatarCategory.PREMIUM,
+            description = "Tenue de fêtes en velours brodé et grande barbe blanche d'hiver.",
+            price = 2200,
+            ghostColor = GhostRed,
+            isAnimatedPacman = false,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_santa_deluxe,
             isPremium = true
         )
     )
