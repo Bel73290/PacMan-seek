@@ -66,6 +66,7 @@ fun ShopScreen(
 
     Scaffold(
         containerColor = DeepNavy,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             BottomNavigationBar(
                 currentScreen = Screen.SHOP,
@@ -76,8 +77,8 @@ fun ShopScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
                 .statusBarsPadding()
+                .padding(bottom = paddingValues.calculateBottomPadding())
         ) {
             // 1. Header: Back Arrow, Title, User Points Balance
             Row(
@@ -91,7 +92,7 @@ fun ShopScreen(
                     IconButton(
                         onClick = onBack,
                         modifier = Modifier
-                            .size(38.dp)
+                            .size(44.dp)
                             .clip(CircleShape)
                             .background(NavyIntermediate)
                             .border(1.dp, BorderSubtle, CircleShape)
@@ -99,7 +100,8 @@ fun ShopScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Retour",
-                            tint = TextPrimary
+                            tint = TextPrimary,
+                            modifier = Modifier.size(22.dp)
                         )
                     }
 
@@ -202,24 +204,24 @@ fun ShopScreen(
                                     }
                                 },
                                 modifier = Modifier
-                                    .height(30.dp)
+                                    .height(40.dp)
                                     .fillMaxWidth(),
-                                shape = RoundedCornerShape(15.dp),
+                                shape = RoundedCornerShape(20.dp),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = buttonColor,
                                     contentColor = if (isUnlocked) TextPrimary else DarkContrast
                                 ),
-                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 2.dp),
                                 enabled = isUnlocked || state.userScore >= activePreviewAvatar.price
                             ) {
                                 if (isUnlocked) {
-                                    Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(14.dp))
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(text = "Équiper ce skin", fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                                    Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(text = "Équiper ce skin", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                                 } else {
-                                    Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(13.dp))
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(text = "Débloquer (${formatCompactScore(activePreviewAvatar.price)} pts)", fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                                    Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(15.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(text = "Débloquer (${formatCompactScore(activePreviewAvatar.price)} pts)", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                                 }
                             }
                         } else {
@@ -262,13 +264,13 @@ fun ShopScreen(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(34.dp)
-                            .clip(RoundedCornerShape(17.dp))
+                            .height(42.dp)
+                            .clip(RoundedCornerShape(21.dp))
                             .background(if (isSelected) activeColor else CardSurface)
                             .border(
                                 1.dp,
                                 if (isSelected) activeColor else if (isPremiumTab) Color(0xFFFFD700).copy(alpha = 0.4f) else BorderSubtle,
-                                RoundedCornerShape(17.dp)
+                                RoundedCornerShape(21.dp)
                             )
                             .clickable { selectedTab = tab },
                         contentAlignment = Alignment.Center
@@ -277,7 +279,7 @@ fun ShopScreen(
                             text = tab.label,
                             color = textColor,
                             fontWeight = if (isSelected) FontWeight.Black else FontWeight.SemiBold,
-                            fontSize = 12.sp
+                            fontSize = 13.sp
                         )
                     }
                 }
@@ -388,32 +390,32 @@ fun ShopScreen(
                             when {
                                 isEquipped -> {
                                     Box(
-                                        modifier = Modifier.height(22.dp),
+                                        modifier = Modifier.height(28.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Check,
                                             contentDescription = "Équipé",
                                             tint = PacmanYellow,
-                                            modifier = Modifier.size(16.dp)
+                                            modifier = Modifier.size(18.dp)
                                         )
                                     }
                                 }
                                 isUnlocked -> {
                                     Button(
                                         onClick = { onEquipAvatar(avatar.id) },
-                                        shape = RoundedCornerShape(10.dp),
+                                        shape = RoundedCornerShape(12.dp),
                                         colors = ButtonDefaults.buttonColors(
                                             containerColor = ScaredBlue,
                                             contentColor = TextPrimary
                                         ),
-                                        modifier = Modifier.height(22.dp),
-                                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp)
+                                        modifier = Modifier.height(28.dp),
+                                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp)
                                     ) {
                                         Text(
                                             text = "Équiper",
                                             fontWeight = FontWeight.Bold,
-                                            fontSize = 9.sp
+                                            fontSize = 11.sp
                                         )
                                     }
                                 }
@@ -422,26 +424,26 @@ fun ShopScreen(
                                     val unlockBtnColor = if (avatar.isPremium) Color(0xFFFFD700) else PacmanYellow
                                     Button(
                                         onClick = { onUnlockAvatar(avatar) },
-                                        shape = RoundedCornerShape(10.dp),
+                                        shape = RoundedCornerShape(12.dp),
                                         colors = ButtonDefaults.buttonColors(
                                             containerColor = if (canAfford) unlockBtnColor else CardSurface,
                                             contentColor = if (canAfford) DarkContrast else TextSecondary
                                         ),
                                         border = if (canAfford) null else androidx.compose.foundation.BorderStroke(1.dp, BorderSubtle),
-                                        modifier = Modifier.height(22.dp),
+                                        modifier = Modifier.height(28.dp),
                                         enabled = canAfford,
-                                        contentPadding = PaddingValues(horizontal = 2.dp, vertical = 0.dp)
+                                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp)
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Lock,
                                             contentDescription = null,
-                                            modifier = Modifier.size(9.dp)
+                                            modifier = Modifier.size(11.dp)
                                         )
-                                        Spacer(modifier = Modifier.width(2.dp))
+                                        Spacer(modifier = Modifier.width(3.dp))
                                         Text(
                                             text = "${formatCompactScore(avatar.price)} pts",
                                             fontWeight = FontWeight.Bold,
-                                            fontSize = 9.sp,
+                                            fontSize = 11.sp,
                                             maxLines = 1
                                         )
                                     }
