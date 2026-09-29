@@ -37,9 +37,38 @@ import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.util.GeoPoint as OsmGeoPoint
 import org.osmdroid.views.MapView
 import kotlin.math.sin
+
+/**
+ * Thème visuel de la carte OpenStreetMap.
+ * - MINIMALIST_BALANCED : Style épuré sans encombrement inutile (pas de poubelles, bancs, etc.)
+ *   mais avec les noms de rues, campus et repères indispensables pour bien s'orienter.
+ * - CLASSIC_MAPNIK : Style OpenStreetMap par défaut avec le filtre sombre classique.
+ *
+ * Pour revenir en arrière à tout moment, il suffit de changer cette valeur sur CLASSIC_MAPNIK.
+ */
+enum class OsmMapTheme {
+    MINIMALIST_BALANCED,
+    CLASSIC_MAPNIK
+}
+
+// Variable globale pour basculer facilement de style
+var activeOsmMapTheme = OsmMapTheme.MINIMALIST_BALANCED
+
+val MinimalistBalancedTileSource = XYTileSource(
+    "CartoDarkAll",
+    0, 20, 256, ".png",
+    arrayOf(
+        "https://a.basemaps.cartocdn.com/rastertiles/dark_all/",
+        "https://b.basemaps.cartocdn.com/rastertiles/dark_all/",
+        "https://c.basemaps.cartocdn.com/rastertiles/dark_all/",
+        "https://d.basemaps.cartocdn.com/rastertiles/dark_all/"
+    ),
+    "© OpenStreetMap contributors, © CARTO"
+)
 
 @Composable
 fun OsmMapView(
@@ -254,22 +283,40 @@ fun OsmMapView(
             factory = { ctx ->
                 Configuration.getInstance().userAgentValue = ctx.packageName
                 MapView(ctx).apply {
-                    setTileSource(TileSourceFactory.MAPNIK)
                     setMultiTouchControls(true)
                     isTilesScaledToDpi = true
                     controller.setZoom(18.2)
                     controller.setCenter(OsmGeoPoint(seekerLocation.latitude, seekerLocation.longitude))
 
-                    // Dark Theme Filter (Slate blue buildings, dark navy streets, muted parks)
-                    val darkMatrix = ColorMatrix(
-                        floatArrayOf(
-                            0.28f, 0f, 0f, 0f, 12f,
-                            0f, 0.32f, 0f, 0f, 22f,
-                            0f, 0f, 0.44f, 0f, 40f,
-                            0f, 0f, 0f, 1f, 0f
-                        )
-                    )
-                    overlayManager.tilesOverlay.setColorFilter(ColorMatrixColorFilter(darkMatrix))
+                    // Appliquer le style sélectionné (Minimaliste équilibré par défaut, ou Classique Mapnik)
+                    when (activeOsmMapTheme) {
+                        OsmMapTheme.MINIMALIST_BALANCED -> {
+                            setTileSource(MinimalistBalancedTileSource)
+                            // Teinte bleu nuit contrastée adaptée au thème Pac & Seek (rues bien visibles, repères préservés)
+                            val navyMatrix = ColorMatrix(
+                                floatArrayOf(
+                                    0.75f, 0f, 0f, 0f, -10f,
+                                    0f, 0.85f, 0f, 0f, -5f,
+                                    0f, 0f, 1.15f, 0f, 15f,
+                                    0f, 0f, 0f, 1f, 0f
+                                )
+                            )
+                            overlayManager.tilesOverlay.setColorFilter(ColorMatrixColorFilter(navyMatrix))
+                        }
+                        OsmMapTheme.CLASSIC_MAPNIK -> {
+                            setTileSource(TileSourceFactory.MAPNIK)
+                            // Filtre sombre historique (conservé pour retour immédiat si souhaité)
+                            val darkMatrix = ColorMatrix(
+                                floatArrayOf(
+                                    0.28f, 0f, 0f, 0f, 12f,
+                                    0f, 0.32f, 0f, 0f, 22f,
+                                    0f, 0f, 0.44f, 0f, 40f,
+                                    0f, 0f, 0f, 1f, 0f
+                                )
+                            )
+                            overlayManager.tilesOverlay.setColorFilter(ColorMatrixColorFilter(darkMatrix))
+                        }
+                    }
 
                     addMapListener(object : MapListener {
                         override fun onScroll(event: ScrollEvent?): Boolean {
