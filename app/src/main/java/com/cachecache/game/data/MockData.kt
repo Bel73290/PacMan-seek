@@ -92,32 +92,32 @@ object MockData {
     )
 
     val GeneralLeaderboard = listOf(
-        LeaderboardEntry(1, "ChasseurPro", 2340, false, GhostPink, "gold"),
-        LeaderboardEntry(2, "Toi", 1820, true, PacmanYellow, "silver"),
-        LeaderboardEntry(3, "FastGhost", 1760, false, GhostCyan, "bronze"),
-        LeaderboardEntry(4, "PacManette", 1520, false, GhostRed, null),
-        LeaderboardEntry(5, "Cacheur23", 1340, false, GhostOrange, null),
-        LeaderboardEntry(6, "Léo", 980, false, GhostPurple, null),
-        LeaderboardEntry(7, "Shadow", 860, false, GhostPink, null),
-        LeaderboardEntry(8, "Nina", 730, false, GhostCyan, null),
-        LeaderboardEntry(9, "GhostRider", 650, false, GhostRed, null),
-        LeaderboardEntry(10, "Momo", 540, false, GhostOrange, null)
+        LeaderboardEntry(1, "ChasseurPro", 2340, level = 48, isCurrentUser = false, avatarColor = GhostPink, badgeType = "gold"),
+        LeaderboardEntry(2, "FastGhost", 1760, level = 35, isCurrentUser = false, avatarColor = GhostCyan, badgeType = "silver"),
+        LeaderboardEntry(3, "PacManette", 1520, level = 28, isCurrentUser = false, avatarColor = GhostRed, badgeType = "bronze"),
+        LeaderboardEntry(4, "Cacheur23", 1340, level = 22, isCurrentUser = false, avatarColor = GhostOrange, badgeType = null),
+        LeaderboardEntry(5, "Léo", 980, level = 18, isCurrentUser = false, avatarColor = GhostPurple, badgeType = null),
+        LeaderboardEntry(6, "Shadow", 860, level = 15, isCurrentUser = false, avatarColor = GhostPink, badgeType = null),
+        LeaderboardEntry(7, "Toi", 1820, level = 12, isCurrentUser = true, avatarColor = PacmanYellow, badgeType = null),
+        LeaderboardEntry(8, "Nina", 730, level = 9, isCurrentUser = false, avatarColor = GhostCyan, badgeType = null),
+        LeaderboardEntry(9, "GhostRider", 650, level = 5, isCurrentUser = false, avatarColor = GhostRed, badgeType = null),
+        LeaderboardEntry(10, "Momo", 540, level = 2, isCurrentUser = false, avatarColor = GhostOrange, badgeType = null)
     )
 
     val FriendsLeaderboard = listOf(
-        LeaderboardEntry(1, "Toi", 1820, true, PacmanYellow, "gold"),
-        LeaderboardEntry(2, "FastGhost", 1760, false, GhostCyan, "silver"),
-        LeaderboardEntry(3, "PacManette", 1520, false, GhostRed, "bronze"),
-        LeaderboardEntry(4, "Léo", 980, false, GhostPurple, null),
-        LeaderboardEntry(5, "Nina", 730, false, GhostCyan, null)
+        LeaderboardEntry(1, "Toi", 1820, level = 12, isCurrentUser = true, avatarColor = PacmanYellow, badgeType = "gold"),
+        LeaderboardEntry(2, "FastGhost", 1760, level = 35, isCurrentUser = false, avatarColor = GhostCyan, badgeType = "silver"),
+        LeaderboardEntry(3, "PacManette", 1520, level = 28, isCurrentUser = false, avatarColor = GhostRed, badgeType = "bronze"),
+        LeaderboardEntry(4, "Léo", 980, level = 18, isCurrentUser = false, avatarColor = GhostPurple, badgeType = null),
+        LeaderboardEntry(5, "Nina", 730, level = 9, isCurrentUser = false, avatarColor = GhostCyan, badgeType = null)
     )
 
     val SeasonsLeaderboard = listOf(
-        LeaderboardEntry(1, "ChasseurPro", 4120, false, GhostPink, "gold"),
-        LeaderboardEntry(2, "GhostRider", 3450, false, GhostRed, "silver"),
-        LeaderboardEntry(3, "Toi", 2890, true, PacmanYellow, "bronze"),
-        LeaderboardEntry(4, "Cacheur23", 2400, false, GhostOrange, null),
-        LeaderboardEntry(5, "Shadow", 1980, false, GhostPurple, null)
+        LeaderboardEntry(1, "ChasseurPro", 4120, false, GhostPink, "gold", level = 52),
+        LeaderboardEntry(2, "GhostRider", 3450, false, GhostRed, "silver", level = 41),
+        LeaderboardEntry(3, "Toi", 2890, true, PacmanYellow, "bronze", level = 12),
+        LeaderboardEntry(4, "Cacheur23", 2400, false, GhostOrange, null, level = 30),
+        LeaderboardEntry(5, "Shadow", 1980, false, GhostPurple, null, level = 25)
     )
 
     val BadgesList = listOf(
@@ -163,16 +163,6 @@ object MockData {
             progressTarget = 1_000_000,
             isUnlocked = true,
             unlockDate = "25/09"
-        ),
-        AchievementSkinItem(
-            id = "achieve_samurai",
-            avatarId = "premium_ghost_samurai",
-            title = "Samouraï du Campus",
-            requirementDescription = "Découvrir 20 cachettes secrètes sur Savoie Technolac",
-            progressCurrent = 20,
-            progressTarget = 20,
-            isUnlocked = true,
-            unlockDate = "24/09"
         ),
         AchievementSkinItem(
             id = "achieve_devil",
@@ -422,28 +412,6 @@ object MockData {
             isPremium = false
         ),
         AvatarItem(
-            id = "ghost_blue_glasses",
-            name = "Spectre Érudit",
-            category = AvatarCategory.CLASSIC,
-            description = "Grosses montures d'intello pour décoder la carte GPS en temps réel.",
-            price = 500,
-            ghostColor = GhostPurple,
-            isAnimatedPacman = false,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_blue_glasses,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "ghost_red_3d",
-            name = "Blinky Cinéma 3D",
-            category = AvatarCategory.CLASSIC,
-            description = "Lunettes anaglyphes rétro rouge et cyan pour voir à travers les murs.",
-            price = 550,
-            ghostColor = GhostRed,
-            isAnimatedPacman = false,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_red_3d,
-            isPremium = false
-        ),
-        AvatarItem(
             id = "avatar_ghost_cowboy",
             name = "Shérif de l'Ouest",
             category = AvatarCategory.CLASSIC,
@@ -507,17 +475,6 @@ object MockData {
             ghostColor = GhostOrange,
             isAnimatedPacman = false,
             drawableResId = com.cachecache.game.R.drawable.avatar_ghost_mustache,
-            isPremium = false
-        ),
-        AvatarItem(
-            id = "avatar_ghost_headphones",
-            name = "Spectre Beats Audio",
-            category = AvatarCategory.CLASSIC,
-            description = "Basse puissante et immersion sonore sans fil.",
-            price = 450,
-            ghostColor = GhostPurple,
-            isAnimatedPacman = false,
-            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_headphones,
             isPremium = false
         ),
         AvatarItem(
@@ -591,17 +548,6 @@ object MockData {
             isPremium = true
         ),
         AvatarItem(
-            id = "premium_ghost_samurai",
-            name = "Samouraï Kabuto",
-            category = AvatarCategory.PREMIUM,
-            description = "Armure d'honneur avec casque kabuto et sabre spectral tranchant.",
-            price = 2500,
-            ghostColor = GhostRed,
-            isAnimatedPacman = false,
-            drawableResId = com.cachecache.game.R.drawable.premium_ghost_samurai,
-            isPremium = true
-        ),
-        AvatarItem(
             id = "premium_ghost_cyberpunk",
             name = "Cyberpunk 2099",
             category = AvatarCategory.PREMIUM,
@@ -613,17 +559,6 @@ object MockData {
             isPremium = true
         ),
         AvatarItem(
-            id = "premium_ghost_dark_void",
-            name = "Ombre Abyssale",
-            category = AvatarCategory.PREMIUM,
-            description = "Seigneur des ténèbres couronné d'améthyste et de flammes sombres.",
-            price = 2600,
-            ghostColor = GhostPurple,
-            isAnimatedPacman = false,
-            drawableResId = com.cachecache.game.R.drawable.premium_ghost_dark_void,
-            isPremium = true
-        ),
-        AvatarItem(
             id = "premium_ghost_angel_wings",
             name = "Séraphin Ailé",
             category = AvatarCategory.PREMIUM,
@@ -632,17 +567,6 @@ object MockData {
             ghostColor = GhostPink,
             isAnimatedPacman = false,
             drawableResId = com.cachecache.game.R.drawable.premium_ghost_angel_wings,
-            isPremium = true
-        ),
-        AvatarItem(
-            id = "premium_ghost_superhero",
-            name = "Super-Fantôme",
-            category = AvatarCategory.PREMIUM,
-            description = "Cape volante rouge et blason héroïque invincible.",
-            price = 1900,
-            ghostColor = GhostCyan,
-            isAnimatedPacman = false,
-            drawableResId = com.cachecache.game.R.drawable.premium_ghost_superhero,
             isPremium = true
         ),
         AvatarItem(
@@ -753,17 +677,6 @@ object MockData {
             ghostColor = GhostPink,
             isAnimatedPacman = false,
             drawableResId = com.cachecache.game.R.drawable.premium_ghost_princess,
-            isPremium = true
-        ),
-        AvatarItem(
-            id = "premium_ghost_punk_rock",
-            name = "Punk Rockeur",
-            category = AvatarCategory.PREMIUM,
-            description = "Crête iroquoise violette et attitude rebelle électrique.",
-            price = 2200,
-            ghostColor = GhostPurple,
-            isAnimatedPacman = false,
-            drawableResId = com.cachecache.game.R.drawable.premium_ghost_punk_rock,
             isPremium = true
         ),
         AvatarItem(

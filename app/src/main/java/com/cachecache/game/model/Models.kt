@@ -50,7 +50,8 @@ data class LeaderboardEntry(
     val score: Int,
     val isCurrentUser: Boolean = false,
     val avatarColor: Color,
-    val badgeType: String? = null // "gold", "silver", "bronze"
+    val badgeType: String? = null, // "gold", "silver", "bronze"
+    val level: Int = 1
 )
 
 fun formatCompactScore(score: Int): String {
@@ -204,8 +205,7 @@ data class GameState(
         "ghost_pink_classic",
         "ghost_red_headphones",
         "avatar_ghost_cowboy",
-        "premium_ghost_gold_king",
-        "premium_ghost_samurai"
+        "premium_ghost_gold_king"
     ),
     val isGhostProximityAlertVisible: Boolean = true,
     val isStreetViewMiniVisible: Boolean = true,

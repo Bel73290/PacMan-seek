@@ -447,30 +447,23 @@ fun ProfileScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
-                    // Description & XP Requirements
+                    // XP Requirements & Unlock status
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        horizontalArrangement = Arrangement.End,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = selectedAvatar?.description ?: "Récompense de palier",
-                            color = TextSecondary,
-                            fontSize = 11.sp,
-                            maxLines = 1,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Text(
                             text = if (isSelectedTierUnlocked) "✓ Débloqué" else "XP : ${state.userXp % 100}/100",
                             color = if (isSelectedTierUnlocked) Color(0xFF10B981) else TextSecondary,
-                            fontSize = 11.sp,
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     // Action Button (Equip / Equipped / Locked)
                     when {

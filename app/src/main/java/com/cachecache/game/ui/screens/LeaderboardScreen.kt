@@ -34,18 +34,24 @@ fun LeaderboardScreen(
     state: GameState,
     onBack: () -> Unit,
     onNavigate: (Screen) -> Unit,
-    onSelectTab: (LeaderboardTab) -> Unit
+    onSelectTab: (LeaderboardTab) -> Unit = {}
 ) {
-    // Dynamic list based on selected tab and user score, sorted by score descending
-    val entries = when (state.activeLeaderboardTab) {
-        LeaderboardTab.GENERAL -> MockData.GeneralLeaderboard.map {
-            if (it.isCurrentUser) it.copy(score = state.userScore) else it
-        }
-        LeaderboardTab.FRIENDS -> MockData.FriendsLeaderboard.map {
-            if (it.isCurrentUser) it.copy(score = state.userScore) else it
-        }
-    }.sortedByDescending { it.score }.mapIndexed { index, entry ->
-        entry.copy(rank = index + 1)
+    // Dynamic list sorted by player level descending first, then score descending
+    val entries = MockData.GeneralLeaderboard.map {
+        if (it.isCurrentUser) it.copy(score = state.userScore, level = state.userLevel) else it
+    }.sortedWith(
+        compareByDescending<LeaderboardEntry> { it.level }
+            .thenByDescending { it.score }
+    ).mapIndexed { index, entry ->
+        entry.copy(
+            rank = index + 1,
+            badgeType = when (index) {
+                0 -> "gold"
+                1 -> "silver"
+                2 -> "bronze"
+                else -> null
+            }
+        )
     }
 
     val top1 = entries.getOrNull(0)
@@ -103,37 +109,6 @@ fun LeaderboardScreen(
             }
 
             Spacer(modifier = Modifier.height(10.dp))
-
-            // Filter Tabs (Pills): Général vs Amis
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 14.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                LeaderboardTab.entries.forEach { tab ->
-                    val isSelected = state.activeLeaderboardTab == tab
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(42.dp)
-                            .clip(RoundedCornerShape(21.dp))
-                            .background(if (isSelected) PacmanYellow else CardSurface)
-                            .border(1.dp, if (isSelected) PacmanYellow else BorderSubtle, RoundedCornerShape(21.dp))
-                            .clickable { onSelectTab(tab) },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = tab.label,
-                            color = if (isSelected) DarkContrast else TextSecondary,
-                            fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium,
-                            fontSize = 14.sp
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
 
             // LazyColumn with Podium at top and remaining ranks below
             LazyColumn(
@@ -284,11 +259,30 @@ private fun PodiumColumn(
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
 
+        Spacer(modifier = Modifier.height(2.dp))
+
+        // Player Level Pill
+        Surface(
+            shape = RoundedCornerShape(6.dp),
+            color = accentColor.copy(alpha = 0.2f),
+            border = androidx.compose.foundation.BorderStroke(1.dp, accentColor.copy(alpha = 0.6f))
+        ) {
+            Text(
+                text = "Niv. ${entry.level}",
+                color = accentColor,
+                fontWeight = FontWeight.Black,
+                fontSize = if (rank == 1) 11.sp else 10.sp,
+                modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(2.dp))
+
         // Player Score
         Text(
             text = "${formatCompactScore(entry.score)} pts",
-            color = accentColor,
-            fontWeight = FontWeight.ExtraBold,
+            color = TextSecondary,
+            fontWeight = FontWeight.SemiBold,
             fontSize = if (rank == 1) 10.sp else 9.sp,
             maxLines = 1,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -385,28 +379,38 @@ private fun LeaderboardRow(
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            // Player Name
-            Text(
-                text = entry.name,
-                color = if (entry.isCurrentUser) PacmanYellow else TextPrimary,
-                fontSize = 14.sp,
-                fontWeight = if (entry.isCurrentUser) FontWeight.Black else FontWeight.SemiBold,
-                modifier = Modifier.weight(1f)
-            )
-
-            // Score with optional medal for 1st
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            // Player Name & Score
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = formattedScore,
+                    text = entry.name,
                     color = if (entry.isCurrentUser) PacmanYellow else TextPrimary,
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = if (entry.isCurrentUser) FontWeight.Black else FontWeight.SemiBold
                 )
+                Text(
+                    text = formattedScore,
+                    color = TextSecondary,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
 
-                if (entry.rank == 1) {
-                    Spacer(modifier = Modifier.width(6.dp))
-                    MedalComposable(size = 16.dp, rank = 1)
-                }
+            // Level Pill on the right
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = if (entry.isCurrentUser) PacmanYellow.copy(alpha = 0.2f) else NavyIntermediate,
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    if (entry.isCurrentUser) PacmanYellow else BorderSubtle
+                )
+            ) {
+                Text(
+                    text = "Niv. ${entry.level}",
+                    color = if (entry.isCurrentUser) PacmanYellow else TextPrimary,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                )
             }
         }
     }
