@@ -286,10 +286,12 @@ fun ShopScreen(
                 }
             }
 
+            val battlePassAvatarIds = remember { MockData.BattlePassTiers.map { it.avatarId }.toSet() }
+
             // 4. Grid of Avatar Selection Cards (3 per line)
             val filteredAvatars = when (selectedTab) {
-                ShopTab.CLASSIC -> currentCatalog.filter { it.category == AvatarCategory.CLASSIC }
-                ShopTab.PREMIUM -> currentCatalog.filter { it.category == AvatarCategory.PREMIUM }
+                ShopTab.CLASSIC -> currentCatalog.filter { it.category == AvatarCategory.CLASSIC && !battlePassAvatarIds.contains(it.id) }
+                ShopTab.PREMIUM -> currentCatalog.filter { it.category == AvatarCategory.PREMIUM && !battlePassAvatarIds.contains(it.id) }
                 ShopTab.INVENTORY -> currentCatalog.filter { state.unlockedAvatarIds.contains(it.id) }
             }
 
@@ -385,19 +387,7 @@ fun ShopScreen(
                                 overflow = TextOverflow.Ellipsis
                             )
 
-                            val bpTier = MockData.BattlePassTiers.firstOrNull { it.avatarId == avatar.id }
-                            if (bpTier != null && !isUnlocked) {
-                                Text(
-                                    text = "Pass Niv. ${bpTier.level}",
-                                    color = Color(0xFFFFD700),
-                                    fontSize = 8.5.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    maxLines = 1
-                                )
-                                Spacer(modifier = Modifier.height(2.dp))
-                            } else {
-                                Spacer(modifier = Modifier.height(4.dp))
-                            }
+                            Spacer(modifier = Modifier.height(4.dp))
 
                             // Status or Action Button
                             when {
