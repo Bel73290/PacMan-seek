@@ -15,6 +15,7 @@ fun resolveGhostColor(name: String, defaultColor: Color = GhostRed): Color {
         "inky" -> GhostCyan
         "clyde" -> GhostOrange
         "sue" -> GhostPurple
+        "goldy", "roi d'or", "gold", "king" -> Color(0xFFFFD700)
         else -> defaultColor
     }
 }

@@ -54,6 +54,15 @@ object MockData {
             color = GhostPurple,
             isFound = false,
             isScared = false
+        ),
+        HiddenPlayer(
+            id = 6,
+            name = "Goldy",
+            locationName = "Place Centrale Technolac",
+            location = GeoPoint(45.6412, 5.8675),
+            color = Color(0xFFFFD700),
+            isFound = false,
+            isScared = false
         )
     )
 

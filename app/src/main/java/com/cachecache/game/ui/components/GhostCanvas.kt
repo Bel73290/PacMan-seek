@@ -88,6 +88,7 @@ fun getGhostDrawableId(
         GhostCyan -> "cyan"
         GhostOrange -> "orange"
         GhostPurple -> "purple"
+        Color(0xFFFFD700), PacmanYellow -> "gold"
         else -> "red"
     }
 
@@ -106,6 +107,19 @@ fun getGhostDrawableId(
     }
 
     return when ("${colorPrefix}_${dir}_$frameSuffix") {
+        "gold_true_front_0", "gold_front_0" -> R.drawable.ghost_gold_true_front_0
+        "gold_true_front_1", "gold_front_1" -> R.drawable.ghost_gold_true_front_1
+        "gold_slight_right_0" -> R.drawable.ghost_gold_front_0
+        "gold_slight_right_1" -> R.drawable.ghost_gold_front_1
+        "gold_slight_left_0" -> R.drawable.ghost_gold_slight_left_0
+        "gold_slight_left_1" -> R.drawable.ghost_gold_slight_left_1
+        "gold_left_0" -> R.drawable.ghost_gold_left_0
+        "gold_left_1" -> R.drawable.ghost_gold_left_1
+        "gold_right_0" -> R.drawable.ghost_gold_right_0
+        "gold_right_1" -> R.drawable.ghost_gold_right_1
+        "gold_back_0" -> R.drawable.ghost_gold_back_0
+        "gold_back_1" -> R.drawable.ghost_gold_back_1
+
         "red_true_front_0", "red_front_0" -> R.drawable.ghost_red_true_front_0
         "red_true_front_1", "red_front_1" -> R.drawable.ghost_red_true_front_1
         "red_slight_right_0" -> R.drawable.ghost_red_front_0

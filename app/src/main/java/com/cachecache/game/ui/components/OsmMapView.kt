@@ -136,6 +136,21 @@ fun OsmMapView(
             "purple_back_0" to R.drawable.ghost_purple_back_0,
             "purple_back_1" to R.drawable.ghost_purple_back_1,
 
+            "gold_true_front_0" to R.drawable.ghost_gold_true_front_0,
+            "gold_true_front_1" to R.drawable.ghost_gold_true_front_1,
+            "gold_front_0" to R.drawable.ghost_gold_true_front_0,
+            "gold_front_1" to R.drawable.ghost_gold_true_front_1,
+            "gold_slight_right_0" to R.drawable.ghost_gold_front_0,
+            "gold_slight_right_1" to R.drawable.ghost_gold_front_1,
+            "gold_slight_left_0" to R.drawable.ghost_gold_slight_left_0,
+            "gold_slight_left_1" to R.drawable.ghost_gold_slight_left_1,
+            "gold_left_0" to R.drawable.ghost_gold_left_0,
+            "gold_left_1" to R.drawable.ghost_gold_left_1,
+            "gold_right_0" to R.drawable.ghost_gold_right_0,
+            "gold_right_1" to R.drawable.ghost_gold_right_1,
+            "gold_back_0" to R.drawable.ghost_gold_back_0,
+            "gold_back_1" to R.drawable.ghost_gold_back_1,
+
             "scared_0" to R.drawable.ghost_scared_blue_0,
             "scared_1" to R.drawable.ghost_scared_blue_1
         )
@@ -465,7 +480,8 @@ fun OsmMapView(
                     "clyde" -> "orange"
                     "blinky" -> "red"
                     "sue" -> "purple"
-                    else -> "purple"
+                    "goldy", "roi d'or", "gold", "king" -> "gold"
+                    else -> if (player.color == Color(0xFFFFD700)) "gold" else "purple"
                 }
 
                 val spriteKey = if (player.isScared) {
