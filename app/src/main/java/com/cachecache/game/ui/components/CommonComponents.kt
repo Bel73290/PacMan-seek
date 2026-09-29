@@ -32,15 +32,15 @@ fun BottomNavigationBar(
         modifier = Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(horizontal = 48.dp, vertical = 12.dp),
+            .padding(horizontal = 28.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center
     ) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(58.dp)
-                .shadow(12.dp, RoundedCornerShape(29.dp), spotColor = PacmanYellow.copy(alpha = 0.25f)),
-            shape = RoundedCornerShape(29.dp),
+                .height(54.dp)
+                .shadow(12.dp, RoundedCornerShape(27.dp), spotColor = PacmanYellow.copy(alpha = 0.25f)),
+            shape = RoundedCornerShape(27.dp),
             color = NavyIntermediate.copy(alpha = 0.96f),
             border = androidx.compose.foundation.BorderStroke(1.2.dp, BorderSubtle)
         ) {

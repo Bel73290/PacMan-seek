@@ -60,12 +60,12 @@ fun ProfileScreen(
                 .padding(paddingValues)
                 .statusBarsPadding()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 6.dp)
+                .padding(horizontal = 14.dp, vertical = 6.dp)
         ) {
             val equippedAvatar = MockData.AvatarItemsCatalog.firstOrNull { it.id == state.equippedAvatarId }
                 ?: MockData.AvatarItemsCatalog.first()
 
-            // Header: Back Arrow + Skin Avatar + Level & Compact XP Bar
+            // Header: Back Arrow + Skin Avatar + Level & Responsive XP Bar (fills width)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -87,34 +87,37 @@ fun ProfileScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(10.dp))
 
                 // Equipped Skin Avatar
                 Box(
                     modifier = Modifier
-                        .size(52.dp)
+                        .size(50.dp)
                         .clip(CircleShape)
                         .background(NavyIntermediate)
                         .border(2.dp, PacmanYellow, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    AvatarVisual(avatar = equippedAvatar, size = 38.dp)
+                    AvatarVisual(avatar = equippedAvatar, size = 36.dp)
                 }
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                Column {
+                // Responsive Player Info & Progress
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
                     Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = "Toi",
                             color = TextPrimary,
-                            fontSize = 17.sp,
+                            fontSize = 18.sp,
                             fontWeight = FontWeight.Black
                         )
-
-                        Spacer(modifier = Modifier.width(8.dp))
 
                         Surface(
                             shape = RoundedCornerShape(10.dp),
@@ -126,23 +129,24 @@ fun ProfileScreen(
                                 color = PacmanYellow,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(5.dp))
 
-                    // Reduced length XP Progress Bar
+                    // Responsive XP Progress Bar expanding across the remaining space
                     Row(
+                        modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         LinearProgressIndicator(
                             progress = { (state.userXp.toFloat() / state.maxXp.toFloat()).coerceIn(0f, 1f) },
                             modifier = Modifier
-                                .width(125.dp)
-                                .height(6.dp)
-                                .clip(RoundedCornerShape(3.dp)),
+                                .weight(1f)
+                                .height(7.dp)
+                                .clip(RoundedCornerShape(3.5.dp)),
                             color = PacmanYellow,
                             trackColor = CardSurface
                         )
@@ -153,7 +157,7 @@ fun ProfileScreen(
                             text = "${formatCompactScore(state.userXp)} / ${formatCompactScore(state.maxXp)} pts",
                             color = TextSecondary,
                             fontSize = 10.sp,
-                            fontWeight = FontWeight.Medium
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 }
@@ -231,7 +235,7 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 MockData.AchievementSkinsList.forEach { achievement ->
                     val isEquipped = state.equippedAvatarId == achievement.avatarId
                     AchievementSkinCard(
@@ -243,7 +247,7 @@ fun ProfileScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             // 4. Section "Historique récent"
             Text(
@@ -253,15 +257,15 @@ fun ProfileScreen(
                 fontWeight = FontWeight.Bold
             )
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 state.recentHistory.forEach { historyItem ->
                     HistoryRow(item = historyItem)
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(28.dp))
         }
 
         // Achievement Skin Detail Dialog
@@ -311,7 +315,7 @@ private fun AchievementSkinCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp),
+                .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Avatar with unlock badge/lock icon
