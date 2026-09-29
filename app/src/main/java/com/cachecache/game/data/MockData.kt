@@ -1,0 +1,494 @@
+package com.cachecache.game.data
+
+import androidx.compose.ui.graphics.Color
+import com.cachecache.game.model.*
+import com.cachecache.game.ui.theme.*
+
+object MockData {
+
+    // Savoie Technolac (USMB Le Bourget-du-Lac) Coordinates
+    val SeekerStartLocation = GeoPoint(45.6410, 5.8672)
+
+    val HiddenPlayersList = listOf(
+        HiddenPlayer(
+            id = 1,
+            name = "Inky",
+            locationName = "Polytech Annecy-Chambéry",
+            location = GeoPoint(45.6420, 5.8690),
+            color = GhostCyan,
+            isFound = false,
+            isScared = false
+        ),
+        HiddenPlayer(
+            id = 2,
+            name = "Pinky",
+            locationName = "BU Bourget - Savoie Technolac",
+            location = GeoPoint(45.6428, 5.8682),
+            color = GhostPink,
+            isFound = false,
+            isScared = false
+        ),
+        HiddenPlayer(
+            id = 3,
+            name = "Clyde",
+            locationName = "Bâtiment Éveillon",
+            location = GeoPoint(45.6402, 5.8680),
+            color = GhostOrange,
+            isFound = false,
+            isScared = false
+        ),
+        HiddenPlayer(
+            id = 4,
+            name = "Blinky",
+            locationName = "RU La Boussole",
+            location = GeoPoint(45.6434, 5.8698),
+            color = GhostRed,
+            isFound = false,
+            isScared = false
+        ),
+        HiddenPlayer(
+            id = 5,
+            name = "Sue",
+            locationName = "Hall des Sports USMB",
+            location = GeoPoint(45.6395, 5.8705),
+            color = GhostPurple,
+            isFound = false,
+            isScared = false
+        )
+    )
+
+    val DefaultSuspectZone = SuspectZone(
+        id = "zone_technolac_nord",
+        title = "Zone suspecte",
+        description = "3 personnes se cachent probablement ici.",
+        center = GeoPoint(45.6424, 5.8688),
+        polygon = listOf(
+            GeoPoint(45.6415, 5.8678),
+            GeoPoint(45.6432, 5.8676),
+            GeoPoint(45.6435, 5.8702),
+            GeoPoint(45.6418, 5.8706)
+        ),
+        hiddenCount = 3,
+        isTargeted = false,
+        isModalVisible = true
+    )
+
+    val PacDotsRouteWaypoints = listOf(
+        GeoPoint(45.6410, 5.8672),
+        GeoPoint(45.6413, 5.8676),
+        GeoPoint(45.6416, 5.8680),
+        GeoPoint(45.6419, 5.8683),
+        GeoPoint(45.6421, 5.8685),
+        GeoPoint(45.6424, 5.8688)
+    )
+
+    val GeneralLeaderboard = listOf(
+        LeaderboardEntry(1, "ChasseurPro", 2340, false, GhostPink, "gold"),
+        LeaderboardEntry(2, "Toi", 1820, true, PacmanYellow, "silver"),
+        LeaderboardEntry(3, "FastGhost", 1760, false, GhostCyan, "bronze"),
+        LeaderboardEntry(4, "PacManette", 1520, false, GhostRed, null),
+        LeaderboardEntry(5, "Cacheur23", 1340, false, GhostOrange, null),
+        LeaderboardEntry(6, "Léo", 980, false, GhostPurple, null),
+        LeaderboardEntry(7, "Shadow", 860, false, GhostPink, null),
+        LeaderboardEntry(8, "Nina", 730, false, GhostCyan, null),
+        LeaderboardEntry(9, "GhostRider", 650, false, GhostRed, null),
+        LeaderboardEntry(10, "Momo", 540, false, GhostOrange, null)
+    )
+
+    val FriendsLeaderboard = listOf(
+        LeaderboardEntry(1, "Toi", 1820, true, PacmanYellow, "gold"),
+        LeaderboardEntry(2, "FastGhost", 1760, false, GhostCyan, "silver"),
+        LeaderboardEntry(3, "PacManette", 1520, false, GhostRed, "bronze"),
+        LeaderboardEntry(4, "Léo", 980, false, GhostPurple, null),
+        LeaderboardEntry(5, "Nina", 730, false, GhostCyan, null)
+    )
+
+    val SeasonsLeaderboard = listOf(
+        LeaderboardEntry(1, "ChasseurPro", 4120, false, GhostPink, "gold"),
+        LeaderboardEntry(2, "GhostRider", 3450, false, GhostRed, "silver"),
+        LeaderboardEntry(3, "Toi", 2890, true, PacmanYellow, "bronze"),
+        LeaderboardEntry(4, "Cacheur23", 2400, false, GhostOrange, null),
+        LeaderboardEntry(5, "Shadow", 1980, false, GhostPurple, null)
+    )
+
+    val BadgesList = listOf(
+        BadgeItem(
+            id = "first_found",
+            title = "Premier trouvé",
+            description = "Tu as trouvé ton tout premier caché sur le campus Savoie Technolac !",
+            shape = BadgeShape.SHIELD,
+            unlocked = true,
+            unlockDate = "12/04"
+        ),
+        BadgeItem(
+            id = "win_streak",
+            title = "Série de victoires",
+            description = "Remporté 3 parties consécutives sans dépasser le temps imparti.",
+            shape = BadgeShape.STAR,
+            unlocked = true,
+            unlockDate = "08/04"
+        ),
+        BadgeItem(
+            id = "urban_explorer",
+            title = "Explorateur urbain",
+            description = "Découvert plus de 20 cachettes distinctes sur l'ensemble du campus USMB.",
+            shape = BadgeShape.HEXAGON,
+            unlocked = true,
+            unlockDate = "02/04"
+        )
+    )
+
+    val RecentHistoryList = listOf(
+        HistoryItem("hist_1", "12/04", "Trouvé 3 cachés", 150, "ghost"),
+        HistoryItem("hist_2", "10/04", "2e place", 80, "ranking"),
+        HistoryItem("hist_3", "08/04", "Victoire", 200, "trophy")
+    )
+
+    val AchievementSkinsList = listOf(
+        AchievementSkinItem(
+            id = "achieve_gold_king",
+            avatarId = "premium_ghost_gold_king",
+            title = "Roi Doré Suprême",
+            requirementDescription = "Atteindre 1Mill de points",
+            progressCurrent = 1_000_000,
+            progressTarget = 1_000_000,
+            isUnlocked = true,
+            unlockDate = "25/09"
+        ),
+        AchievementSkinItem(
+            id = "achieve_samurai",
+            avatarId = "premium_ghost_samurai",
+            title = "Samouraï du Campus",
+            requirementDescription = "Découvrir 20 cachettes secrètes sur Savoie Technolac",
+            progressCurrent = 20,
+            progressTarget = 20,
+            isUnlocked = true,
+            unlockDate = "24/09"
+        ),
+        AchievementSkinItem(
+            id = "achieve_devil",
+            avatarId = "ghost_blue_devil",
+            title = "Diablotin Farceur",
+            requirementDescription = "Attraper Sue dans le Bâtiment Éveillon",
+            progressCurrent = 1,
+            progressTarget = 1,
+            isUnlocked = true,
+            unlockDate = "12/04"
+        ),
+        AchievementSkinItem(
+            id = "achieve_cyberpunk",
+            avatarId = "premium_ghost_cyberpunk",
+            title = "Cyberpunk 2099",
+            requirementDescription = "Gagner 10 parties en tant que chercheur",
+            progressCurrent = 7,
+            progressTarget = 10,
+            isUnlocked = false
+        ),
+        AchievementSkinItem(
+            id = "achieve_pirate",
+            avatarId = "premium_ghost_pirate_captain",
+            title = "Capitaine Corsaire",
+            requirementDescription = "Capturer 5 fantômes en moins de 3 minutes",
+            progressCurrent = 3,
+            progressTarget = 5,
+            isUnlocked = false
+        ),
+        AchievementSkinItem(
+            id = "achieve_angel",
+            avatarId = "premium_ghost_angel_wings",
+            title = "Séraphin Ailé",
+            requirementDescription = "Terminer 3 parties consécutives sans radar",
+            progressCurrent = 1,
+            progressTarget = 3,
+            isUnlocked = false
+        )
+    )
+
+    val AvatarItemsCatalog = listOf(
+        // === CATÉGORIE 1 : CLASSIQUES ICONIQUES & DISTINCTIFS ===
+        AvatarItem(
+            id = "ghost_red_classic",
+            name = "Blinky L'Ombre",
+            category = AvatarCategory.CLASSIC,
+            description = "Le fantôme rouge légendaire, rapide et redoutable.",
+            price = 0,
+            ghostColor = GhostRed,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_red_classic,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "ghost_pink_classic",
+            name = "Pinky La Furtive",
+            category = AvatarCategory.CLASSIC,
+            description = "Embusquée dans les ruelles, elle anticipe chaque virage.",
+            price = 150,
+            ghostColor = GhostPink,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_pink_classic,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "ghost_cyan_classic",
+            name = "Inky Le Farceur",
+            category = AvatarCategory.CLASSIC,
+            description = "Imprévisible et facétieux avec sa robe turquoise.",
+            price = 200,
+            ghostColor = GhostCyan,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_cyan_classic,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "ghost_orange_classic",
+            name = "Clyde Le Rêveur",
+            category = AvatarCategory.CLASSIC,
+            description = "Un esprit solitaire et contemplatif à la robe orangée.",
+            price = 200,
+            ghostColor = GhostOrange,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_orange_classic,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "ghost_blue_sunglasses",
+            name = "Spectre VIP Lunettes",
+            category = AvatarCategory.CLASSIC,
+            description = "Impassible et ultra-stylé avec ses verres teintés sombres.",
+            price = 350,
+            ghostColor = GhostPurple,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_blue_sunglasses,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "ghost_red_headphones",
+            name = "Blinky Gamer DJ",
+            category = AvatarCategory.CLASSIC,
+            description = "Casque circum-aural pour mixer et traquer sur le meilleur son.",
+            price = 450,
+            ghostColor = GhostRed,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_red_headphones,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "ghost_pink_flower",
+            name = "Pinky Bohème",
+            category = AvatarCategory.CLASSIC,
+            description = "Ornée d'une fleur printanière cueillie au bord du lac.",
+            price = 400,
+            ghostColor = GhostPink,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_pink_flower,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "ghost_cyan_cap",
+            name = "Inky Rider Urbain",
+            category = AvatarCategory.CLASSIC,
+            description = "Casquette street portée à l'envers pour le parkour du campus.",
+            price = 450,
+            ghostColor = GhostCyan,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_cyan_cap,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "ghost_red_crown",
+            name = "Blinky Monarque",
+            category = AvatarCategory.CLASSIC,
+            description = "Couronné de rubis pour régner sur les couloirs universitaires.",
+            price = 600,
+            ghostColor = GhostRed,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_red_crown,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "ghost_blue_glasses",
+            name = "Spectre Érudit",
+            category = AvatarCategory.CLASSIC,
+            description = "Grosses montures d'intello pour décoder la carte GPS en temps réel.",
+            price = 500,
+            ghostColor = GhostPurple,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_blue_glasses,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "ghost_red_3d",
+            name = "Blinky Cinéma 3D",
+            category = AvatarCategory.CLASSIC,
+            description = "Lunettes anaglyphes rétro rouge et cyan pour voir à travers les murs.",
+            price = 550,
+            ghostColor = GhostRed,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_red_3d,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "avatar_ghost_cowboy",
+            name = "Shérif de l'Ouest",
+            category = AvatarCategory.CLASSIC,
+            description = "Stetson texan paré pour le duel au coucher du soleil.",
+            price = 700,
+            ghostColor = GhostOrange,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_cowboy,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "avatar_ghost_wizard",
+            name = "Archimage Spectrale",
+            category = AvatarCategory.CLASSIC,
+            description = "Chapeau pointu infusé d'arcanes de téléportation furtive.",
+            price = 800,
+            ghostColor = GhostPurple,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_wizard,
+            isPremium = false
+        ),
+
+        // === SKINS DE SUCCÈS (DÉBLOQUÉS PAR DES EXPLOITS DANS LE PROFIL) ===
+        AvatarItem(
+            id = "premium_ghost_gold_king",
+            name = "Roi Doré Suprême",
+            category = AvatarCategory.PREMIUM,
+            description = "Souverain auréolé d'or pur. Débloqué en atteignant 1Mill de points !",
+            price = 0,
+            ghostColor = GhostOrange,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_gold_king,
+            isPremium = true
+        ),
+        AvatarItem(
+            id = "premium_ghost_samurai",
+            name = "Samouraï Kabuto",
+            category = AvatarCategory.PREMIUM,
+            description = "Guerrier d'honneur. Débloqué en découvrant 20 cachettes secrètes.",
+            price = 0,
+            ghostColor = GhostRed,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_samurai,
+            isPremium = true
+        ),
+        AvatarItem(
+            id = "ghost_blue_devil",
+            name = "Diablotin Farceur",
+            category = AvatarCategory.CLASSIC,
+            description = "Cornes écarlates et malice infernale. Débloqué en capturant Sue.",
+            price = 0,
+            ghostColor = GhostPurple,
+            drawableResId = com.cachecache.game.R.drawable.avatar_ghost_blue_devil,
+            isPremium = false
+        ),
+        AvatarItem(
+            id = "premium_ghost_cyberpunk",
+            name = "Cyberpunk 2099",
+            category = AvatarCategory.PREMIUM,
+            description = "Visière néon HUD cybernétique. Déblocable en gagnant 10 parties !",
+            price = 2100,
+            ghostColor = GhostCyan,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_cyberpunk,
+            isPremium = true
+        ),
+        AvatarItem(
+            id = "premium_ghost_pirate_captain",
+            name = "Vieux Loup de Mer",
+            category = AvatarCategory.PREMIUM,
+            description = "Capitaine corsaire légendaire. Déblocable en capturant 5 fantômes rapidement.",
+            price = 1800,
+            ghostColor = GhostOrange,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_pirate_captain,
+            isPremium = true
+        ),
+        AvatarItem(
+            id = "premium_ghost_angel_wings",
+            name = "Séraphin Ailé",
+            category = AvatarCategory.PREMIUM,
+            description = "Ailes d'or divines et auréole céleste. Déblocable sans radar ni boussole.",
+            price = 2400,
+            ghostColor = GhostPink,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_angel_wings,
+            isPremium = true
+        ),
+
+        // === CATÉGORIE 2 : SKINS PREMIUM DE LA BOUTIQUE ===
+        AvatarItem(
+            id = "premium_ghost_crystal_ice",
+            name = "Cristal de Givre",
+            category = AvatarCategory.PREMIUM,
+            description = "Taillé dans la glace éternelle avec des reflets prismatiques scintillants.",
+            price = 2000,
+            ghostColor = GhostCyan,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_crystal_ice,
+            isPremium = true
+        ),
+        AvatarItem(
+            id = "premium_ghost_fire_flame",
+            name = "Flamme Infernale",
+            category = AvatarCategory.PREMIUM,
+            description = "Brasier incandescent pulsant d'une énergie volcanique bouillonnante.",
+            price = 2200,
+            ghostColor = GhostRed,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_fire_flame,
+            isPremium = true
+        ),
+        AvatarItem(
+            id = "premium_ghost_dark_void",
+            name = "Ombre Abyssale",
+            category = AvatarCategory.PREMIUM,
+            description = "Seigneur des ténèbres couronné d'améthyste et de flammes sombres.",
+            price = 2600,
+            ghostColor = GhostPurple,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_dark_void,
+            isPremium = true
+        ),
+        AvatarItem(
+            id = "premium_ghost_superhero",
+            name = "Super-Fantôme",
+            category = AvatarCategory.PREMIUM,
+            description = "Cape volante rouge et blason héroïque invincible.",
+            price = 1900,
+            ghostColor = GhostCyan,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_superhero,
+            isPremium = true
+        ),
+        AvatarItem(
+            id = "premium_ghost_disco_synthwave",
+            name = "Disco Synthwave",
+            category = AvatarCategory.PREMIUM,
+            description = "Ambiance néon rétro 80s et lunettes à persiennes dorées.",
+            price = 2300,
+            ghostColor = GhostPink,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_disco_synthwave,
+            isPremium = true
+        ),
+        AvatarItem(
+            id = "premium_ghost_vampire",
+            name = "Comte Dracula",
+            category = AvatarCategory.PREMIUM,
+            description = "Cape de velours rouge, canines acérées et nœud papillon.",
+            price = 2000,
+            ghostColor = GhostPurple,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_vampire,
+            isPremium = true
+        ),
+        AvatarItem(
+            id = "premium_ghost_steampunk",
+            name = "Steampunk Aviateur",
+            category = AvatarCategory.PREMIUM,
+            description = "Lunettes de pilote en laiton et engrenages mécaniques ouvragés.",
+            price = 2100,
+            ghostColor = GhostOrange,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_steampunk,
+            isPremium = true
+        ),
+        AvatarItem(
+            id = "premium_ghost_astral_mage",
+            name = "Mage Astral",
+            category = AvatarCategory.PREMIUM,
+            description = "Chapeau mystique brodé d'étoiles filantes et croissant lunaire.",
+            price = 2500,
+            ghostColor = GhostCyan,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_astral_mage,
+            isPremium = true
+        ),
+        AvatarItem(
+            id = "premium_ghost_divine_sun",
+            name = "Divinité Solaire",
+            category = AvatarCategory.PREMIUM,
+            description = "Astres étincelants et couronne de triomphe d'or massif.",
+            price = 3000,
+            ghostColor = PacmanYellow,
+            drawableResId = com.cachecache.game.R.drawable.premium_ghost_divine_sun,
+            isPremium = true
+        )
+    )
+}
