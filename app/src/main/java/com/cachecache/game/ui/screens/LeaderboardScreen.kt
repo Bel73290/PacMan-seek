@@ -55,6 +55,7 @@ fun LeaderboardScreen(
 
     Scaffold(
         containerColor = DeepNavy,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             BottomNavigationBar(
                 currentScreen = Screen.LEADERBOARD,
@@ -65,8 +66,8 @@ fun LeaderboardScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
                 .statusBarsPadding()
+                .padding(bottom = paddingValues.calculateBottomPadding())
         ) {
             // Header: Back Arrow & Title
             Row(
@@ -78,7 +79,7 @@ fun LeaderboardScreen(
                 IconButton(
                     onClick = onBack,
                     modifier = Modifier
-                        .size(38.dp)
+                        .size(44.dp)
                         .clip(CircleShape)
                         .background(NavyIntermediate)
                         .border(1.dp, BorderSubtle, CircleShape)
@@ -86,7 +87,8 @@ fun LeaderboardScreen(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Retour",
-                        tint = TextPrimary
+                        tint = TextPrimary,
+                        modifier = Modifier.size(22.dp)
                     )
                 }
 
@@ -114,10 +116,10 @@ fun LeaderboardScreen(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(34.dp)
-                            .clip(RoundedCornerShape(17.dp))
+                            .height(42.dp)
+                            .clip(RoundedCornerShape(21.dp))
                             .background(if (isSelected) PacmanYellow else CardSurface)
-                            .border(1.dp, if (isSelected) PacmanYellow else BorderSubtle, RoundedCornerShape(17.dp))
+                            .border(1.dp, if (isSelected) PacmanYellow else BorderSubtle, RoundedCornerShape(21.dp))
                             .clickable { onSelectTab(tab) },
                         contentAlignment = Alignment.Center
                     ) {
@@ -125,7 +127,7 @@ fun LeaderboardScreen(
                             text = tab.label,
                             color = if (isSelected) DarkContrast else TextSecondary,
                             fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium,
-                            fontSize = 13.sp
+                            fontSize = 14.sp
                         )
                     }
                 }

@@ -47,6 +47,7 @@ fun ProfileScreen(
 ) {
     Scaffold(
         containerColor = DeepNavy,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             BottomNavigationBar(
                 currentScreen = Screen.PROFILE,
@@ -57,10 +58,10 @@ fun ProfileScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
                 .statusBarsPadding()
+                .padding(bottom = paddingValues.calculateBottomPadding())
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 14.dp, vertical = 6.dp)
+                .padding(horizontal = 14.dp, vertical = 2.dp)
         ) {
             val equippedAvatar = MockData.AvatarItemsCatalog.firstOrNull { it.id == state.equippedAvatarId }
                 ?: MockData.AvatarItemsCatalog.first()
@@ -75,7 +76,7 @@ fun ProfileScreen(
                 IconButton(
                     onClick = onBack,
                     modifier = Modifier
-                        .size(38.dp)
+                        .size(44.dp)
                         .clip(CircleShape)
                         .background(NavyIntermediate)
                         .border(1.dp, BorderSubtle, CircleShape)
@@ -83,7 +84,8 @@ fun ProfileScreen(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Retour",
-                        tint = TextPrimary
+                        tint = TextPrimary,
+                        modifier = Modifier.size(22.dp)
                     )
                 }
 
@@ -92,13 +94,13 @@ fun ProfileScreen(
                 // Equipped Skin Avatar
                 Box(
                     modifier = Modifier
-                        .size(50.dp)
+                        .size(52.dp)
                         .clip(CircleShape)
                         .background(NavyIntermediate)
                         .border(2.dp, PacmanYellow, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    AvatarVisual(avatar = equippedAvatar, size = 36.dp)
+                    AvatarVisual(avatar = equippedAvatar, size = 38.dp)
                 }
 
                 Spacer(modifier = Modifier.width(12.dp))
@@ -410,19 +412,19 @@ private fun AchievementSkinCard(
             when {
                 isEquipped -> {
                     Surface(
-                        shape = RoundedCornerShape(10.dp),
+                        shape = RoundedCornerShape(12.dp),
                         color = PacmanYellow,
-                        modifier = Modifier.height(24.dp)
+                        modifier = Modifier.height(34.dp)
                     ) {
                         Box(
-                            modifier = Modifier.padding(horizontal = 6.dp),
+                            modifier = Modifier.padding(horizontal = 10.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = "ÉQUIPÉ",
                                 color = DarkContrast,
                                 fontWeight = FontWeight.Black,
-                                fontSize = 9.sp
+                                fontSize = 11.sp
                             )
                         }
                     }
@@ -430,44 +432,44 @@ private fun AchievementSkinCard(
                 achievement.isUnlocked -> {
                     Button(
                         onClick = onEquip,
-                        shape = RoundedCornerShape(10.dp),
+                        shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFFFFD700),
                             contentColor = DarkContrast
                         ),
-                        modifier = Modifier.height(26.dp),
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                        modifier = Modifier.height(34.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
                     ) {
                         Text(
                             text = "Équiper",
                             fontWeight = FontWeight.Black,
-                            fontSize = 10.sp
+                            fontSize = 12.sp
                         )
                     }
                 }
                 else -> {
                     Surface(
-                        shape = RoundedCornerShape(10.dp),
+                        shape = RoundedCornerShape(12.dp),
                         color = NavyIntermediate,
                         border = androidx.compose.foundation.BorderStroke(1.dp, BorderSubtle),
-                        modifier = Modifier.height(24.dp)
+                        modifier = Modifier.height(34.dp)
                     ) {
                         Row(
-                            modifier = Modifier.padding(horizontal = 6.dp),
+                            modifier = Modifier.padding(horizontal = 10.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Lock,
                                 contentDescription = null,
                                 tint = TextSecondary,
-                                modifier = Modifier.size(10.dp)
+                                modifier = Modifier.size(13.dp)
                             )
-                            Spacer(modifier = Modifier.width(3.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = "Défi",
                                 color = TextSecondary,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 9.sp
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 11.sp
                             )
                         }
                     }
@@ -659,32 +661,32 @@ private fun StatCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp),
+                .padding(vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
-                modifier = Modifier.height(20.dp),
+                modifier = Modifier.height(24.dp),
                 contentAlignment = Alignment.Center
             ) {
                 iconContent()
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(5.dp))
 
             Text(
                 text = value,
                 color = TextPrimary,
-                fontSize = 15.sp,
+                fontSize = 17.sp,
                 fontWeight = FontWeight.Black
             )
 
-            Spacer(modifier = Modifier.height(1.dp))
+            Spacer(modifier = Modifier.height(2.dp))
 
             Text(
                 text = label,
                 color = TextSecondary,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Medium
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold
             )
         }
     }

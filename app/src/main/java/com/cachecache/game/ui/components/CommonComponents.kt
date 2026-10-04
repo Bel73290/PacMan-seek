@@ -38,9 +38,9 @@ fun BottomNavigationBar(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(54.dp)
-                .shadow(12.dp, RoundedCornerShape(27.dp), spotColor = PacmanYellow.copy(alpha = 0.25f)),
-            shape = RoundedCornerShape(27.dp),
+                .height(56.dp)
+                .shadow(12.dp, RoundedCornerShape(28.dp), spotColor = PacmanYellow.copy(alpha = 0.25f)),
+            shape = RoundedCornerShape(28.dp),
             color = NavyIntermediate.copy(alpha = 0.96f),
             border = androidx.compose.foundation.BorderStroke(1.2.dp, BorderSubtle)
         ) {
@@ -91,7 +91,7 @@ private fun BottomNavIconItem(
 
     Box(
         modifier = Modifier
-            .size(44.dp)
+            .size(48.dp)
             .clip(CircleShape)
             .background(if (isSelected) PacmanYellow.copy(alpha = 0.18f) else Color.Transparent)
             .clickable { onClick() },
@@ -101,7 +101,7 @@ private fun BottomNavIconItem(
             imageVector = icon,
             contentDescription = contentDescription,
             tint = if (isSelected) activeColor else inactiveColor,
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(26.dp)
         )
     }
 }

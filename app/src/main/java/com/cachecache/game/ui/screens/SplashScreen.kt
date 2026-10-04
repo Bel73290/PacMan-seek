@@ -71,9 +71,8 @@ fun SplashScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .statusBarsPadding()
                 .navigationBarsPadding()
-                .padding(horizontal = 24.dp, vertical = 10.dp),
+                .padding(horizontal = 16.dp, vertical = 14.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Bottom
         ) {
@@ -81,17 +80,17 @@ fun SplashScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(bottom = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // Button "Jouer" (Pill Yellow)
                 Button(
                     onClick = { showPlayDialog = true },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp)
-                        .shadow(12.dp, RoundedCornerShape(28.dp), spotColor = PacmanYellow),
-                    shape = RoundedCornerShape(28.dp),
+                        .height(76.dp)
+                        .shadow(18.dp, RoundedCornerShape(38.dp), spotColor = PacmanYellow),
+                    shape = RoundedCornerShape(38.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = PacmanYellow,
                         contentColor = DarkContrast
@@ -99,7 +98,7 @@ fun SplashScreen(
                 ) {
                     Text(
                         text = "Jouer",
-                        fontSize = 18.sp,
+                        fontSize = 24.sp,
                         fontWeight = FontWeight.Black
                     )
                 }
@@ -109,9 +108,9 @@ fun SplashScreen(
                     onClick = onOpenMenu,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(52.dp)
-                        .border(1.2.dp, BorderSubtle, RoundedCornerShape(26.dp)),
-                    shape = RoundedCornerShape(26.dp),
+                        .height(68.dp)
+                        .border(1.8.dp, BorderSubtle, RoundedCornerShape(34.dp)),
+                    shape = RoundedCornerShape(34.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF0D1C38).copy(alpha = 0.95f),
                         contentColor = TextPrimary
@@ -119,7 +118,7 @@ fun SplashScreen(
                 ) {
                     Text(
                         text = "Menu",
-                        fontSize = 16.sp,
+                        fontSize = 21.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextPrimary
                     )
