@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "996318903519",
+    "project_id": "pac-and-seek",
+    "storage_bucket": "pac-and-seek.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:996318903519:android:fa9b2f3fe2bf6f6b107d6a",
+        "android_client_info": {
+          "package_name": "com.cachecache.game"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjPWr0cQfANc0mEOrl-5aSvRvsvjRSx6w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
