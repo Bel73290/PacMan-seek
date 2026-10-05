@@ -2,6 +2,7 @@ package com.cachecache.game.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cachecache.game.data.GameRepository
 import com.cachecache.game.data.MockData
 import com.cachecache.game.model.*
 import kotlinx.coroutines.Job
@@ -28,6 +29,8 @@ class GameViewModel : ViewModel() {
 
     private var timerJob: Job? = null
     private var walkSimulationJob: Job? = null
+    private var lobbyJob: Job? = null
+    private val gameRepository = GameRepository()
 
     init {
         // Initial distance calculation
@@ -38,6 +41,129 @@ class GameViewModel : ViewModel() {
             .map { it.avatarId }
             .toSet()
         _uiState.update { it.copy(unlockedAvatarIds = it.unlockedAvatarIds + initialBattlePassSkins) }
+    }
+
+    // ---- Salon multijoueur (Firebase) ----
+
+    fun createGame() {
+        if (_uiState.value.lobby?.isLoading == true) return
+        _uiState.update { it.copy(lobby = LobbyState(isHost = true, isLoading = true)) }
+        viewModelScope.launch {
+            try {
+                val code = gameRepository.createGame(GAME_CODE_LENGTH)
+                _uiState.update { it.copy(lobby = LobbyState(code = code, isHost = true)) }
+                observeLobby(code)
+            } catch (e: Exception) {
+                showLobbyError(e)
+            }
+        }
+    }
+
+    fun joinGame(code: String) {
+        if (_uiState.value.lobby?.isLoading == true) return
+        val normalizedCode = code.uppercase()
+        _uiState.update { it.copy(lobby = LobbyState(isLoading = true)) }
+        viewModelScope.launch {
+            try {
+                gameRepository.joinGame(normalizedCode)
+                _uiState.update { it.copy(lobby = LobbyState(code = normalizedCode, isHost = false)) }
+                observeLobby(normalizedCode)
+            } catch (e: Exception) {
+                showLobbyError(e)
+            }
+        }
+    }
+
+    /** L'hôte lance la partie : tous les joueurs du salon basculent sur la carte. */
+    fun launchLobbyGame() {
+        val code = _uiState.value.lobby?.code ?: return
+        val settings = _uiState.value.settings
+        viewModelScope.launch {
+            try {
+                gameRepository.startGame(
+                    code,
+                    hidingSeconds = settings.freezeDurationSeconds,
+                    seekingSeconds = settings.huntDurationMinutes * 60
+                )
+            } catch (e: Exception) {
+                showLobbyError(e)
+            }
+        }
+    }
+
+    fun leaveLobby() {
+        val lobby = _uiState.value.lobby
+        lobbyJob?.cancel()
+        _uiState.update { it.copy(lobby = null) }
+        val code = lobby?.code ?: return
+        viewModelScope.launch {
+            try {
+                gameRepository.leaveGame(code, lobby.isHost)
+            } catch (_: Exception) {
+                // Sans réseau : le salon sera simplement abandonné
+            }
+        }
+    }
+
+    fun clearLobbyError() {
+        _uiState.update { state -> state.copy(lobby = state.lobby?.copy(error = null)) }
+    }
+
+    private fun observeLobby(code: String) {
+        lobbyJob?.cancel()
+        lobbyJob = viewModelScope.launch {
+            launch {
+                gameRepository.observePlayers(code).collect { players ->
+                    _uiState.update { state -> state.copy(lobby = state.lobby?.copy(players = players)) }
+                }
+            }
+            gameRepository.observeStatus(code).collect { status ->
+                when (status) {
+                    GameRepository.STATUS_STARTED -> {
+                        // Le salon a rempli son rôle : on le ferme et tout le monde part sur la carte
+                        val isHost = _uiState.value.lobby?.isHost == true
+                        _uiState.update {
+                            it.copy(
+                                lobby = null,
+                                activeMatch = ActiveMatch(code, isHost),
+                                currentScreen = Screen.MATCH
+                            )
+                        }
+                        lobbyJob?.cancel()
+                    }
+                    GameRepository.STATUS_CANCELLED, null -> {
+                        if (_uiState.value.lobby?.isHost == false && !_uiState.value.isGameRunning) {
+                            lobbyJob?.cancel()
+                            _uiState.update {
+                                it.copy(lobby = LobbyState(error = "L'hôte a annulé la partie."))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /** Reprend une partie sauvegardée après un redémarrage de l'app. */
+    fun resumeMatch(match: ActiveMatch) {
+        _uiState.update { it.copy(activeMatch = match, currentScreen = Screen.MATCH) }
+    }
+
+    /** Fin ou abandon de la partie multijoueur : retour à l'accueil. */
+    fun exitMatch() {
+        _uiState.update { it.copy(activeMatch = null, currentScreen = Screen.SPLASH) }
+    }
+
+    private fun showLobbyError(e: Exception) {
+        val message = when (e) {
+            is GameRepository.GameNotFoundException,
+            is GameRepository.GameAlreadyStartedException -> e.message
+            else -> "Connexion impossible. Vérifie ta connexion Internet."
+        }
+        android.util.Log.w("GameViewModel", "Erreur salon", e)
+        _uiState.update { state ->
+            state.copy(lobby = (state.lobby ?: LobbyState()).copy(isLoading = false, error = message))
+        }
     }
 
     fun startGame() {
@@ -464,6 +590,8 @@ class GameViewModel : ViewModel() {
     }
 
     companion object {
+        const val GAME_CODE_LENGTH = 6
+
         // Haversine formula returning distance in meters
         fun calculateDistanceMeters(p1: GeoPoint, p2: GeoPoint): Double {
             val r = 6371000.0 // Earth radius in meters

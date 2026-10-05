@@ -52,6 +52,8 @@ fun OsmMapView(
     suspectZone: SuspectZone?,
     pacDotsRoute: List<GeoPoint>,
     isRadarScanning: Boolean = false,
+    zonePolygons: List<List<GeoPoint>> = emptyList(), // Zones supplémentaires (partie multijoueur)
+    showSeeker: Boolean = true, // false sur l'écran d'un fantôme : pas de Pacman ni de radar
     onMapTap: (GeoPoint) -> Unit = {},
     onPlayerTap: (HiddenPlayer) -> Unit = {}
 ) {
@@ -345,32 +347,32 @@ fun OsmMapView(
 
             val pt = Point()
 
-            // 1. Suspect Zone Polygon with Animated Dashed Outline
-            suspectZone?.let { zone ->
-                if (zone.polygon.size >= 3) {
-                    val polyPath = Path()
-                    zone.polygon.forEachIndexed { index, geo ->
-                        proj.toPixels(OsmGeoPoint(geo.latitude, geo.longitude), pt)
-                        if (index == 0) polyPath.moveTo(pt.x.toFloat(), pt.y.toFloat())
-                        else polyPath.lineTo(pt.x.toFloat(), pt.y.toFloat())
-                    }
-                    polyPath.close()
-
-                    drawPath(
-                        path = polyPath,
-                        color = ScaredBlue.copy(alpha = 0.20f),
-                        style = Fill
-                    )
-
-                    drawPath(
-                        path = polyPath,
-                        color = ScaredBlue,
-                        style = Stroke(
-                            width = 3.dp.toPx(),
-                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(18f, 12f), 0f)
-                        )
-                    )
+            // 1. Suspect Zone Polygons with Animated Dashed Outline
+            val polygons = listOfNotNull(suspectZone?.polygon) + zonePolygons
+            for (polygon in polygons) {
+                if (polygon.size < 3) continue
+                val polyPath = Path()
+                polygon.forEachIndexed { index, geo ->
+                    proj.toPixels(OsmGeoPoint(geo.latitude, geo.longitude), pt)
+                    if (index == 0) polyPath.moveTo(pt.x.toFloat(), pt.y.toFloat())
+                    else polyPath.lineTo(pt.x.toFloat(), pt.y.toFloat())
                 }
+                polyPath.close()
+
+                drawPath(
+                    path = polyPath,
+                    color = ScaredBlue.copy(alpha = 0.20f),
+                    style = Fill
+                )
+
+                drawPath(
+                    path = polyPath,
+                    color = ScaredBlue,
+                    style = Stroke(
+                        width = 3.dp.toPx(),
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(18f, 12f), 0f)
+                    )
+                )
             }
 
             // 2. Animated Pac-Dots Route (Treadmill Conveyor Effect)
@@ -381,15 +383,17 @@ fun OsmMapView(
                     Offset(p.x.toFloat(), p.y.toFloat())
                 }
 
+                val step = 32f
+                // Espacement régulier sur tout le chemin, même quand il est fait de petits segments
+                var carry = pacDotsPhase % step
                 for (i in 0 until screenPoints.size - 1) {
                     val p1 = screenPoints[i]
                     val p2 = screenPoints[i + 1]
                     val dx = p2.x - p1.x
                     val dy = p2.y - p1.y
                     val dist = kotlin.math.sqrt(dx * dx + dy * dy)
-                    val step = 32f
 
-                    var curr = (pacDotsPhase % step)
+                    var curr = carry
                     while (curr < dist) {
                         val fraction = curr / dist
                         val dotX = p1.x + dx * fraction
@@ -407,6 +411,7 @@ fun OsmMapView(
                         )
                         curr += step
                     }
+                    carry = curr - dist
                 }
             }
 
@@ -418,7 +423,7 @@ fun OsmMapView(
             val minR = 10.dp.toPx()
             val maxR = 70.dp.toPx()
 
-            for (ring in 0 until 3) {
+            if (showSeeker) for (ring in 0 until 3) {
                 val ringProgress = (waveProgress + ring * 0.33f) % 1f
                 val ringRadius = minR + (maxR - minR) * ringProgress
                 val ringAlpha = (1f - ringProgress).coerceIn(0f, 1f) * 0.4f
@@ -515,6 +520,7 @@ fun OsmMapView(
             }
 
             // 5. Pacman Seeker Marker with Authentic Chomp Cycle
+            if (!showSeeker) return@Canvas
             val pacmanSize = 44.dp.toPx()
             val pacmanTopLeft = Offset(seekerCenter.x - pacmanSize / 2f, seekerCenter.y - pacmanSize / 2f)
 

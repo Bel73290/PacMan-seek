@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -19,18 +19,41 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cachecache.game.R
 import com.cachecache.game.model.GameState
+import com.cachecache.game.ui.components.PlayModeDialog
+import com.cachecache.game.viewmodel.GameViewModel
 import com.cachecache.game.ui.theme.*
 
 @Composable
 fun SplashScreen(
     state: GameState,
-    onStartGame: () -> Unit,
+    onCreateGame: () -> Unit,
+    onJoinGame: (String) -> Unit,
+    onLaunchGame: () -> Unit,
+    onLeaveLobby: () -> Unit,
+    onClearLobbyError: () -> Unit,
     onOpenMenu: () -> Unit,
     onOpenGuide: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
     onCloseSettings: () -> Unit = {},
     onSaveSettings: (Int, Int) -> Unit = { _, _ -> }
 ) {
+    var showPlayDialog by remember { mutableStateOf(false) }
+
+    if (showPlayDialog) {
+        PlayModeDialog(
+            lobby = state.lobby,
+            codeLength = GameViewModel.GAME_CODE_LENGTH,
+            onDismiss = {
+                showPlayDialog = false
+                onLeaveLobby()
+            },
+            onCreateGame = onCreateGame,
+            onJoinGame = onJoinGame,
+            onLaunchGame = onLaunchGame,
+            onClearError = onClearLobbyError
+        )
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -62,7 +85,7 @@ fun SplashScreen(
             ) {
                 // Button "Jouer" (Pill Yellow)
                 Button(
-                    onClick = onStartGame,
+                    onClick = { showPlayDialog = true },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(76.dp)

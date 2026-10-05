@@ -9,22 +9,33 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import com.cachecache.game.data.MatchSessionStore
 import com.cachecache.game.model.Screen
 import com.cachecache.game.ui.screens.*
 import com.cachecache.game.ui.theme.CacheCacheTheme
 import com.cachecache.game.ui.theme.DeepNavy
 import com.cachecache.game.viewmodel.GameViewModel
+import com.cachecache.game.viewmodel.MatchViewModel
 
 class MainActivity : ComponentActivity() {
 
     private val viewModel: GameViewModel by viewModels()
+    private val matchViewModel: MatchViewModel by viewModels()
+    private val matchSessionStore by lazy { MatchSessionStore(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+
+        // L'app a été fermée pendant une partie : on y retourne directement
+        if (viewModel.uiState.value.activeMatch == null) {
+            matchSessionStore.load()?.let { viewModel.resumeMatch(it) }
+        }
+
         setContent {
             CacheCacheTheme {
                 Surface(
@@ -32,6 +43,17 @@ class MainActivity : ComponentActivity() {
                     color = DeepNavy
                 ) {
                     val state by viewModel.uiState.collectAsState()
+
+                    // Démarre la partie multijoueur dès que le salon est lancé
+                    LaunchedEffect(state.activeMatch) {
+                        val match = state.activeMatch
+                        if (match != null) {
+                            matchSessionStore.save(match)
+                            matchViewModel.start(match)
+                        } else {
+                            matchSessionStore.clear()
+                        }
+                    }
 
                     // Hardware Back Button Navigation
                     BackHandler(enabled = state.currentScreen != Screen.SPLASH) {
@@ -44,6 +66,7 @@ class MainActivity : ComponentActivity() {
                             Screen.GUIDE -> viewModel.setScreen(Screen.SPLASH)
                             Screen.PROFILE -> viewModel.setScreen(Screen.SPLASH)
                             Screen.SPLASH -> finish()
+                            Screen.MATCH -> Unit // Géré par MatchScreen (confirmation avant de quitter)
                         }
                     }
 
@@ -52,7 +75,11 @@ class MainActivity : ComponentActivity() {
                         Screen.SPLASH -> {
                             SplashScreen(
                                 state = state,
-                                onStartGame = { viewModel.startGame() },
+                                onCreateGame = { viewModel.createGame() },
+                                onJoinGame = { code -> viewModel.joinGame(code) },
+                                onLaunchGame = { viewModel.launchLobbyGame() },
+                                onLeaveLobby = { viewModel.leaveLobby() },
+                                onClearLobbyError = { viewModel.clearLobbyError() },
                                 onOpenMenu = { viewModel.setScreen(Screen.LEADERBOARD) }
                             )
                         }
@@ -114,6 +141,18 @@ class MainActivity : ComponentActivity() {
                                 onSelectBadge = { badge -> viewModel.selectBadge(badge) },
                                 onAddXp = { xp -> viewModel.addXp(xp) },
                                 onAddLevel = { count -> viewModel.addLevel(count) }
+                            )
+                        }
+                        Screen.MATCH -> {
+                            val matchState by matchViewModel.state.collectAsState()
+                            MatchScreen(
+                                state = matchState,
+                                onPermissionsResult = { matchViewModel.onPermissionsResult() },
+                                onCatch = { matchViewModel.catchGhost() },
+                                onLeave = {
+                                    matchViewModel.leave()
+                                    viewModel.exitMatch()
+                                }
                             )
                         }
                         Screen.SHOP -> {

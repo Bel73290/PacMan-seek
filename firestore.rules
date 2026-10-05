@@ -1,0 +1,21 @@
+rules_version = '2';
+
+// Règles Firestore de Pac & Seek : à coller dans la console Firebase
+// (Firestore Database > Règles), puis "Publier".
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /games/{code} {
+      allow read: if request.auth != null;
+      // Seul l'hôte crée la partie et peut changer son statut (lancer / annuler)
+      allow create: if request.auth != null && request.resource.data.hostId == request.auth.uid;
+      allow update: if request.auth != null && resource.data.hostId == request.auth.uid;
+
+      match /players/{uid} {
+        allow read: if request.auth != null;
+        // Chaque joueur ne peut ajouter / retirer que lui-même
+        allow write: if request.auth != null && request.auth.uid == uid;
+      }
+    }
+  }
+}

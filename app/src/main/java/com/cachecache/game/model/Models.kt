@@ -129,7 +129,8 @@ enum class Screen {
     RADAR_FILTERS,
     GUIDE,
     PROFILE,
-    SHOP
+    SHOP,
+    MATCH // Partie multijoueur en temps réel
 }
 
 enum class AvatarCategory(val label: String) {
@@ -167,8 +168,8 @@ enum class GamePhase {
 }
 
 data class GameSettings(
-    val freezeDurationSeconds: Int = 30,
-    val huntDurationMinutes: Int = 10,
+    val freezeDurationSeconds: Int = 3 * 60, // Temps pour se cacher
+    val huntDurationMinutes: Int = 9,        // Temps de chasse pour Pacman
     val captureThresholdMeters: Double = 0.30,
     val seekerDurationMinutes: Int = 10,
     val hidingDurationMinutes: Int = 10
@@ -216,5 +217,22 @@ data class GameState(
     val selectedAchievementSkin: AchievementSkinItem? = null,
     val showSettingsDialog: Boolean = false,
     val showFilterMenu: Boolean = false,
-    val recentHistory: List<HistoryItem> = emptyList()
+    val recentHistory: List<HistoryItem> = emptyList(),
+    val lobby: LobbyState? = null, // Salon multijoueur en cours (créé ou rejoint)
+    val activeMatch: ActiveMatch? = null // Partie multijoueur lancée
+)
+
+data class LobbyPlayer(
+    val id: String,
+    val name: String,
+    val isHost: Boolean,
+    val isMe: Boolean
+)
+
+data class LobbyState(
+    val code: String? = null,
+    val isHost: Boolean = false,
+    val players: List<LobbyPlayer> = emptyList(),
+    val isLoading: Boolean = false,
+    val error: String? = null
 )
