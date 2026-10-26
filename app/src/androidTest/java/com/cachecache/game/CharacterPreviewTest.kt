@@ -20,15 +20,15 @@ class CharacterPreviewTest {
                 Text("Vues des fantômes",style=MaterialTheme.typography.titleLarge)
                 GhostRow("ghost_red_classic")
                 GhostRow("ghost_red_headphones")
-                Text("Nouveaux Pacman · droite / gauche",style=MaterialTheme.typography.titleLarge)
-                listOf("pacman_miss" to "Miss Pacman","pacman_retro" to "Pacman Rétro","pacman_super" to "Super Pacman").forEach{(id,name)->
+                Text("Pacman d’origine · droite / gauche",style=MaterialTheme.typography.titleLarge)
+                listOf("pacman_neon" to "Pacman Néon","pacman_pirate" to "Pacman Pirate","pacman_wizard" to "Pacman Mage").forEach{(id,name)->
                     Text(name)
                     Row(horizontalArrangement=Arrangement.spacedBy(32.dp)){SkinAvatar(id,76.dp,90f);SkinAvatar(id,76.dp,270f)}
                 }
             }
         } } }
-        compose.onNodeWithText("Miss Pacman").assertIsDisplayed()
-        compose.onNodeWithText("Super Pacman").assertIsDisplayed()
+        compose.onNodeWithText("Pacman Pirate").assertIsDisplayed()
+        compose.onNodeWithText("Pacman Mage").assertIsDisplayed()
         val instrumentation=androidx.test.platform.app.InstrumentationRegistry.getInstrumentation()
         val resolver=instrumentation.targetContext.contentResolver
         val values=android.content.ContentValues().apply {
@@ -40,6 +40,6 @@ class CharacterPreviewTest {
         resolver.openOutputStream(uri)!!.use{instrumentation.uiAutomation.takeScreenshot().compress(android.graphics.Bitmap.CompressFormat.PNG,100,it)}
     }
     @Composable private fun GhostRow(id:String) {
-        Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){repeat(6){SkinAvatar(id,48.dp,it*60f)}}
+        Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){if(id.endsWith("_classic"))repeat(6){SkinAvatar(id,48.dp,it*60f)} else SkinAvatar(id,64.dp)}
     }
 }

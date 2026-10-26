@@ -19,7 +19,7 @@ npm run test:emulator
 - Achats et récompenses transactionnels, points de classement distincts des pièces.
 - Salons 2–12 joueurs, état prêt, reprise par code et chronos partagés.
 - GPS réel, radar Bluetooth, captures confirmées par le serveur et guidage Pac-dots piéton.
-- Pacman gauche/droite, fantômes en six vues debout, nouveaux skins Miss/Rétro/Super.
+- Visuels de skins d’origine, Pacman gauche/droite, six vues debout pour les fantômes classiques.
 - Pass de combat à dix paliers, récompenses exclusives débloquées par les niveaux.
 - Classements général, mensuel UTC et amis, pagination et rang personnel.
 - Demandes d'amis et invitations aux salons.

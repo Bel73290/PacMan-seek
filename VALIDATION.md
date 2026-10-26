@@ -12,6 +12,6 @@ Correctif solo : test Android supplémentaire réussi, sans émulateurs Firebase
 
 Ces vérifications n'utilisent pas le serveur de production. Elles ne valident pas la connexion Play Jeux réelle, les permissions/configurations des consoles, la qualité GPS/Bluetooth dehors ni un déploiement Firebase. La carte a été ouverte dans l'émulateur ; le téléchargement complet des tuiles et le guidage GPS doivent encore être contrôlés sur de vrais téléphones.
 
-Pass de combat : test Android de prévisualisation réussi ; un palier verrouillé peut être consulté mais pas équipé. Pacman ne subit plus de rotation ; les fantômes utilisent six sprites de perspective en restant debout.
+Pass de combat : test Android de prévisualisation réussi ; un palier verrouillé peut être consulté mais pas équipé. Pacman ne subit plus de rotation ; les fantômes classiques utilisent six sprites de perspective en restant debout. Les skins thématiques retrouvent leurs illustrations d’origine, sans rotation ni accessoires redessinés.
 
 Voir [DEPLOYMENT.md](DEPLOYMENT.md) pour activer les services et réaliser la validation terrain.

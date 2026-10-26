@@ -68,7 +68,6 @@ fun OsmMapView(
     val directionalSkins=rememberGhostSkins(skinIds)
     val skinBitmaps = remember(skinIds) {
         skinIds.mapNotNull { id ->
-            if(!id.startsWith("pacman_")) return@mapNotNull null
             val resource = MockData.AvatarItemsCatalog.firstOrNull { it.id == id }?.drawableResId ?: return@mapNotNull null
             val bounds = BitmapFactory.Options().apply { inJustDecodeBounds=true }
             BitmapFactory.decodeResource(context.resources,resource,bounds)
@@ -536,9 +535,11 @@ fun OsmMapView(
                 val offsetX = if (player.isScared) scaredTrembleX else 0f
                 val topLeft = Offset(ghostCenter.x - ghostSize / 2f + offsetX, ghostCenter.y - ghostSize / 2f)
 
-                val selectedSkin = if(!player.isScared) directionalSkins[player.skinId] else null
+                val selectedSkin = if(!player.isScared && player.skinId?.endsWith("_classic")==true) directionalSkins[player.skinId] else null
                 if (selectedSkin != null) {
                     drawDirectionalGhost(selectedSkin,player.skinId!!,player.heading,topLeft,ghostSize)
+                } else if (!player.isScared && skinBitmaps[player.skinId] != null) {
+                    drawImage(skinBitmaps[player.skinId]!!,dstOffset=IntOffset(topLeft.x.toInt(),topLeft.y.toInt()),dstSize=IntSize(ghostSize.toInt(),ghostSize.toInt()))
                 } else if (ghostBmp != null) {
                     val bmpW = ghostSize
                     val bmpH = bmpW * (ghostBmp.height.toFloat() / ghostBmp.width.toFloat())
@@ -583,10 +584,9 @@ fun OsmMapView(
 
             val equippedPacman = skinBitmaps[seekerSkinId]
             scale(scaleX=if(isFacingRight) 1f else -1f,scaleY=1f,pivot=seekerCenter) {
-                if (equippedPacman != null && seekerSkinId != "pacman_neon") {
+                if (equippedPacman != null) {
                     drawImage(equippedPacman,dstOffset=IntOffset(pacmanTopLeft.x.toInt(),pacmanTopLeft.y.toInt()),dstSize=IntSize(pacmanSize.toInt(),pacmanSize.toInt()))
-                } else if (seekerSkinId!="pacman_classic") {
-                    drawPacmanSkin(seekerSkinId,pacmanTopLeft,pacmanSize,20f+pacmanFrameIndex*3f)
+
                 } else if (chompBmp != null) {
                     drawImage(chompBmp,dstOffset=IntOffset(pacmanTopLeft.x.toInt(),pacmanTopLeft.y.toInt()),dstSize=IntSize(pacmanSize.toInt(),pacmanSize.toInt()))
                 } else drawChompPacman(pacmanTopLeft,Size(pacmanSize,pacmanSize),35f,PacmanYellow)

@@ -259,23 +259,16 @@
     "unlockLevel": 0
   },
   {
-    "id": "pacman_miss",
-    "name": "Miss Pacman",
+    "id": "pacman_pirate",
+    "name": "Pacman Pirate",
     "price": 800,
     "role": "pacman",
     "unlockLevel": 0
   },
   {
-    "id": "pacman_retro",
-    "name": "Pacman Rétro",
-    "price": 500,
-    "role": "pacman",
-    "unlockLevel": 0
-  },
-  {
-    "id": "pacman_super",
-    "name": "Super Pacman",
-    "price": 1000,
+    "id": "pacman_wizard",
+    "name": "Pacman Mage",
+    "price": 900,
     "role": "pacman",
     "unlockLevel": 0
   }

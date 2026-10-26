@@ -171,9 +171,10 @@ fun OnlineShopScreen(state:OnlineState,onNavigate:(Screen)->Unit,onRetry:()->Uni
                 Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceEvenly) {
                     if(preview.id.startsWith("pacman_")) {
                         SkinAvatar(preview.id,56.dp,90f);SkinAvatar(preview.id,56.dp,270f)
-                    } else repeat(6) {direction->SkinAvatar(preview.id,38.dp,direction*60f)}
+                    } else if(preview.id.endsWith("_classic")) repeat(6) {direction->SkinAvatar(preview.id,38.dp,direction*60f)}
+                    else SkinAvatar(preview.id,96.dp)
                 }
-                Text(if(preview.id.startsWith("pacman_")) "Gauche et droite, sans inclinaison" else "6 vues : face, trois-quarts, profils et dos",color=TextSecondary,fontSize=12.sp)
+                Text(if(preview.id.startsWith("pacman_")) "Gauche et droite, sans inclinaison" else if(preview.id.endsWith("_classic")) "6 vues : face, trois-quarts, profils et dos" else "Visuel original du skin",color=TextSecondary,fontSize=12.sp)
             }
         }
         items(catalog,key={it.id}) {skin ->
