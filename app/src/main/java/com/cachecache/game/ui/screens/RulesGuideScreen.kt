@@ -176,7 +176,7 @@ fun RulesGuideScreen(
             RuleCard(
                 stepNumber = "4",
                 title = "Points",
-                description = "Sois le plus rapide, approche-toi à 30 cm de la cible et grimpe dans le classement !",
+                description = "Approche-toi de la cible puis appuie sur Trouvé. La capture est validée en ligne avec des positions GPS récentes. Le Bluetooth aide à la recherche.",
                 iconContent = {
                     Box(
                         modifier = Modifier

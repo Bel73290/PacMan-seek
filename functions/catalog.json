@@ -1,0 +1,275 @@
+[
+  {
+    "id": "ghost_red_classic",
+    "name": "Blinky L'Ombre",
+    "price": 0,
+    "role": "ghost",
+    "unlockLevel": 0
+  },
+  {
+    "id": "ghost_pink_classic",
+    "name": "Pinky La Furtive",
+    "price": 150,
+    "role": "ghost",
+    "unlockLevel": 0
+  },
+  {
+    "id": "ghost_cyan_classic",
+    "name": "Inky Le Farceur",
+    "price": 200,
+    "role": "ghost",
+    "unlockLevel": 0
+  },
+  {
+    "id": "ghost_orange_classic",
+    "name": "Clyde Le Rêveur",
+    "price": 200,
+    "role": "ghost",
+    "unlockLevel": 0
+  },
+  {
+    "id": "ghost_purple_classic",
+    "name": "Sue La Mystique",
+    "price": 250,
+    "role": "ghost",
+    "unlockLevel": 0
+  },
+  {
+    "id": "ghost_blue_sunglasses",
+    "name": "Spectre VIP Lunettes",
+    "price": 350,
+    "role": "ghost",
+    "unlockLevel": 0
+  },
+  {
+    "id": "ghost_red_headphones",
+    "name": "Blinky Gamer DJ",
+    "price": 450,
+    "role": "ghost",
+    "unlockLevel": 10
+  },
+  {
+    "id": "ghost_pink_flower",
+    "name": "Pinky Bohème",
+    "price": 400,
+    "role": "ghost",
+    "unlockLevel": 0
+  },
+  {
+    "id": "ghost_cyan_cap",
+    "name": "Inky Rider Urbain",
+    "price": 450,
+    "role": "ghost",
+    "unlockLevel": 30
+  },
+  {
+    "id": "ghost_red_crown",
+    "name": "Blinky Monarque",
+    "price": 600,
+    "role": "ghost",
+    "unlockLevel": 0
+  },
+  {
+    "id": "avatar_ghost_cowboy",
+    "name": "Shérif de l'Ouest",
+    "price": 500,
+    "role": "ghost",
+    "unlockLevel": 20
+  },
+  {
+    "id": "avatar_ghost_wizard",
+    "name": "Archimage Spectral",
+    "price": 600,
+    "role": "ghost",
+    "unlockLevel": 50
+  },
+  {
+    "id": "avatar_ghost_pirate",
+    "name": "Fantôme Pirate",
+    "price": 600,
+    "role": "ghost",
+    "unlockLevel": 40
+  },
+  {
+    "id": "avatar_ghost_santa",
+    "name": "Père Noël Spectral",
+    "price": 550,
+    "role": "ghost",
+    "unlockLevel": 0
+  },
+  {
+    "id": "avatar_ghost_snorkel",
+    "name": "Plongeur Sous-Marin",
+    "price": 450,
+    "role": "ghost",
+    "unlockLevel": 0
+  },
+  {
+    "id": "avatar_ghost_mustache",
+    "name": "Gentleman Moustache",
+    "price": 400,
+    "role": "ghost",
+    "unlockLevel": 0
+  },
+  {
+    "id": "ghost_blue_devil",
+    "name": "Diablotin Farceur",
+    "price": 500,
+    "role": "ghost",
+    "unlockLevel": 0
+  },
+  {
+    "id": "ghost_blue_halo",
+    "name": "Ange Pur",
+    "price": 500,
+    "role": "ghost",
+    "unlockLevel": 0
+  },
+  {
+    "id": "ghost_scared",
+    "name": "Fantôme Apeuré Bleu",
+    "price": 300,
+    "role": "ghost",
+    "unlockLevel": 0
+  },
+  {
+    "id": "premium_ghost_crystal_ice",
+    "name": "Cristal de Givre",
+    "price": 2000,
+    "role": "ghost",
+    "unlockLevel": 60
+  },
+  {
+    "id": "premium_ghost_fire_flame",
+    "name": "Flamme Infernale",
+    "price": 2200,
+    "role": "ghost",
+    "unlockLevel": 80
+  },
+  {
+    "id": "premium_ghost_gold_king",
+    "name": "Roi Doré Suprême",
+    "price": 3000,
+    "role": "ghost",
+    "unlockLevel": 100
+  },
+  {
+    "id": "premium_ghost_cyberpunk",
+    "name": "Cyberpunk 2099",
+    "price": 2100,
+    "role": "ghost",
+    "unlockLevel": 70
+  },
+  {
+    "id": "premium_ghost_angel_wings",
+    "name": "Séraphin Ailé",
+    "price": 2400,
+    "role": "ghost",
+    "unlockLevel": 90
+  },
+  {
+    "id": "premium_ghost_disco_synthwave",
+    "name": "Disco Synthwave",
+    "price": 2300,
+    "role": "ghost",
+    "unlockLevel": 0
+  },
+  {
+    "id": "premium_ghost_vampire",
+    "name": "Comte Dracula",
+    "price": 2000,
+    "role": "ghost",
+    "unlockLevel": 0
+  },
+  {
+    "id": "premium_ghost_steampunk",
+    "name": "Steampunk Aviateur",
+    "price": 2100,
+    "role": "ghost",
+    "unlockLevel": 0
+  },
+  {
+    "id": "premium_ghost_astral_mage",
+    "name": "Mage Astral",
+    "price": 2500,
+    "role": "ghost",
+    "unlockLevel": 0
+  },
+  {
+    "id": "premium_ghost_divine_sun",
+    "name": "Divinité Solaire",
+    "price": 3000,
+    "role": "ghost",
+    "unlockLevel": 0
+  },
+  {
+    "id": "premium_ghost_pirate_captain",
+    "name": "Vieux Loup de Mer",
+    "price": 1800,
+    "role": "ghost",
+    "unlockLevel": 0
+  },
+  {
+    "id": "premium_ghost_flower_spring",
+    "name": "Fleur Printanière",
+    "price": 1900,
+    "role": "ghost",
+    "unlockLevel": 0
+  },
+  {
+    "id": "premium_ghost_mummy",
+    "name": "Momie Millénaire",
+    "price": 2000,
+    "role": "ghost",
+    "unlockLevel": 0
+  },
+  {
+    "id": "premium_ghost_pharaoh",
+    "name": "Pharaon d'Égypte",
+    "price": 2500,
+    "role": "ghost",
+    "unlockLevel": 0
+  },
+  {
+    "id": "premium_ghost_princess",
+    "name": "Princesse Royale",
+    "price": 2100,
+    "role": "ghost",
+    "unlockLevel": 0
+  },
+  {
+    "id": "premium_ghost_santa_deluxe",
+    "name": "Père Noël Deluxe",
+    "price": 2200,
+    "role": "ghost",
+    "unlockLevel": 0
+  },
+  {
+    "id": "pacman_classic",
+    "name": "Pacman Classique",
+    "price": 0,
+    "role": "pacman",
+    "unlockLevel": 0
+  },
+  {
+    "id": "pacman_neon",
+    "name": "Pacman Néon",
+    "price": 650,
+    "role": "pacman",
+    "unlockLevel": 0
+  },
+  {
+    "id": "pacman_pirate",
+    "name": "Pacman Pirate",
+    "price": 800,
+    "role": "pacman",
+    "unlockLevel": 0
+  },
+  {
+    "id": "pacman_wizard",
+    "name": "Pacman Mage",
+    "price": 900,
+    "role": "pacman",
+    "unlockLevel": 0
+  }
+]

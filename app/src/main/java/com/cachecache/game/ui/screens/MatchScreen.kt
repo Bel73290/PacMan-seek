@@ -59,6 +59,7 @@ fun MatchScreen(
     val context = LocalContext.current
     val isPacman = state.role == MatchRole.PACMAN
     var showQuitDialog by remember { mutableStateOf(false) }
+    var recenterKey by remember { mutableIntStateOf(0) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -96,12 +97,16 @@ fun MatchScreen(
                     locationName = "",
                     location = center,
                     color = resolveGhostColor(ghost.character),
-                    isScared = state.isPacmanNearby
+                    isScared = state.isPacmanNearby,
+                    skinId = ghost.skinId,
+                    heading = state.heading
                 )
             }
         OsmMapView(
             seekerLocation = center,
-            seekerHeading = 0f,
+            seekerHeading = state.heading,
+            seekerSkinId = state.pacmanSkin,
+            recenterKey = recenterKey,
             isFacingRight = state.isFacingRight,
             isFrozen = isPacman && state.phase == MatchPhase.HIDING,
             hiddenPlayers = listOfNotNull(myGhostMarker),
@@ -130,7 +135,7 @@ fun MatchScreen(
             if (state.isOffline && state.phase != MatchPhase.FINISHED) {
                 AlertBanner(
                     icon = { Icon(Icons.Default.CloudOff, contentDescription = null, tint = GhostOrange) },
-                    text = "Hors ligne : la partie continue. Tout sera synchronisé au retour du réseau."
+                    text = "Hors ligne : positions et captures en pause. Le chrono continue ; les résultats seront confirmés au retour du réseau."
                 )
             }
 
@@ -155,6 +160,10 @@ fun MatchScreen(
                 )
             }
 
+            state.error?.let { error -> AlertBanner(icon={}, text=error, actionLabel="Réessayer", onAction=onPermissionsResult) }
+            if ((state.gpsAccuracy ?: 0f)>25) AlertBanner(icon={},text="GPS imprécis : place-toi dehors et attends une meilleure précision.")
+            if (state.stalePlayers>0) AlertBanner(icon={},text="${state.stalePlayers} position(s) en attente de mise à jour.")
+            if (!state.routeAvailable) AlertBanner(icon={},text="Itinéraire piéton indisponible. Réessaie lorsque le réseau revient.")
             state.bluetoothIssue?.let { issue ->
                 val canEnable = issue.startsWith("Active")
                 val canAuthorize = issue.startsWith("Autorise")
@@ -195,12 +204,14 @@ fun MatchScreen(
                     ProximityMeter(proximity = state.proximity, source = state.proximitySource)
                 }
                 CatchButton(
-                    enabled = state.catchCandidateId != null && state.capturingGhost == null,
+                    enabled = state.catchCandidateId != null && state.capturingGhost == null && !state.syncingCapture && !state.isOffline,
                     onClick = onCatch
                 )
             }
         }
 
+        TextButton(onClick={recenterKey++},modifier=Modifier.align(Alignment.CenterEnd).background(NavyIntermediate)) { Text("Recentrer GPS") }
+        Text("© OpenStreetMap contributors",color=TextSecondary,fontSize=10.sp,modifier=Modifier.align(Alignment.BottomStart).navigationBarsPadding())
         // 4. Animation de capture, écran "trouvé", fin de partie
         GhostCaptureOverlay(capturingGhost = state.capturingGhost)
 

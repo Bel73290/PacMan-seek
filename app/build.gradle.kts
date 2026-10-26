@@ -15,6 +15,9 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+        resValue("string", "play_games_project_id", providers.gradleProperty("playGamesProjectId").orElse("0").get())
+        buildConfigField("String", "PLAY_GAMES_WEB_CLIENT_ID", "\"${providers.gradleProperty("playGamesWebClientId").orElse("").get()}\"")
+        buildConfigField("boolean", "USE_FIREBASE_EMULATORS", providers.gradleProperty("useFirebaseEmulators").orElse("false").get())
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -37,6 +40,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -56,12 +60,15 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.functions)
+    implementation(libs.play.games)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.play.services.location)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation("androidx.test:rules:1.6.1")
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)

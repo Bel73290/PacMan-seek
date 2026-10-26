@@ -26,9 +26,12 @@ import com.cachecache.game.ui.theme.*
 @Composable
 fun SplashScreen(
     state: GameState,
+    canPlay: Boolean = true,
     onCreateGame: () -> Unit,
     onJoinGame: (String) -> Unit,
     onLaunchGame: () -> Unit,
+    onReady: () -> Unit,
+    onInviteFriends: () -> Unit,
     onLeaveLobby: () -> Unit,
     onClearLobbyError: () -> Unit,
     onOpenMenu: () -> Unit,
@@ -38,6 +41,8 @@ fun SplashScreen(
     onSaveSettings: (Int, Int) -> Unit = { _, _ -> }
 ) {
     var showPlayDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(state.lobby) { if (state.lobby != null) showPlayDialog = true }
 
     if (showPlayDialog) {
         PlayModeDialog(
@@ -50,7 +55,12 @@ fun SplashScreen(
             onCreateGame = onCreateGame,
             onJoinGame = onJoinGame,
             onLaunchGame = onLaunchGame,
-            onClearError = onClearLobbyError
+            onClearError = onClearLobbyError,
+            onReady = onReady,
+            onInviteFriends = onInviteFriends,
+            onSaveSettings = onSaveSettings,
+            hidingSeconds = state.settings.freezeDurationSeconds,
+            seekingMinutes = state.settings.huntDurationMinutes
         )
     }
 
@@ -86,6 +96,7 @@ fun SplashScreen(
                 // Button "Jouer" (Pill Yellow)
                 Button(
                     onClick = { showPlayDialog = true },
+                    enabled = canPlay,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(76.dp)

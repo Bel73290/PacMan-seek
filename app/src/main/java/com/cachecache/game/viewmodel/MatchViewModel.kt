@@ -21,6 +21,7 @@ import com.cachecache.game.data.GeoUtils
 import com.cachecache.game.data.LocationTracker
 import com.cachecache.game.model.*
 import com.cachecache.game.viewmodel.GameViewModel.Companion.calculateDistanceMeters
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,8 +40,8 @@ import kotlin.math.abs
  *    jusqu'à la plus proche ; dans la zone, son téléphone vibre de plus en plus vite en approchant
  *    (GPS de loin, Bluetooth de près). Assez proche, il peut appuyer sur "Trouvé !".
  *
- * Sans réseau, la partie continue : chrono calculé localement, cache Firestore, écritures mises
- * en file d'attente, et Bluetooth de téléphone à téléphone (radar + annonce des fantômes trouvés).
+ * Le chrono continue hors ligne. Les captures et résultats attendent une confirmation serveur.
+ * Le Bluetooth est uniquement un indice de proximité ; les positions anciennes sont signalées.
  */
 class MatchViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -127,6 +128,9 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     private val zonesByGhost = mutableMapOf<String, GhostZone>()
     private val bleReadings = mutableMapOf<String, BleReading>()
     private var lastUpload: Pair<GeoPoint, Long>? = null
+    private var serverOffsetMs = 0L
+    private var lastGpsTime = 0L
+    private var uploadJob: Job? = null
     private var lastScanStart = 0L
     private var advertiseFailed = false
     private var routeRequest: RouteRequest? = null
@@ -155,14 +159,22 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                 Log.w(TAG, "Identifiant joueur indisponible", e)
                 null
             }
+            try {
+                val before = System.currentTimeMillis()
+                val server = repository.serverTime()
+                serverOffsetMs = server - (before + System.currentTimeMillis()) / 2
+            } catch (e: Exception) { report(e) }
             launch {
                 repository.observeGame(match.code)
-                    .catch { Log.w(TAG, "Écoute de la partie interrompue", it) }
-                    .collect { game = it; refresh() }
+                    .catch { report(it) }
+                    .collect {
+                        if (it == null) _state.update { state -> state.copy(phase=MatchPhase.FINISHED, endMessage="Cette partie n’existe plus.") }
+                        game = it; refresh()
+                    }
             }
             launch {
                 repository.observeMatchPlayers(match.code)
-                    .catch { Log.w(TAG, "Écoute des joueurs interrompue", it) }
+                    .catch { report(it) }
                     .collect { players = it; refresh() }
             }
             launch {
@@ -194,6 +206,13 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun onPermissionsResult() {
+        val current = _state.value
+        if (current.error != null && current.code.isNotEmpty()) {
+            val match = ActiveMatch(current.code,current.role==MatchRole.PACMAN)
+            stopSession()
+            start(match)
+            return
+        }
         _state.update { it.copy(hasLocationPermission = hasLocationPermission()) }
         startLocationIfAllowed()
         ensureBluetooth()
@@ -209,6 +228,7 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         locationJob?.cancel()
         scanJob?.cancel()
         routeJob?.cancel()
+        uploadJob?.cancel()
         sessionJob = null
         unregisterNetworkCallback()
         ble.stopAdvertising()
@@ -255,26 +275,28 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         if (current.capturingGhost != null) return
         val ghost = current.ghosts.firstOrNull { it.id == current.catchCandidateId } ?: return
 
-        _state.update {
-            it.copy(
-                capturingGhost = HiddenPlayer(
-                    id = ghost.id.hashCode(),
-                    name = ghost.character,
-                    locationName = "",
-                    location = ghost.location ?: current.myLocation ?: GeoPoint(0.0, 0.0),
-                    color = resolveGhostColor(ghost.character),
-                    isFound = true
-                )
-            )
-        }
-        vibrate(350L, 255)
-        // Visible tout de suite en local, même hors ligne ; le fantôme est aussi prévenu
-        // par la balise Bluetooth de Pacman (voir ensureBluetooth)
-        repository.markGhostFound(current.code, ghost.id)
+        if (current.isOffline || current.syncingCapture) return
+        _state.update { it.copy(syncingCapture = true, error = null) }
         viewModelScope.launch {
-            delay(1_100L)
-            _state.update { it.copy(capturingGhost = null) }
+            try {
+                repository.markGhostFound(current.code, ghost.id)
+                _state.update { it.copy(capturingGhost = HiddenPlayer(
+                    id=ghost.id.hashCode(), name=ghost.character, locationName="",
+                    location=ghost.location ?: current.myLocation ?: GeoPoint(0.0,0.0),
+                    color=resolveGhostColor(ghost.character), isFound=true, skinId=ghost.skinId
+                )) }
+                vibrate(350L,255)
+                delay(1100L)
+                _state.update { it.copy(capturingGhost=null) }
+            } catch (e: Exception) { report(e) }
+            finally { _state.update { it.copy(syncingCapture=false) } }
         }
+    }
+
+    private fun report(error: Throwable) {
+        if (error is CancellationException) throw error
+        Log.w(TAG,"Synchronisation",error)
+        _state.update { it.copy(error=error.message ?: "Synchronisation impossible. Réessaie avec du réseau.") }
     }
 
     // ---- Position GPS ----
@@ -283,35 +305,40 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         if (sessionJob == null || locationJob?.isActive == true || !hasLocationPermission()) return
         locationJob = viewModelScope.launch {
             locationTracker.updates()
-                .catch { Log.w(TAG, "GPS indisponible", it) }
-                .collect { location -> onLocation(GeoPoint(location.latitude, location.longitude)) }
+                .catch { report(it) }
+                .collect { location ->
+                    if (android.os.SystemClock.elapsedRealtimeNanos() - location.elapsedRealtimeNanos <= 15_000_000_000L) onLocation(location)
+                }
         }
     }
 
-    private fun onLocation(point: GeoPoint) {
-        val previous = _state.value.myLocation
-        val deltaLon = previous?.let { point.longitude - it.longitude } ?: 0.0
-        _state.update {
-            it.copy(
-                myLocation = point,
-                isFacingRight = if (abs(deltaLon) > 0.000002) deltaLon > 0 else it.isFacingRight
-            )
+    private fun onLocation(location: android.location.Location) {
+        val point=GeoPoint(location.latitude,location.longitude)
+        val previous=_state.value.myLocation
+        val moved=previous != null && calculateDistanceMeters(previous,point)>=3
+        val heading=when {
+            location.hasBearing() && location.hasSpeed() && location.speed>=0.5f -> ((location.bearing%360)+360)%360
+            moved -> Direction.bearing(previous!!,point)
+            else -> _state.value.heading
         }
-        maybeUploadLocation(point)
+        lastGpsTime=SystemClock.elapsedRealtime()
+        _state.update { it.copy(myLocation=point, heading=heading, gpsAccuracy=location.accuracy,
+            isFacingRight=heading<180f) }
+        maybeUploadLocation(point,location.accuracy,heading,location.time+serverOffsetMs)
         refresh()
     }
 
-    private fun maybeUploadLocation(point: GeoPoint) {
-        val current = _state.value
-        if (current.code.isEmpty() || current.phase == MatchPhase.FINISHED || current.iAmFound) return
-        val now = SystemClock.elapsedRealtime()
-        val last = lastUpload
-        val shouldUpload = last == null ||
-            calculateDistanceMeters(last.first, point) >= UPLOAD_MIN_MOVE_METERS ||
-            now - last.second >= UPLOAD_MAX_INTERVAL_MS
-        if (!shouldUpload) return
-        lastUpload = point to now
-        repository.updateMyLocation(current.code, point)
+    private fun maybeUploadLocation(point: GeoPoint, accuracy: Float, heading: Float, measuredAt: Long) {
+        val current=_state.value
+        if (current.code.isEmpty() || current.phase==MatchPhase.FINISHED || current.iAmFound || current.isOffline || game?.status!=GameRepository.STATUS_STARTED) return
+        if (uploadJob?.isActive==true) return
+        val now=SystemClock.elapsedRealtime(); val last=lastUpload
+        if (last!=null && now-last.second<3_000L) return
+        if (last!=null && calculateDistanceMeters(last.first,point)<UPLOAD_MIN_MOVE_METERS && now-last.second<UPLOAD_MAX_INTERVAL_MS && kotlin.math.abs(current.heading-heading)<30) return
+        uploadJob=viewModelScope.launch {
+            try { repository.updateMyLocation(current.code,point,accuracy,heading,measuredAt); lastUpload=point to now }
+            catch(e:Exception) { report(e) }
+        }
     }
 
     // ---- Calcul de l'état de la partie ----
@@ -324,7 +351,7 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         val uid = myUid
 
         val ghosts = players
-            .filter { !it.isHost && it.id != game.hostId }
+            .filter { !it.isHost && it.id != game.hostId && it.active }
             .mapIndexed { index, player ->
                 MatchGhost(
                     id = player.id,
@@ -332,13 +359,18 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                     character = GHOST_CHARACTERS[index % GHOST_CHARACTERS.size],
                     location = player.location,
                     isFound = player.id in game.foundGhostIds,
-                    isMe = player.id == uid
+                    isMe = player.id == uid,
+                    skinId = player.skinId,
+                    heading = player.heading,
+                    locationFresh = System.currentTimeMillis()+serverOffsetMs-player.locationUpdatedAt in 0..30_000 && player.accuracy<=25
                 )
             }
         val pacmanLocation = players.firstOrNull { it.id == game.hostId }?.location
 
         // Chrono commun : tous les téléphones partent de l'heure de lancement enregistrée par Firebase
-        val now = System.currentTimeMillis()
+        _state.update { it.copy(pacmanSkin=players.firstOrNull { p -> p.id==game.hostId }?.pacmanSkin ?: "pacman_classic",
+            stalePlayers=ghosts.count { g -> !g.isFound && !g.locationFresh }) }
+        val now = System.currentTimeMillis()+serverOffsetMs
         val elapsed = (((now - (game.startedAtMillis ?: now)) / 1000L).toInt()).coerceAtLeast(0)
         val hidingEnd = game.hidingSeconds
         val seekingEnd = game.hidingSeconds + game.seekingSeconds
@@ -382,20 +414,23 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         if (current.phase == MatchPhase.FINISHED && phase == MatchPhase.FINISHED) remaining = current.remainingSeconds
 
         // Pacman (hôte) enregistre la fin de partie pour tout le monde
-        if (current.role == MatchRole.PACMAN && phase == MatchPhase.FINISHED && winner != null &&
-            game.status == GameRepository.STATUS_STARTED && !finishRequested
+        if (phase == MatchPhase.FINISHED && winner != null &&
+            game.status == GameRepository.STATUS_STARTED && !finishRequested && !current.isOffline
         ) {
             finishRequested = true
-            repository.finishGame(
-                code,
-                if (winner == MatchRole.PACMAN) GameRepository.WINNER_PACMAN else GameRepository.WINNER_GHOSTS
-            )
+            viewModelScope.launch {
+                try { repository.finishGame(code, if (winner == MatchRole.PACMAN) GameRepository.WINNER_PACMAN else GameRepository.WINNER_GHOSTS) }
+                catch (e: Exception) { report(e); delay(5_000L); finishRequested=false }
+            }
         }
 
+        val confirmed = game.status == GameRepository.STATUS_FINISHED || game.status == GameRepository.STATUS_CANCELLED
+        val displayedPhase = if (phase == MatchPhase.FINISHED && !confirmed) MatchPhase.SEEKING else phase
+        val displayedWinner = if (confirmed) winner else null
         if (current.role == MatchRole.PACMAN) {
-            refreshPacman(current, ghosts, phase, remaining, elapsed >= hidingEnd, winner, endMessage)
+            refreshPacman(current, ghosts, displayedPhase, remaining.coerceAtLeast(0), elapsed >= hidingEnd, displayedWinner, endMessage)
         } else {
-            refreshGhost(current, ghosts, pacmanLocation, phase, remaining, winner, endMessage)
+            refreshGhost(current, ghosts, pacmanLocation, displayedPhase, remaining.coerceAtLeast(0), displayedWinner, endMessage)
         }
     }
 
@@ -433,7 +468,7 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             val nowMs = SystemClock.elapsedRealtime()
-            val candidates = unfound.map { ghost ->
+            val candidates = unfound.filter { it.locationFresh }.map { ghost ->
                 Candidate(
                     ghost = ghost,
                     gpsDistance = ghost.location?.let { calculateDistanceMeters(myLocation, it) },
@@ -453,7 +488,7 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
             if (best != null) {
                 val closeByBluetooth = (best.bleRssi ?: Double.NEGATIVE_INFINITY) >= BLE_CATCH_RSSI
                 val closeByGps = (best.gpsDistance ?: Double.MAX_VALUE) <= GPS_CATCH_DISTANCE_METERS
-                if (closeByBluetooth || closeByGps) catchCandidate = best.ghost.id
+                if (closeByGps && !current.isOffline && SystemClock.elapsedRealtime()-lastGpsTime<15_000L && (current.gpsAccuracy ?: 1000f)<=25f) catchCandidate = best.ghost.id
             }
 
             // Pac-gommes vers la zone la plus proche, tant qu'on n'est pas dedans
@@ -491,7 +526,7 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         endMessage: String?
     ) {
         val me = ghosts.firstOrNull { it.isMe }
-        val iAmFound = me?.isFound == true || foundByBluetooth
+        val iAmFound = me?.isFound == true
         val myLocation = current.myLocation
         val nearbyByGps = myLocation != null && pacmanLocation != null &&
             calculateDistanceMeters(myLocation, pacmanLocation) <= PACMAN_NEARBY_METERS
@@ -533,7 +568,7 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         val request = routeRequest
         val now = SystemClock.elapsedRealtime()
         val targetChanged = request == null || request.targetGhostId != zone.ghostId
-        if (targetChanged) currentRoute = listOf(zone.center)
+        if (targetChanged) currentRoute = emptyList()
 
         val needsRefresh = targetChanged ||
             calculateDistanceMeters(request!!.from, from) > ROUTE_REFRESH_MOVE_METERS ||
@@ -542,15 +577,14 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
             routeRequest = RouteRequest(zone.ghostId, from, now)
             routeJob = viewModelScope.launch {
                 val path = FootRouteService.route(from, zone.center)
-                if (path != null && routeRequest?.targetGhostId == zone.ghostId) {
-                    currentRoute = path
-                }
+                currentRoute = path.orEmpty()
+                _state.update { it.copy(routeAvailable=path!=null) }
+                refresh()
             }
         }
-
-        // On repart du point du chemin le plus proche de Pacman pour ne pas tracer derrière lui
+        if(currentRoute.size<2) return emptyList()
         val nearestIndex = currentRoute.indices.minByOrNull { calculateDistanceMeters(from, currentRoute[it]) } ?: 0
-        return listOf(from) + currentRoute.drop(nearestIndex + 1).ifEmpty { listOf(zone.center) }
+        return currentRoute.drop(nearestIndex)
     }
 
     // ---- Bluetooth ----

@@ -25,7 +25,10 @@ data class MatchGhost(
     val character: String, // Blinky, Pinky, Inky, Clyde, Sue : choisit la couleur du sprite
     val location: GeoPoint?,
     val isFound: Boolean,
-    val isMe: Boolean
+    val isMe: Boolean,
+    val skinId: String = "ghost_red_classic",
+    val heading: Float = 0f,
+    val locationFresh: Boolean = false
 )
 
 /** Périmètre (taille d'un bâtiment) dans lequel un fantôme est caché. */
@@ -42,6 +45,13 @@ data class MatchState(
     val phase: MatchPhase = MatchPhase.LOADING,
     val remainingSeconds: Int = 0,
     val myLocation: GeoPoint? = null,
+    val heading: Float = 0f,
+    val pacmanSkin: String = "pacman_classic",
+    val gpsAccuracy: Float? = null,
+    val error: String? = null,
+    val routeAvailable: Boolean = true,
+    val stalePlayers: Int = 0,
+    val syncingCapture: Boolean = false,
     val isFacingRight: Boolean = true,
     val ghosts: List<MatchGhost> = emptyList(),
     val zones: List<GhostZone> = emptyList(),

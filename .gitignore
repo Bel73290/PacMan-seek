@@ -10,3 +10,8 @@ local.properties
 .externalNativeBuild
 .cxx
 .kotlin
+node_modules/
+*-debug.log
+.firebase/
+.env*
+!.env.example

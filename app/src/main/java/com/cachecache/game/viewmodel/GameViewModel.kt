@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.cachecache.game.data.GameRepository
 import com.cachecache.game.data.MockData
 import com.cachecache.game.model.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +24,7 @@ class GameViewModel : ViewModel() {
             hiddenPlayers = MockData.HiddenPlayersList,
             suspectZone = MockData.DefaultSuspectZone,
             pacDotsRoute = MockData.PacDotsRouteWaypoints,
-            recentHistory = MockData.RecentHistoryList
+            recentHistory = emptyList()
         )
     )
     val uiState: StateFlow<GameState> = _uiState.asStateFlow()
@@ -61,13 +63,17 @@ class GameViewModel : ViewModel() {
 
     fun joinGame(code: String) {
         if (_uiState.value.lobby?.isLoading == true) return
-        val normalizedCode = code.uppercase()
+        val normalizedCode = code.trim().uppercase(java.util.Locale.ROOT)
         _uiState.update { it.copy(lobby = LobbyState(isLoading = true)) }
         viewModelScope.launch {
             try {
-                gameRepository.joinGame(normalizedCode)
-                _uiState.update { it.copy(lobby = LobbyState(code = normalizedCode, isHost = false)) }
-                observeLobby(normalizedCode)
+                val joined = gameRepository.joinGame(normalizedCode)
+                val isHost = joined["isHost"] == true
+                if (joined["started"] == true) resumeMatch(ActiveMatch(normalizedCode, isHost))
+                else {
+                    _uiState.update { it.copy(currentScreen = Screen.SPLASH, lobby = LobbyState(code = normalizedCode, isHost = isHost)) }
+                    observeLobby(normalizedCode)
+                }
             } catch (e: Exception) {
                 showLobbyError(e)
             }
@@ -105,6 +111,13 @@ class GameViewModel : ViewModel() {
         }
     }
 
+    fun setReady() {
+        val lobby = _uiState.value.lobby ?: return
+        val code = lobby.code ?: return
+        val ready = lobby.players.firstOrNull { it.isMe }?.ready != true
+        viewModelScope.launch { try { gameRepository.setReady(code, ready) } catch (e: Exception) { showLobbyError(e) } }
+    }
+
     fun clearLobbyError() {
         _uiState.update { state -> state.copy(lobby = state.lobby?.copy(error = null)) }
     }
@@ -113,11 +126,11 @@ class GameViewModel : ViewModel() {
         lobbyJob?.cancel()
         lobbyJob = viewModelScope.launch {
             launch {
-                gameRepository.observePlayers(code).collect { players ->
+                gameRepository.observePlayers(code).catch { showLobbyError(it) }.collect { players ->
                     _uiState.update { state -> state.copy(lobby = state.lobby?.copy(players = players)) }
                 }
             }
-            gameRepository.observeStatus(code).collect { status ->
+            gameRepository.observeStatus(code).catch { showLobbyError(it) }.collect { status ->
                 when (status) {
                     GameRepository.STATUS_STARTED -> {
                         // Le salon a rempli son rôle : on le ferme et tout le monde part sur la carte
@@ -154,11 +167,12 @@ class GameViewModel : ViewModel() {
         _uiState.update { it.copy(activeMatch = null, currentScreen = Screen.SPLASH) }
     }
 
-    private fun showLobbyError(e: Exception) {
+    private fun showLobbyError(e: Throwable) {
+        if (e is CancellationException) throw e
         val message = when (e) {
             is GameRepository.GameNotFoundException,
             is GameRepository.GameAlreadyStartedException -> e.message
-            else -> "Connexion impossible. Vérifie ta connexion Internet."
+            else -> e.message ?: "Connexion impossible. Vérifie ta connexion Internet."
         }
         android.util.Log.w("GameViewModel", "Erreur salon", e)
         _uiState.update { state ->
@@ -529,64 +543,6 @@ class GameViewModel : ViewModel() {
             )
         }
         recalculateDistances(startLoc)
-    }
-
-    fun equipAvatar(avatarId: String) {
-        _uiState.update { it.copy(equippedAvatarId = avatarId) }
-    }
-
-    fun unlockAndEquipAvatar(avatar: AvatarItem) {
-        _uiState.update { state ->
-            if (state.unlockedAvatarIds.contains(avatar.id)) {
-                state.copy(equippedAvatarId = avatar.id)
-            } else if (state.userScore >= avatar.price) {
-                state.copy(
-                    userScore = state.userScore - avatar.price,
-                    unlockedAvatarIds = state.unlockedAvatarIds + avatar.id,
-                    equippedAvatarId = avatar.id
-                )
-            } else {
-                state
-            }
-        }
-    }
-
-    fun addXp(amount: Int) {
-        _uiState.update { state ->
-            var currentXp = state.userXp + amount
-            var currentLevel = state.userLevel
-            var currentMaxXp = state.maxXp
-            while (currentXp >= currentMaxXp) {
-                currentXp -= currentMaxXp
-                currentLevel++
-            }
-            val newBattlePassUnlocked = MockData.BattlePassTiers
-                .filter { it.level <= currentLevel }
-                .map { it.avatarId }
-                .toSet()
-
-            state.copy(
-                userXp = currentXp,
-                userLevel = currentLevel,
-                maxXp = currentMaxXp,
-                unlockedAvatarIds = state.unlockedAvatarIds + newBattlePassUnlocked
-            )
-        }
-    }
-
-    fun addLevel(count: Int = 1) {
-        _uiState.update { state ->
-            val currentLevel = state.userLevel + count
-            val newBattlePassUnlocked = MockData.BattlePassTiers
-                .filter { it.level <= currentLevel }
-                .map { it.avatarId }
-                .toSet()
-
-            state.copy(
-                userLevel = currentLevel,
-                unlockedAvatarIds = state.unlockedAvatarIds + newBattlePassUnlocked
-            )
-        }
     }
 
     companion object {

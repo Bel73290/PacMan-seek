@@ -45,7 +45,12 @@ fun PlayModeDialog(
     onCreateGame: () -> Unit,
     onJoinGame: (String) -> Unit,
     onLaunchGame: () -> Unit,
-    onClearError: () -> Unit
+    onClearError: () -> Unit,
+    onReady: () -> Unit,
+    onInviteFriends: () -> Unit,
+    onSaveSettings: (Int, Int) -> Unit,
+    hidingSeconds: Int,
+    seekingMinutes: Int
 ) {
     var step by remember { mutableStateOf(PlayStep.CHOICE) }
     var joinCode by remember { mutableStateOf("") }
@@ -100,7 +105,12 @@ fun PlayModeDialog(
                 when {
                     inLobby -> LobbyContent(
                         lobby = lobby!!,
-                        onLaunchGame = onLaunchGame
+                        onLaunchGame = onLaunchGame,
+                        onReady = onReady,
+                        onInviteFriends = onInviteFriends,
+                        onSaveSettings = onSaveSettings,
+                        hidingSeconds = hidingSeconds,
+                        seekingMinutes = seekingMinutes
                     )
 
                     step == PlayStep.CHOICE -> {
@@ -196,7 +206,12 @@ fun PlayModeDialog(
 @Composable
 private fun LobbyContent(
     lobby: LobbyState,
-    onLaunchGame: () -> Unit
+    onLaunchGame: () -> Unit,
+    onReady: () -> Unit,
+    onInviteFriends: () -> Unit,
+    onSaveSettings: (Int, Int) -> Unit,
+    hidingSeconds: Int,
+    seekingMinutes: Int
 ) {
     val clipboard = LocalClipboardManager.current
     val code = lobby.code.orEmpty()
@@ -250,11 +265,23 @@ private fun LobbyContent(
     }
 
     Spacer(modifier = Modifier.height(16.dp))
+    TextButton(onClick=onInviteFriends) { Text("Inviter mes amis") }
+    if (!lobby.isHost) {
+        Button(onClick=onReady) { Text(if(lobby.players.firstOrNull { it.isMe }?.ready == true) "Je ne suis plus prêt" else "Je suis prêt") }
+    }
     if (lobby.isHost) {
+        Text("Cache : ${hidingSeconds / 60} min • Chasse : $seekingMinutes min", color=TextSecondary)
+        Row {
+            TextButton(onClick={onSaveSettings((hidingSeconds-60).coerceAtLeast(60),seekingMinutes)}){Text("Cache −")}
+            TextButton(onClick={onSaveSettings((hidingSeconds+60).coerceAtMost(600),seekingMinutes)}){Text("Cache +")}
+            TextButton(onClick={onSaveSettings(hidingSeconds,(seekingMinutes-1).coerceAtLeast(1))}){Text("Chasse −")}
+            TextButton(onClick={onSaveSettings(hidingSeconds,(seekingMinutes+1).coerceAtMost(60))}){Text("Chasse +")}
+        }
+
         PlayPillButton(
             text = "Lancer la partie",
             primary = true,
-            enabled = lobby.players.size >= 2,
+            enabled = lobby.players.size >= 2 && lobby.players.all { it.ready },
             onClick = onLaunchGame
         )
         if (lobby.players.size < 2) {
@@ -298,9 +325,8 @@ private fun LobbyPlayerRow(player: LobbyPlayer) {
             fontSize = 15.sp,
             modifier = Modifier.weight(1f)
         )
-        if (player.isHost) {
-            Text("Hôte", color = PacmanYellow, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-        }
+        Text(if(player.isHost) "Hôte · prêt" else if(player.ready) "Prêt" else "En attente", color = if(player.ready) GhostCyan else TextMuted, fontSize = 12.sp)
+
     }
 }
 

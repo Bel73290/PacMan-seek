@@ -12,21 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
-/**
- * Parties multijoueur stockées dans Firestore :
- *   games/{code}                 -> hostId, status ("waiting" | "started" | "finished" | "cancelled"),
- *                                   createdAt, startedAt, hidingSeconds, seekingSeconds,
- *                                   foundGhostIds, winner ("pacman" | "ghosts")
- *   games/{code}/players/{uid}   -> name, isHost, joinedAt, lat, lng, locationUpdatedAt
- *
- * L'hôte (Pacman) est le seul à modifier le document de la partie ; chaque joueur
- * ne modifie que son propre document (voir firestore.rules).
- *
- * Hors ligne : Firestore garde une copie locale des parties (cache persistant activé par défaut
- * sur Android) et met les écritures en file d'attente. Pendant la partie, on n'attend donc jamais
- * la réponse du serveur : l'écriture est visible tout de suite en local et part dès que le
- * réseau revient.
- */
+/** Real-time reads use Firestore; all game decisions are authenticated server calls. */
 class GameRepository(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
@@ -58,86 +44,26 @@ class GameRepository(
 
     private fun defaultName(uid: String) = "Joueur ${uid.takeLast(4).uppercase()}"
 
-    suspend fun createGame(codeLength: Int): String {
-        val uid = currentUserId()
-        repeat(5) {
-            val code = (1..codeLength).map { CODE_ALPHABET.random() }.joinToString("")
-            val gameRef = games().document(code)
-            val created = db.runTransaction { tx ->
-                if (tx.get(gameRef).exists()) return@runTransaction false
-                tx.set(
-                    gameRef,
-                    mapOf(
-                        "hostId" to uid,
-                        "status" to STATUS_WAITING,
-                        "createdAt" to FieldValue.serverTimestamp()
-                    )
-                )
-                tx.set(gameRef.collection("players").document(uid), playerData(uid, isHost = true))
-                true
-            }.await()
-            if (created) return code
-        }
-        throw IllegalStateException("Impossible de générer un code de partie, réessaie.")
-    }
+    private val online = OnlineRepository()
 
-    suspend fun joinGame(code: String) {
-        val uid = currentUserId()
-        val game = games().document(code).get().await()
-        if (!game.exists()) throw GameNotFoundException()
-        if (game.getString("status") != STATUS_WAITING) throw GameAlreadyStartedException()
-        games().document(code).collection("players").document(uid)
-            .set(playerData(uid, isHost = false)).await()
-    }
-
-    /** Lance la partie : les chronos de tous les téléphones partent de `startedAt` (heure serveur). */
+    suspend fun createGame(codeLength: Int): String = online.call("createGame")["code"] as String
+    suspend fun joinGame(code: String): Map<String, Any?> = online.call("joinGame", mapOf("code" to code))
     suspend fun startGame(code: String, hidingSeconds: Int, seekingSeconds: Int) {
-        games().document(code).update(
-            mapOf(
-                "status" to STATUS_STARTED,
-                "startedAt" to FieldValue.serverTimestamp(),
-                "hidingSeconds" to hidingSeconds,
-                "seekingSeconds" to seekingSeconds,
-                "foundGhostIds" to emptyList<String>()
-            )
-        ).await()
+        online.call("startGame", mapOf("code" to code, "hidingSeconds" to hidingSeconds, "seekingSeconds" to seekingSeconds))
     }
-
-    /** Pacman (hôte) déclare un fantôme trouvé. Fonctionne hors ligne (envoi différé). */
-    fun markGhostFound(code: String, ghostId: String) {
-        games().document(code).update("foundGhostIds", FieldValue.arrayUnion(ghostId))
-            .addOnFailureListener { Log.w(TAG, "Capture refusée par le serveur", it) }
-    }
-
-    /** Fonctionne hors ligne (envoi différé). */
-    fun finishGame(code: String, winner: String) {
-        games().document(code).update(mapOf("status" to STATUS_FINISHED, "winner" to winner))
-            .addOnFailureListener { Log.w(TAG, "Fin de partie refusée par le serveur", it) }
-    }
-
-    /** Fonctionne hors ligne : seule la dernière position compte, Firestore regroupe les envois. */
-    fun updateMyLocation(code: String, location: GeoPoint) {
+    suspend fun setReady(code: String, ready: Boolean) { online.call("setReady", mapOf("code" to code, "ready" to ready)) }
+    suspend fun markGhostFound(code: String, ghostId: String) { online.call("captureGhost", mapOf("code" to code, "ghostId" to ghostId)) }
+    suspend fun finishGame(code: String, winner: String) { online.call("finishGame", mapOf("code" to code)) }
+    suspend fun serverTime(): Long = (online.call("serverTime")["now"] as Number).toLong()
+    suspend fun updateMyLocation(code: String, location: GeoPoint, accuracy: Float, heading: Float, measuredAt: Long) {
         val uid = auth.currentUser?.uid ?: return
-        games().document(code).collection("players").document(uid).update(
-            mapOf(
-                "lat" to location.latitude,
-                "lng" to location.longitude,
-                "locationUpdatedAt" to FieldValue.serverTimestamp()
-            )
-        ).addOnFailureListener { Log.w(TAG, "Position refusée par le serveur", it) }
+        games().document(code).collection("players").document(uid).update(mapOf(
+            "lat" to location.latitude, "lng" to location.longitude, "accuracy" to accuracy.toDouble(),
+            "heading" to heading.toDouble(), "measuredAt" to com.google.firebase.Timestamp(java.util.Date(measuredAt)), "locationUpdatedAt" to FieldValue.serverTimestamp()
+        )).await()
     }
-
     suspend fun myUserId(): String = currentUserId()
-
-    /** Quitte le salon ; si c'est l'hôte, la partie est annulée pour tout le monde. */
-    suspend fun leaveGame(code: String, isHost: Boolean) {
-        val uid = currentUserId()
-        // Pas d'attente du serveur : hors ligne, le départ sera envoyé au retour du réseau
-        if (isHost) {
-            games().document(code).update("status", STATUS_CANCELLED)
-        }
-        games().document(code).collection("players").document(uid).delete()
-    }
+    suspend fun leaveGame(code: String, isHost: Boolean) { online.call("leaveGame", mapOf("code" to code)) }
 
     fun observeStatus(code: String): Flow<String?> = callbackFlow {
         val registration = games().document(code).addSnapshotListener { snapshot, error ->
@@ -166,7 +92,8 @@ class GameRepository(
                         id = doc.id,
                         name = doc.getString("name") ?: defaultName(doc.id),
                         isHost = doc.getBoolean("isHost") == true,
-                        isMe = doc.id == myId
+                        isMe = doc.id == myId,
+                        ready = doc.getBoolean("ready") == true
                     )
                 }
                 trySend(players)
@@ -188,7 +115,13 @@ class GameRepository(
         val id: String,
         val name: String,
         val isHost: Boolean,
-        val location: GeoPoint?
+        val location: GeoPoint?,
+        val skinId: String = "ghost_red_classic",
+        val pacmanSkin: String = "pacman_classic",
+        val heading: Float = 0f,
+        val active: Boolean = true,
+        val accuracy: Float = 1000f,
+        val locationUpdatedAt: Long = 0L
     )
 
     fun observeGame(code: String): Flow<GameSnapshot?> = callbackFlow {
@@ -244,7 +177,13 @@ class GameRepository(
                             id = doc.id,
                             name = doc.getString("name") ?: defaultName(doc.id),
                             isHost = doc.getBoolean("isHost") == true,
-                            location = if (lat != null && lng != null) GeoPoint(lat, lng) else null
+                            location = if (lat != null && lng != null) GeoPoint(lat, lng) else null,
+                            skinId = doc.getString("ghostSkin") ?: "ghost_red_classic",
+                            pacmanSkin = doc.getString("pacmanSkin") ?: "pacman_classic",
+                            heading = (doc.getDouble("heading") ?: 0.0).toFloat(),
+                            active = doc.getBoolean("active") != false,
+                            accuracy = (doc.getDouble("accuracy") ?: 1000.0).toFloat(),
+                            locationUpdatedAt = doc.getTimestamp("locationUpdatedAt")?.toDate()?.time ?: 0L
                         )
                     }
                 trySend(players)

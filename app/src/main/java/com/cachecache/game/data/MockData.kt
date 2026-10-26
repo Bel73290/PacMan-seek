@@ -298,6 +298,10 @@ object MockData {
     )
 
     val AvatarItemsCatalog = listOf(
+        AvatarItem("pacman_classic", "Pacman Classique", AvatarCategory.CLASSIC, "Le chercheur original.", isAnimatedPacman = true),
+        AvatarItem("pacman_neon", "Pacman Néon", AvatarCategory.PREMIUM, "Une lueur électrique pour la chasse.", price = 650, drawableResId = com.cachecache.game.R.drawable.avatar_pacman_neon, isPremium = true),
+        AvatarItem("pacman_pirate", "Pacman Pirate", AvatarCategory.PREMIUM, "À l'abordage des cachettes.", price = 800, drawableResId = com.cachecache.game.R.drawable.avatar_pacman_pirate, isPremium = true),
+        AvatarItem("pacman_wizard", "Pacman Mage", AvatarCategory.PREMIUM, "Un chercheur aux pouvoirs mystérieux.", price = 900, drawableResId = com.cachecache.game.R.drawable.avatar_pacman_wizard, isPremium = true),
         // =========================================================================
         // === 1. TOUS LES FANTÔMES CLASSIQUES & THÉMATIQUES (22 SKINS) ===
         // =========================================================================

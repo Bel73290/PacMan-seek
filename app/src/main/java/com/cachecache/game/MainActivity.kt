@@ -6,174 +6,85 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.cachecache.game.data.MatchSessionStore
-import com.cachecache.game.model.Screen
+import com.cachecache.game.model.*
 import com.cachecache.game.ui.screens.*
 import com.cachecache.game.ui.theme.CacheCacheTheme
 import com.cachecache.game.ui.theme.DeepNavy
-import com.cachecache.game.viewmodel.GameViewModel
-import com.cachecache.game.viewmodel.MatchViewModel
+import com.cachecache.game.viewmodel.*
 
 class MainActivity : ComponentActivity() {
-
     private val viewModel: GameViewModel by viewModels()
     private val matchViewModel: MatchViewModel by viewModels()
-    private val matchSessionStore by lazy { MatchSessionStore(this) }
+    private val online: OnlineViewModel by viewModels()
+    private val sessions by lazy { MatchSessionStore(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-
-        // L'app a été fermée pendant une partie : on y retourne directement
-        if (viewModel.uiState.value.activeMatch == null) {
-            matchSessionStore.load()?.let { viewModel.resumeMatch(it) }
-        }
-
+        sessions.load()?.let { viewModel.resumeMatch(it) }
         setContent {
             CacheCacheTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = DeepNavy
-                ) {
-                    val state by viewModel.uiState.collectAsState()
-
-                    // Démarre la partie multijoueur dès que le salon est lancé
-                    LaunchedEffect(state.activeMatch) {
-                        val match = state.activeMatch
-                        if (match != null) {
-                            matchSessionStore.save(match)
-                            matchViewModel.start(match)
-                        } else {
-                            matchSessionStore.clear()
+                val state by viewModel.uiState.collectAsState()
+                val account by online.state.collectAsState()
+                val snack = remember { SnackbarHostState() }
+                val navigate: (Screen) -> Unit = { screen ->
+                    viewModel.setScreen(screen)
+                    if (screen == Screen.LEADERBOARD) online.loadLeaderboard()
+                }
+                LaunchedEffect(state.activeMatch) {
+                    state.activeMatch?.let { sessions.save(it); matchViewModel.start(it) } ?: sessions.clear()
+                }
+                LaunchedEffect(account.error, account.message) {
+                    if (state.currentScreen == Screen.SPLASH) {
+                        val message = account.error ?: account.message
+                        if (message != null) {
+                            if (snack.showSnackbar(message, actionLabel = if(account.error != null) "Réessayer" else null) == SnackbarResult.ActionPerformed) online.retry()
+                            online.clearNotice()
                         }
                     }
-
-                    // Hardware Back Button Navigation
-                    BackHandler(enabled = state.currentScreen != Screen.SPLASH) {
-                        when (state.currentScreen) {
-                            Screen.GAME -> viewModel.setScreen(Screen.SPLASH)
-                            Screen.STREET_VIEW -> viewModel.closeStreetView()
-                            Screen.LEADERBOARD -> viewModel.setScreen(Screen.SPLASH)
-                            Screen.SHOP -> viewModel.setScreen(Screen.SPLASH)
-                            Screen.RADAR_FILTERS -> viewModel.setScreen(Screen.GAME)
-                            Screen.GUIDE -> viewModel.setScreen(Screen.SPLASH)
-                            Screen.PROFILE -> viewModel.setScreen(Screen.SPLASH)
-                            Screen.SPLASH -> finish()
-                            Screen.MATCH -> Unit // Géré par MatchScreen (confirmation avant de quitter)
-                        }
-                    }
-
-                    // Screen Router for All 8 Screens
-                    when (state.currentScreen) {
-                        Screen.SPLASH -> {
-                            SplashScreen(
-                                state = state,
-                                onCreateGame = { viewModel.createGame() },
-                                onJoinGame = { code -> viewModel.joinGame(code) },
-                                onLaunchGame = { viewModel.launchLobbyGame() },
-                                onLeaveLobby = { viewModel.leaveLobby() },
-                                onClearLobbyError = { viewModel.clearLobbyError() },
-                                onOpenMenu = { viewModel.setScreen(Screen.LEADERBOARD) }
+                }
+                BackHandler(enabled = state.currentScreen != Screen.SPLASH && state.currentScreen != Screen.MATCH) {
+                    navigate(if(state.currentScreen == Screen.FRIENDS) Screen.PROFILE else Screen.SPLASH)
+                }
+                Surface(Modifier.fillMaxSize(), color=DeepNavy) {
+                    Box(Modifier.fillMaxSize()) {
+                        when(state.currentScreen) {
+                            Screen.SPLASH -> SplashScreen(
+                                state=state,
+                                onCreateGame={viewModel.createGame()}, onJoinGame={viewModel.joinGame(it)},
+                                onLaunchGame={viewModel.launchLobbyGame()}, onReady={viewModel.setReady()},
+                                onInviteFriends={navigate(Screen.FRIENDS)},
+                                onLeaveLobby={viewModel.leaveLobby()}, onClearLobbyError={viewModel.clearLobbyError()},
+                                onOpenMenu={navigate(Screen.PROFILE)},
+                                onSaveSettings={hide,hunt->viewModel.updateSettings(hide,hunt)},
+                                canPlay=account.profile.isNotEmpty() && !account.loading
                             )
-                        }
-                        Screen.GAME -> {
-                            GameScreen(
-                                state = state,
-                                onBackToHome = { viewModel.setScreen(Screen.SPLASH) },
-                                onNavigate = { screen -> viewModel.setScreen(screen) },
-                                onOpenStreetView = {},
-                                onGoToSuspectZone = { viewModel.goToSuspectZone() },
-                                onDismissSuspectZoneModal = { viewModel.dismissSuspectZoneModal() },
-                                onDismissProximityAlert = { viewModel.dismissProximityAlert() },
-                                onMapTap = { geo -> viewModel.onMapTapped(geo) },
-                                onPlayerTap = { player -> viewModel.onPlayerTapped(player) },
-                                onRecenter = { viewModel.recenterOnCampus() },
-                                onDismissCaptureDialog = { viewModel.dismissCaptureDialog() },
-                                onTestInstantCapture = {},
-                                onReplay = { viewModel.restartGame() }
-                            )
-                        }
-                        Screen.STREET_VIEW -> {
-                            // Mode AR supprimé : redirection vers la carte du jeu
-                            viewModel.setScreen(Screen.GAME)
-                        }
-                        Screen.LEADERBOARD -> {
-                            LeaderboardScreen(
-                                state = state,
-                                onBack = { viewModel.setScreen(Screen.SPLASH) },
-                                onNavigate = { screen -> viewModel.setScreen(screen) },
-                                onSelectTab = { tab -> viewModel.setLeaderboardTab(tab) }
-                            )
-                        }
-                        Screen.RADAR_FILTERS -> {
-                            RadarFilterScreen(
-                                state = state,
-                                onNavigate = { screen -> viewModel.setScreen(screen) },
-                                onToggleFilterMenu = { viewModel.openFilterMenu(!state.showFilterMenu) },
-                                onSelectFilter = { filter -> viewModel.setFilter(filter) },
-                                onMapTap = { geo -> viewModel.onMapTapped(geo) },
-                                onPlayerTap = { player -> viewModel.onPlayerTapped(player) },
-                                onRecenter = { viewModel.recenterOnCampus() }
-                            )
-                        }
-                        Screen.GUIDE -> {
-                            RulesGuideScreen(
-                                state = state,
-                                onBack = { viewModel.setScreen(Screen.SPLASH) },
-                                onStartGame = { viewModel.startGame() }
-                            )
-                        }
-                        Screen.PROFILE -> {
-                            ProfileScreen(
-                                state = state,
-                                onNavigate = { screen -> viewModel.setScreen(screen) },
-                                onBack = { viewModel.setScreen(Screen.SPLASH) },
-                                onOpenSettings = { viewModel.openSettingsDialog(true) },
-                                onEquipAvatar = { avatarId -> viewModel.equipAvatar(avatarId) },
-                                onSelectAchievementSkin = { ach -> viewModel.selectAchievementSkin(ach) },
-                                onSelectBadge = { badge -> viewModel.selectBadge(badge) },
-                                onAddXp = { xp -> viewModel.addXp(xp) },
-                                onAddLevel = { count -> viewModel.addLevel(count) }
-                            )
-                        }
-                        Screen.MATCH -> {
-                            val matchState by matchViewModel.state.collectAsState()
-                            MatchScreen(
-                                state = matchState,
-                                onPermissionsResult = { matchViewModel.onPermissionsResult() },
-                                onCatch = { matchViewModel.catchGhost() },
-                                onLeave = {
-                                    matchViewModel.leave()
-                                    viewModel.exitMatch()
-                                }
-                            )
-                        }
-                        Screen.SHOP -> {
-                            ShopScreen(
-                                state = state,
-                                onBack = { viewModel.setScreen(Screen.SPLASH) },
-                                onNavigate = { screen -> viewModel.setScreen(screen) },
-                                onEquipAvatar = { avatarId -> viewModel.equipAvatar(avatarId) },
-                                onUnlockAvatar = { avatar -> viewModel.unlockAndEquipAvatar(avatar) }
-                            )
-                        }
-                    }
-
-                    if (state.showSettingsDialog && state.currentScreen != Screen.SPLASH) {
-                        com.cachecache.game.ui.components.SettingsDialog(
-                            currentSettings = state.settings,
-                            onDismiss = { viewModel.openSettingsDialog(false) },
-                            onSave = { freezeSec, huntMin ->
-                                viewModel.updateSettings(freezeSec, huntMin)
+                            Screen.PROFILE -> OnlineProfileScreen(account,navigate,{online.retry()},
+                                {existing->online.connect(this@MainActivity,existing)},
+                                {name->online.action("saveProfile",mapOf("name" to name))},
+                                {id->online.action("equipSkin",mapOf("skinId" to id))},
+                                {code->viewModel.joinGame(code)})
+                            Screen.LEADERBOARD -> OnlineLeaderboardScreen(account,navigate,{scope,more->online.loadLeaderboard(scope,more)})
+                            Screen.SHOP -> OnlineShopScreen(account,navigate,{online.retry()},
+                                {id->online.action("purchaseSkin",mapOf("skinId" to id),"Skin ajouté à ta collection.")},
+                                {id->online.action("equipSkin",mapOf("skinId" to id))})
+                            Screen.FRIENDS -> FriendsScreen(account,navigate,{online.retry()},
+                                {name,data->online.action(name,data)}, {code->viewModel.joinGame(code)})
+                            Screen.MATCH -> {
+                                val match by matchViewModel.state.collectAsState()
+                                MatchScreen(match,{matchViewModel.onPermissionsResult()},{matchViewModel.catchGhost()},
+                                    {matchViewModel.leave();viewModel.exitMatch();online.loadLeaderboard()})
                             }
-                        )
+                            Screen.GUIDE -> RulesGuideScreen(state,{navigate(Screen.SPLASH)},{navigate(Screen.SPLASH)})
+                            else -> LaunchedEffect(Unit) { navigate(Screen.SPLASH) }
+                        }
+                        SnackbarHost(snack,Modifier.align(Alignment.BottomCenter).navigationBarsPadding())
                     }
                 }
             }

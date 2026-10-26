@@ -28,6 +28,8 @@ data class HiddenPlayer(
     val color: Color,
     val isFound: Boolean = false,
     val isScared: Boolean = false,
+    val skinId: String? = null,
+    val heading: Float = 0f,
     val distanceMeters: Double = 999.0
 ) {
     val actualColor: Color get() = resolveGhostColor(name, color)
@@ -130,6 +132,7 @@ enum class Screen {
     GUIDE,
     PROFILE,
     SHOP,
+    FRIENDS,
     MATCH // Partie multijoueur en temps réel
 }
 
@@ -194,20 +197,14 @@ data class GameState(
     val pacDotsRoute: List<GeoPoint> = emptyList(),
     val activeFilter: FilterType = FilterType.ALL,
     val activeLeaderboardTab: LeaderboardTab = LeaderboardTab.GENERAL,
-    val userScore: Int = 1_000_000,
-    val userLevel: Int = 12,
-    val userXp: Int = 250,
+    val userScore: Int = 0,
+    val userLevel: Int = 1,
+    val userXp: Int = 0,
     val maxXp: Int = 500,
-    val totalGamesPlayed: Int = 12,
-    val totalVictories: Int = 7,
-    val equippedAvatarId: String = "ghost_red_headphones",
-    val unlockedAvatarIds: Set<String> = setOf(
-        "ghost_red_classic",
-        "ghost_pink_classic",
-        "ghost_red_headphones",
-        "avatar_ghost_cowboy",
-        "premium_ghost_gold_king"
-    ),
+    val totalGamesPlayed: Int = 0,
+    val totalVictories: Int = 0,
+    val equippedAvatarId: String = "ghost_red_classic",
+    val unlockedAvatarIds: Set<String> = setOf("ghost_red_classic", "pacman_classic"),
     val isGhostProximityAlertVisible: Boolean = true,
     val isStreetViewMiniVisible: Boolean = true,
     val isStreetViewRadarOpen: Boolean = true,
@@ -226,7 +223,8 @@ data class LobbyPlayer(
     val id: String,
     val name: String,
     val isHost: Boolean,
-    val isMe: Boolean
+    val isMe: Boolean,
+    val ready: Boolean = false
 )
 
 data class LobbyState(

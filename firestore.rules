@@ -1,21 +1,40 @@
 rules_version = '2';
-
-// Règles Firestore de Pac & Seek : à coller dans la console Firebase
-// (Firestore Database > Règles), puis "Publier".
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    match /games/{code} {
-      allow read: if request.auth != null;
-      // Seul l'hôte crée la partie et peut changer son statut (lancer / annuler)
-      allow create: if request.auth != null && request.resource.data.hostId == request.auth.uid;
-      allow update: if request.auth != null && resource.data.hostId == request.auth.uid;
-
-      match /players/{uid} {
-        allow read: if request.auth != null;
-        // Chaque joueur ne peut ajouter / retirer que lui-même
-        allow write: if request.auth != null && request.auth.uid == uid;
+    function signedIn() { return request.auth != null; }
+    function owner(uid) { return signedIn() && request.auth.uid == uid; }
+    function game(code) { return get(/databases/$(database)/documents/games/$(code)).data; }
+    function member(code) { return signedIn() && request.auth.uid in game(code).memberIds; }
+    match /users/{uid} {
+      allow read: if owner(uid);
+      allow write: if false;
+      match /{collection}/{doc} {
+        allow read: if owner(uid) && collection in ['history', 'friends', 'requests', 'invites'];
+        allow write: if false;
       }
     }
+    match /players/{uid} { allow read: if signedIn(); allow write: if false; }
+    match /seasons/{season}/scores/{uid} { allow read: if signedIn(); allow write: if false; }
+    match /games/{code} {
+      allow read: if member(code);
+      allow write: if false;
+      match /players/{uid} {
+        allow read: if member(code);
+        allow create, delete: if false;
+        // Only the current player's sensors may be written by a phone.
+        allow update: if owner(uid) && member(code) && game(code).status == 'started'
+          && resource.data.active == true
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lat','lng','accuracy','heading','locationUpdatedAt','measuredAt'])
+          && request.resource.data.lat is number && request.resource.data.lat >= -90 && request.resource.data.lat <= 90
+          && request.resource.data.lng is number && request.resource.data.lng >= -180 && request.resource.data.lng <= 180
+          && request.resource.data.accuracy is number && request.resource.data.accuracy >= 0 && request.resource.data.accuracy <= 1000
+          && request.resource.data.heading is number && request.resource.data.heading >= 0 && request.resource.data.heading < 360
+          && request.resource.data.locationUpdatedAt == request.time
+          && request.resource.data.measuredAt is timestamp
+          && request.resource.data.measuredAt >= request.time - duration.value(15, 's')
+          && request.resource.data.measuredAt <= request.time + duration.value(5, 's');
+      }
+    }
+    match /{document=**} { allow read, write: if false; }
   }
 }

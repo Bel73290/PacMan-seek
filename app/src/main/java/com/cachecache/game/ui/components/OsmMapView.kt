@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.cachecache.game.data.MockData
 import com.cachecache.game.R
 import com.cachecache.game.model.*
 import com.cachecache.game.ui.theme.*
@@ -45,6 +46,8 @@ import kotlin.math.sin
 fun OsmMapView(
     seekerLocation: GeoPoint,
     seekerHeading: Float,
+    seekerSkinId: String = "pacman_classic",
+    recenterKey: Int = 0,
     isFacingRight: Boolean = true,
     isFrozen: Boolean = false,
     capturingGhost: HiddenPlayer? = null,
@@ -59,6 +62,31 @@ fun OsmMapView(
 ) {
     val context = LocalContext.current
     var mapViewRef by remember { mutableStateOf<MapView?>(null) }
+
+    var following by remember { mutableStateOf(true) }
+    val skinIds = hiddenPlayers.mapNotNull { it.skinId }.toSet() + seekerSkinId
+    val skinBitmaps = remember(skinIds) {
+        skinIds.mapNotNull { id ->
+            val resource = MockData.AvatarItemsCatalog.firstOrNull { it.id == id }?.drawableResId ?: return@mapNotNull null
+            val bounds = BitmapFactory.Options().apply { inJustDecodeBounds=true }
+            BitmapFactory.decodeResource(context.resources,resource,bounds)
+            val options = BitmapFactory.Options().apply {
+                var sample=1
+                while (bounds.outWidth/sample>160 || bounds.outHeight/sample>160) sample*=2
+                inSampleSize=sample
+            }
+            BitmapFactory.decodeResource(context.resources,resource,options)?.asImageBitmap()?.let { id to it }
+        }.toMap()
+    }
+    DisposableEffect(mapViewRef) {
+        val map=mapViewRef
+        map?.onResume()
+        onDispose { map?.onPause(); map?.onDetach() }
+    }
+    LaunchedEffect(recenterKey) {
+        following=true
+        mapViewRef?.controller?.animateTo(OsmGeoPoint(seekerLocation.latitude,seekerLocation.longitude))
+    }
 
     // Preload directional ghost bitmaps and pacman chomp frames
     val ghostBitmaps = remember {
@@ -258,6 +286,7 @@ fun OsmMapView(
 
     // Camera continuously follows seeker centered
     LaunchedEffect(seekerLocation) {
+        if (!following) return@LaunchedEffect
         mapViewRef?.let { map ->
             map.controller.setCenter(OsmGeoPoint(seekerLocation.latitude, seekerLocation.longitude))
             redrawTrigger++
@@ -273,6 +302,10 @@ fun OsmMapView(
                 MapView(ctx).apply {
                     setTileSource(TileSourceFactory.MAPNIK)
                     setMultiTouchControls(true)
+                    setOnTouchListener { _, event ->
+                        if(event.actionMasked==android.view.MotionEvent.ACTION_MOVE) following=false
+                        false
+                    }
                     isTilesScaledToDpi = true
                     controller.setZoom(18.2)
                     controller.setCenter(OsmGeoPoint(seekerLocation.latitude, seekerLocation.longitude))
@@ -501,7 +534,12 @@ fun OsmMapView(
                 val offsetX = if (player.isScared) scaredTrembleX else 0f
                 val topLeft = Offset(ghostCenter.x - ghostSize / 2f + offsetX, ghostCenter.y - ghostSize / 2f)
 
-                if (ghostBmp != null) {
+                val selectedSkin = if(!player.isScared) skinBitmaps[player.skinId] else null
+                if (selectedSkin != null) {
+                    rotate(Direction.angle(player.heading)-180f,ghostCenter) {
+                        drawImage(selectedSkin,dstOffset=IntOffset((ghostCenter.x-ghostSize/2).toInt(),(ghostCenter.y-ghostSize/2).toInt()),dstSize=IntSize(ghostSize.toInt(),ghostSize.toInt()))
+                    }
+                } else if (ghostBmp != null) {
                     val bmpW = ghostSize
                     val bmpH = bmpW * (ghostBmp.height.toFloat() / ghostBmp.width.toFloat())
                     drawImage(
@@ -543,24 +581,16 @@ fun OsmMapView(
 
             val chompBmp = pacmanChompBitmaps.getOrNull(pacmanFrameIndex.coerceIn(0, pacmanChompBitmaps.size - 1))
 
-            // Pacman strictly facing right or left (horizontal mirror based on movement)
-            scale(scaleX = if (isFacingRight) 1f else -1f, scaleY = 1f, pivot = seekerCenter) {
-                if (chompBmp != null) {
-                    val pW = pacmanSize
-                    val pH = pW * (chompBmp.height.toFloat() / chompBmp.width.toFloat())
-                    drawImage(
-                        image = chompBmp,
-                        dstOffset = IntOffset((seekerCenter.x - pW / 2f).toInt(), (seekerCenter.y - pH / 2f).toInt()),
-                        dstSize = IntSize(pW.toInt(), pH.toInt())
-                    )
-                } else {
-                    drawChompPacman(
-                        topLeft = pacmanTopLeft,
-                        size = Size(pacmanSize, pacmanSize),
-                        mouthAngle = 35f,
-                        color = PacmanYellow
-                    )
-                }
+            val equippedPacman = skinBitmaps[seekerSkinId]
+            rotate(Direction.angle(seekerHeading)-90f,pivot=seekerCenter) {
+                if (equippedPacman != null && seekerSkinId != "pacman_neon") {
+                    drawImage(equippedPacman,dstOffset=IntOffset(pacmanTopLeft.x.toInt(),pacmanTopLeft.y.toInt()),dstSize=IntSize(pacmanSize.toInt(),pacmanSize.toInt()))
+                } else if (seekerSkinId=="pacman_neon") {
+                    drawCircle(Color(0xFF4EF5E2).copy(alpha=.2f),pacmanSize*.65f,seekerCenter)
+                    drawChompPacman(pacmanTopLeft,Size(pacmanSize,pacmanSize),35f,Color(0xFF4EF5E2))
+                } else if (chompBmp != null) {
+                    drawImage(chompBmp,dstOffset=IntOffset(pacmanTopLeft.x.toInt(),pacmanTopLeft.y.toInt()),dstSize=IntSize(pacmanSize.toInt(),pacmanSize.toInt()))
+                } else drawChompPacman(pacmanTopLeft,Size(pacmanSize,pacmanSize),35f,PacmanYellow)
             }
         }
     }
