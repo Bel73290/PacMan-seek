@@ -34,7 +34,9 @@ class MainActivity : ComponentActivity() {
                 val account by online.state.collectAsState()
                 val snack = remember { SnackbarHostState() }
                 val navigate: (Screen) -> Unit = { screen ->
+                    if (state.currentScreen == Screen.GAME) viewModel.pauseGame()
                     viewModel.setScreen(screen)
+                    if (screen in listOf(Screen.PROFILE,Screen.SHOP,Screen.LEADERBOARD,Screen.FRIENDS)) online.startIfNeeded()
                     if (screen == Screen.LEADERBOARD) online.loadLeaderboard()
                 }
                 LaunchedEffect(state.activeMatch) {
@@ -57,13 +59,23 @@ class MainActivity : ComponentActivity() {
                         when(state.currentScreen) {
                             Screen.SPLASH -> SplashScreen(
                                 state=state,
-                                onCreateGame={viewModel.createGame()}, onJoinGame={viewModel.joinGame(it)},
+                                onPlayGuest={online.clearNotice();viewModel.startGuestGame()},
+                                onCreateGame={online.prepare {viewModel.createGame()}}, onJoinGame={code->online.prepare {viewModel.joinGame(code)}},
                                 onLaunchGame={viewModel.launchLobbyGame()}, onReady={viewModel.setReady()},
                                 onInviteFriends={navigate(Screen.FRIENDS)},
                                 onLeaveLobby={viewModel.leaveLobby()}, onClearLobbyError={viewModel.clearLobbyError()},
                                 onOpenMenu={navigate(Screen.PROFILE)},
-                                onSaveSettings={hide,hunt->viewModel.updateSettings(hide,hunt)},
-                                canPlay=account.profile.isNotEmpty() && !account.loading
+                                onSaveSettings={hide,hunt->viewModel.updateSettings(hide,hunt)}
+                            )
+                            Screen.GAME -> GameScreen(
+                                state=state,
+                                onBackToHome={navigate(Screen.SPLASH)}, onNavigate=navigate,
+                                onOpenStreetView={}, onGoToSuspectZone={viewModel.goToSuspectZone()},
+                                onDismissSuspectZoneModal={viewModel.dismissSuspectZoneModal()},
+                                onDismissProximityAlert={viewModel.dismissProximityAlert()},
+                                onMapTap={viewModel.onMapTapped(it)}, onPlayerTap={viewModel.onPlayerTapped(it)},
+                                onRecenter={viewModel.recenterOnCampus()}, onDismissCaptureDialog={viewModel.dismissCaptureDialog()},
+                                onReplay={viewModel.startGuestGame()}
                             )
                             Screen.PROFILE -> OnlineProfileScreen(account,navigate,{online.retry()},
                                 {existing->online.connect(this@MainActivity,existing)},

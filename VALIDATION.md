@@ -1,5 +1,7 @@
 # Vérification locale — 26 octobre 2026
 
+Correctif solo : test Android supplémentaire réussi, sans émulateurs Firebase. Le bouton « Jouer sans compte » ouvre immédiatement une partie, ne crée pas de compte Firebase et permet de recommencer avec un score local remis à zéro. Compilation et tests JVM réussis après ce correctif.
+
 - Compilation Android debug : réussie, version normale reliée à Firebase réel (`USE_FIREBASE_EMULATORS=false`).
 - Contrôle Android Lint : aucune erreur bloquante ; des avertissements restent présents dans les ressources et le code existant.
 - Tests JVM : 2 tests réussis (six orientations, normalisation et cap GPS).

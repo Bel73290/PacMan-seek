@@ -16,8 +16,7 @@ class OnlineFlowTest {
 
     @Test fun lobbyStartsOnlyWhenSecondPlayerIsReadyAndHostDepartureCancels() {
         check(BuildConfig.USE_FIREBASE_EMULATORS)
-        compose.waitUntil(45_000) { compose.onAllNodesWithText("Jouer").filter(isEnabled()).fetchSemanticsNodes().isNotEmpty() }
-        compose.onNodeWithText("Jouer").performClick()
+        compose.onNodeWithText("Jouer en ligne").performClick()
         compose.onNodeWithText("Créer une partie").performClick()
         val auth=com.google.firebase.auth.FirebaseAuth.getInstance()
         val db=com.google.firebase.firestore.FirebaseFirestore.getInstance()

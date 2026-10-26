@@ -180,6 +180,25 @@ class GameViewModel : ViewModel() {
         }
     }
 
+    /** Local discovery session; never writes its score or rewards to Firebase. */
+    fun startGuestGame() {
+        pauseGame()
+        _uiState.value = GameState(
+            currentScreen = Screen.GAME,
+            settings = _uiState.value.settings,
+            gamePhase = GamePhase.SEARCHING,
+            isGameRunning = true,
+            freezeRemainingSeconds = 0,
+            searchRemainingSeconds = _uiState.value.settings.huntDurationMinutes * 60,
+            seekerLocation = MockData.SeekerStartLocation,
+            hiddenPlayers = MockData.HiddenPlayersList.map { it.copy(isFound = false, isScared = false) },
+            suspectZone = MockData.DefaultSuspectZone,
+            pacDotsRoute = MockData.PacDotsRouteWaypoints
+        )
+        recalculateDistances(_uiState.value.seekerLocation)
+        startTimers()
+    }
+
     fun startGame() {
         _uiState.update { state ->
             state.copy(

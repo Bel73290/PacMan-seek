@@ -2,7 +2,9 @@
 
 Application Android Kotlin / Jetpack Compose de cache-cache géolocalisé, avec comptes Google Play Jeux/Firebase, salons en ligne, profil persistant, boutique, classements et amis.
 
-**Commencer par [DEPLOYMENT.md](DEPLOYMENT.md)** pour installer le projet, déployer Firebase et configurer Play Jeux. Le serveur et les identifiants Play Jeux doivent être activés avant utilisation en production. La branche contient aussi une suite de tests isolés sur émulateurs Firebase.
+**« Jouer sans compte » permet de tester immédiatement en solo**, avec des fantômes et déplacements simulés, sans serveur. Les scores de découverte ne sont pas envoyés en ligne.
+
+Voir [DEPLOYMENT.md](DEPLOYMENT.md) pour installer le projet, déployer Firebase et configurer Play Jeux. Les services doivent être activés pour le multijoueur et les profils en ligne. La branche contient aussi une suite de tests isolés sur émulateurs Firebase.
 
 ## Vérification
 

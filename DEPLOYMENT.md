@@ -4,7 +4,9 @@
 
 Le profil, l'inventaire, les achats, les résultats, les classements et les amis utilisent Firebase. Les décisions de partie et la monnaie passent par des fonctions authentifiées. Le téléphone n'a pas le droit de modifier ses points ou son inventaire directement.
 
-**Le code doit être déployé avant d'utiliser cette version contre Firebase réel.** Aucun déploiement en production n'a été effectué depuis le poste de développement faute de session Firebase connectée. Google Play Jeux n'est pas encore créé dans la Play Console. Sans ces opérations, la version standard affiche une erreur de connexion aux services au lieu de données fictives.
+**Le bouton « Jouer sans compte » démarre immédiatement une partie de découverte solo, sans serveur ni connexion.** Les fantômes et déplacements sont simulés ; toucher la carte permet de marcher et toucher un fantôme permet de le poursuivre. Les résultats de cette session restent locaux à la partie et ne sont pas envoyés au classement.
+
+Le code doit être déployé avant d'utiliser les fonctionnalités en ligne contre Firebase réel. Aucun déploiement en production n'a été effectué depuis le poste de développement faute de session Firebase connectée. Google Play Jeux n'est pas encore créé dans la Play Console. Le bouton « Jouer en ligne » conserve l'accès aux salons ; les erreurs de serveur concernent uniquement ces fonctionnalités. Le fond cartographique peut nécessiter Internet pour télécharger les tuiles même en mode solo.
 
 ## 1. Ouvrir dans Android Studio
 

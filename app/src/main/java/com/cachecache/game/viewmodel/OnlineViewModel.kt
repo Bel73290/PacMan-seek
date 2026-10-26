@@ -39,7 +39,9 @@ class OnlineViewModel : ViewModel() {
     private var boundUid: String? = null
     private var cursor: Map<String, Any?>? = null
     private var boardGeneration = 0
+    private var started = false
     private val authListener = FirebaseAuth.AuthStateListener { auth ->
+        if (!started) return@AuthStateListener
         val uid = auth.currentUser?.uid ?: return@AuthStateListener
         if (uid != boundUid) bind(uid)
         _state.update { it.copy(guest = auth.currentUser?.isAnonymous != false) }
@@ -47,10 +49,22 @@ class OnlineViewModel : ViewModel() {
 
     init {
         repository.auth.addAuthStateListener(authListener)
-        retry()
+    }
+
+    fun startIfNeeded() { if (!started) retry() }
+
+    fun prepare(onReady: () -> Unit) = viewModelScope.launch {
+        started = true
+        _state.update { it.copy(loading = true, error = null) }
+        try {
+            repository.initialize()
+            repository.auth.currentUser?.uid?.let { bind(it) }
+            onReady()
+        } catch (e: Exception) { report(e) }
     }
 
     fun retry() = viewModelScope.launch {
+        started = true
         _state.update { it.copy(loading = true, error = null) }
         try { repository.initialize(); repository.auth.currentUser?.uid?.let { bind(it) } }
         catch (e: Exception) { report(e) }
@@ -108,6 +122,7 @@ class OnlineViewModel : ViewModel() {
     }
 
     fun loadLeaderboard(scope: String = _state.value.scope, more: Boolean = false) {
+        if (!started || _state.value.uid.isEmpty()) return
         if (more && (_state.value.boardLoading || !_state.value.hasMore)) return
         val generation = ++boardGeneration
         val nextCursor = if (more) cursor else null

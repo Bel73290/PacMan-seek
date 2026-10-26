@@ -26,7 +26,7 @@ import com.cachecache.game.ui.theme.*
 @Composable
 fun SplashScreen(
     state: GameState,
-    canPlay: Boolean = true,
+    onPlayGuest: () -> Unit,
     onCreateGame: () -> Unit,
     onJoinGame: (String) -> Unit,
     onLaunchGame: () -> Unit,
@@ -95,8 +95,7 @@ fun SplashScreen(
             ) {
                 // Button "Jouer" (Pill Yellow)
                 Button(
-                    onClick = { showPlayDialog = true },
-                    enabled = canPlay,
+                    onClick = onPlayGuest,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(76.dp)
@@ -108,10 +107,14 @@ fun SplashScreen(
                     )
                 ) {
                     Text(
-                        text = "Jouer",
+                        text = "Jouer sans compte",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Black
                     )
+                }
+
+                TextButton(onClick = { showPlayDialog = true }, modifier = Modifier.fillMaxWidth()) {
+                    Text("Jouer en ligne", color = TextPrimary)
                 }
 
                 // Button "Menu"

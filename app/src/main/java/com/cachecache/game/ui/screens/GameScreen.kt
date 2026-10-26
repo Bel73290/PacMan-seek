@@ -84,6 +84,12 @@ fun GameScreen(
                 .statusBarsPadding()
                 .padding(horizontal = 16.dp, vertical = 6.dp)
         ) {
+            Surface(color = NavyIntermediate, shape = RoundedCornerShape(16.dp)) {
+                Column(Modifier.padding(12.dp)) {
+                    Text("Mode solo · sans compte", color = PacmanYellow, fontWeight = FontWeight.Bold)
+                    Text("Fantômes simulés. Touche la carte pour marcher, ou un fantôme pour le poursuivre. Les points restent dans cette partie.", color = TextSecondary, fontSize = 12.sp)
+                }
+            }
             val isFreeze = state.gamePhase == GamePhase.FREEZE
             val timerColor = if (isFreeze) GhostCyan else PacmanYellow
             val timerText = if (isFreeze) "${state.freezeRemainingSeconds}s" else GameViewModel.formatSeconds(state.searchRemainingSeconds)
