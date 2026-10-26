@@ -323,7 +323,7 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         }
         lastGpsTime=SystemClock.elapsedRealtime()
         _state.update { it.copy(myLocation=point, heading=heading, gpsAccuracy=location.accuracy,
-            isFacingRight=heading<180f) }
+            isFacingRight=Direction.facesRight(heading,it.isFacingRight)) }
         maybeUploadLocation(point,location.accuracy,heading,location.time+serverOffsetMs)
         refresh()
     }

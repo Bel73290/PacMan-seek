@@ -34,6 +34,15 @@ test('parallel purchases debit once and keep ranking score',async()=>{
   const p=(await db.doc('users/host').get()).data();assert.equal(p.coins,10000-skin.price);assert.equal(p.score,444);assert.equal(p.ownedSkins.filter(id=>id===skin.id).length,1);
   await assert.rejects(()=>call('equipSkin','host',{skinId:'premium_ghost_gold_king'}));
 });
+test('claiming pass rewards uses server XP and does not change balance',async()=>{
+  await seed('host');const skin=catalog.find(s=>s.unlockLevel>0);
+  await call('claimBattlePass','host',{xp:100000,level:100});
+  assert.ok(!(await db.doc('users/host').get()).data().ownedSkins.includes(skin.id));
+  await db.doc('users/host').update({xp:(skin.unlockLevel-1)*500});
+  await Promise.all([call('claimBattlePass','host'),call('claimBattlePass','host')]);
+  const p=(await db.doc('users/host').get()).data();
+  assert.equal(p.ownedSkins.filter(id=>id===skin.id).length,1);assert.equal(p.coins,0);
+});
 test('equipped skins propagate to the active lobby and public profile',async()=>{
   await seed('host');const skin=catalog.find(s=>s.role==='pacman' && s.price>0);
   await db.doc('users/host').update({coins:10000});

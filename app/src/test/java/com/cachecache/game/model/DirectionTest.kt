@@ -4,6 +4,13 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class DirectionTest {
+    @Test fun pacmanOnlyMirrorsAndKeepsHisFacingWhenMovingVertically() {
+        assertTrue(Direction.facesRight(90f,false))
+        assertFalse(Direction.facesRight(270f,true))
+        assertFalse(Direction.facesRight(0f,false))
+        assertTrue(Direction.facesRight(180f,true))
+        assertFalse(Direction.facesRight(Float.NaN,false))
+    }
     @Test fun wrapsAndSnapsToSixDirections() {
         assertEquals(0,Direction.index(0f));assertEquals(0,Direction.index(359f))
         assertEquals(1,Direction.index(60f));assertEquals(5,Direction.index(-60f))

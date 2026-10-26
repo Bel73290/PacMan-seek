@@ -265,7 +265,7 @@ private fun LobbyContent(
     }
 
     Spacer(modifier = Modifier.height(16.dp))
-    TextButton(onClick=onInviteFriends) { Text("Inviter mes amis") }
+    OutlinedButton(onClick=onInviteFriends,modifier=Modifier.fillMaxWidth()) { Text("Inviter mes amis") }
     if (!lobby.isHost) {
         Button(onClick=onReady) { Text(if(lobby.players.firstOrNull { it.isMe }?.ready == true) "Je ne suis plus prêt" else "Je suis prêt") }
     }

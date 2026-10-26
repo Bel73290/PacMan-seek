@@ -1,6 +1,14 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const {catalog,DEFAULT_SKINS,levelFor,seasonKey,canCapture,rewardFor,inventoryAfterPurchase}=require('../domain');
+const {unlockedPassSkins}=require('../domain');
+test('battle pass rewards unlock at their level and cannot be bought to skip progression',()=>{
+  const skin=catalog.find(s=>s.unlockLevel>0);
+  const threshold=(skin.unlockLevel-1)*500;
+  assert.ok(!unlockedPassSkins(threshold-1).includes(skin.id));
+  assert.ok(unlockedPassSkins(threshold).includes(skin.id));
+  assert.throws(()=>inventoryAfterPurchase({coins:100000,ownedSkins:[...DEFAULT_SKINS]},skin.id),/pass de combat/);
+});
 test('catalog identifiers are unique and role/price values are valid',()=>{
   assert.equal(new Set(catalog.map(s=>s.id)).size,catalog.length);
   for(const item of catalog){assert.ok(['ghost','pacman'].includes(item.role));assert.ok(Number.isInteger(item.price)&&item.price>=0);}

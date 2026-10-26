@@ -18,6 +18,7 @@ import com.cachecache.game.data.MockData
 import com.cachecache.game.model.*
 import com.cachecache.game.ui.components.BottomNavigationBar
 import com.cachecache.game.ui.components.SkinAvatar
+import com.cachecache.game.ui.components.BattlePassSection
 import com.cachecache.game.ui.theme.*
 import com.cachecache.game.viewmodel.OnlineState
 import com.google.firebase.Timestamp
@@ -59,7 +60,7 @@ private fun InfoCard(title:String, text:String, content:@Composable ColumnScope.
 
 @Composable
 fun OnlineProfileScreen(state:OnlineState,onNavigate:(Screen)->Unit,onRetry:()->Unit,onConnect:(Boolean)->Unit,
-    onSave:(String)->Unit,onEquip:(String)->Unit,onResume:(String)->Unit) {
+    onSave:(String)->Unit,onEquip:(String)->Unit,onResume:(String)->Unit,onClaimPass:()->Unit = {}) {
     var name by remember(state.name) { mutableStateOf(state.name) }
     var confirmExisting by remember { mutableStateOf(false) }
     OnlinePage("Mon profil",Screen.PROFILE,state,onNavigate,onRetry) {
@@ -83,6 +84,10 @@ fun OnlineProfileScreen(state:OnlineState,onNavigate:(Screen)->Unit,onRetry:()->
             Text("${state.number("xp")%500} / 500 XP",color=TextSecondary)
         }
         item {InfoCard("${state.number("score")} points • ${state.coins} pièces","${state.number("games")} parties • ${state.number("victories")} victoires • ${state.number("captures")} captures")}
+        item {
+            BattlePassSection(state.level,state.number("xp"),state.owned.toSet(),state.ghostSkin,state.busy,
+                state.profile.isNotEmpty() && !state.loading,onEquip,onClaimPass)
+        }
         (state.profile["activeGame"] as? String)?.let {code -> item {
             Button(onClick={onResume(code)},modifier=Modifier.fillMaxWidth()) {Text("Reprendre la partie $code")}
         } }
@@ -124,7 +129,7 @@ fun OnlineProfileScreen(state:OnlineState,onNavigate:(Screen)->Unit,onRetry:()->
 fun OnlineLeaderboardScreen(state:OnlineState,onNavigate:(Screen)->Unit,onLoad:(String,Boolean)->Unit) {
     OnlinePage("Classement",Screen.LEADERBOARD,state,onNavigate,{onLoad(state.scope,false)}) {
         item {Row(Modifier.horizontalScroll(rememberScrollState()),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-            listOf("general" to "Général","season" to "Ce mois","friends" to "Amis").forEach{(scope,label)->
+            listOf("general" to "Mondial","season" to "Ce mois","friends" to "Amis").forEach{(scope,label)->
                 FilterChip(selected=state.scope==scope,onClick={onLoad(scope,false)},label={Text(label)})
             }
         }}
@@ -152,7 +157,8 @@ fun OnlineShopScreen(state:OnlineState,onNavigate:(Screen)->Unit,onRetry:()->Uni
     var role by remember {mutableStateOf("ghost")}
     var selected by remember {mutableStateOf("ghost_red_classic")}
     var confirmation by remember {mutableStateOf<AvatarItem?>(null)}
-    val catalog=MockData.AvatarItemsCatalog.filter{(it.id.startsWith("pacman_"))==(role=="pacman")}
+    val passSkins=MockData.BattlePassTiers.map{it.avatarId}.toSet()
+    val catalog=MockData.AvatarItemsCatalog.filter{(it.id.startsWith("pacman_"))==(role=="pacman") && it.id !in passSkins}
     val preview=MockData.AvatarItemsCatalog.firstOrNull{it.id==selected} ?: catalog.first()
     OnlinePage("Boutique",Screen.SHOP,state,onNavigate,onRetry) {
         item {InfoCard("${state.coins} pièces","Les skins sont cosmétiques. Tes achats et ta collection sont sauvegardés en ligne.")}
@@ -163,9 +169,11 @@ fun OnlineShopScreen(state:OnlineState,onNavigate:(Screen)->Unit,onRetry:()->Uni
         item {
             InfoCard(preview.name,preview.description) {
                 Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceEvenly) {
-                    repeat(6) {direction->SkinAvatar(preview.id,38.dp,direction*60f)}
+                    if(preview.id.startsWith("pacman_")) {
+                        SkinAvatar(preview.id,56.dp,90f);SkinAvatar(preview.id,56.dp,270f)
+                    } else repeat(6) {direction->SkinAvatar(preview.id,38.dp,direction*60f)}
                 }
-                Text("6 orientations sur la carte",color=TextSecondary,fontSize=12.sp)
+                Text(if(preview.id.startsWith("pacman_")) "Gauche et droite, sans inclinaison" else "6 vues : face, trois-quarts, profils et dos",color=TextSecondary,fontSize=12.sp)
             }
         }
         items(catalog,key={it.id}) {skin ->

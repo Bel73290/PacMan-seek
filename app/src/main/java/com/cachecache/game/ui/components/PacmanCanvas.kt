@@ -76,7 +76,7 @@ fun PacmanComposable(
         contentDescription = "Pacman",
         modifier = modifier
             .size(size)
-            .graphicsLayer { rotationZ = rotationAngle },
+            .graphicsLayer { scaleX = if(cos(Math.toRadians(rotationAngle.toDouble())) < 0) -1f else 1f },
         contentScale = ContentScale.Fit
     )
 }

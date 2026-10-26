@@ -4,7 +4,7 @@ const {onSchedule} = require('firebase-functions/v2/scheduler');
 const {initializeApp} = require('firebase-admin/app');
 const {getFirestore, FieldValue, Timestamp} = require('firebase-admin/firestore');
 const crypto = require('node:crypto');
-const {catalog, DEFAULT_SKINS, levelFor, seasonKey, canCapture, rewardFor, inventoryAfterPurchase} = require('./domain');
+const {catalog, DEFAULT_SKINS, levelFor, unlockedPassSkins, seasonKey, canCapture, rewardFor, inventoryAfterPurchase} = require('./domain');
 initializeApp();
 const db = getFirestore();
 const region = 'europe-west1';
@@ -42,6 +42,13 @@ exports.purchaseSkin = callable(async (uid,data) => db.runTransaction(async tx =
   const snap = await tx.get(profileRef(uid)); if (!snap.exists) fail('Profil indisponible.');
   let next; try {next = inventoryAfterPurchase(snap.data(),data.skinId);} catch (e) {fail(e.message);}
   tx.update(snap.ref,next); return {ok:true};
+}));
+exports.claimBattlePass = callable(async uid=>db.runTransaction(async tx=> {
+  const snap=await tx.get(profileRef(uid)),p=snap.data();
+  if(!p) fail('Profil indisponible.');
+  const earned=unlockedPassSkins(p.xp);
+  tx.update(snap.ref,{ownedSkins:[...new Set([...p.ownedSkins,...earned])]});
+  return {ok:true};
 }));
 exports.equipSkin = callable(async (uid,data) => db.runTransaction(async tx => {
   const snap = await tx.get(profileRef(uid)); const p = snap.data();
@@ -130,7 +137,7 @@ async function settle(code,uid) {
     docs.forEach((ps,i)=> {
       if(!ps.exists) return;
       const id=ps.id,p=ps.data(),r=rewardFor(settled,id),xp=p.xp+r.xp;
-      const earned=catalog.filter(s=>s.unlockLevel && s.unlockLevel<=levelFor(xp)).map(s=>s.id);
+      const earned=unlockedPassSkins(xp);
       const next={...p,score:p.score+r.score,coins:p.coins+r.coins,xp,games:p.games+1,victories:p.victories+(r.won?1:0),captures:(p.captures||0)+(id===g.hostId?g.foundGhostIds.length:0),ownedSkins:[...new Set([...p.ownedSkins,...earned])]};
       tx.update(ps.ref,{score:next.score,coins:next.coins,xp:next.xp,games:next.games,victories:next.victories,captures:next.captures,ownedSkins:next.ownedSkins,activeGame:FieldValue.delete()});
       tx.set(publicRef(id),publicData(next));

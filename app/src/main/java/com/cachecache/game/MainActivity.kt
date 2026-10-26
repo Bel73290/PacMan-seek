@@ -81,7 +81,8 @@ class MainActivity : ComponentActivity() {
                                 {existing->online.connect(this@MainActivity,existing)},
                                 {name->online.action("saveProfile",mapOf("name" to name))},
                                 {id->online.action("equipSkin",mapOf("skinId" to id))},
-                                {code->viewModel.joinGame(code)})
+                                {code->viewModel.joinGame(code)},
+                                onClaimPass={online.action("claimBattlePass",message="Récompenses du pass récupérées.")})
                             Screen.LEADERBOARD -> OnlineLeaderboardScreen(account,navigate,{scope,more->online.loadLeaderboard(scope,more)})
                             Screen.SHOP -> OnlineShopScreen(account,navigate,{online.retry()},
                                 {id->online.action("purchaseSkin",mapOf("skinId" to id),"Skin ajouté à ta collection.")},

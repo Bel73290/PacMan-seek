@@ -2,6 +2,7 @@
 const catalog = require('./catalog.json');
 const DEFAULT_SKINS = ['ghost_red_classic', 'pacman_classic'];
 function levelFor(xp) { return 1 + Math.floor(Math.max(0, xp) / 500); }
+function unlockedPassSkins(xp) { return catalog.filter(s=>s.unlockLevel>0 && s.unlockLevel<=levelFor(xp)).map(s=>s.id); }
 function seasonKey(now = new Date()) { return now.toISOString().slice(0, 7); }
 function distance(a, b) {
   const rad = x => x * Math.PI / 180;
@@ -27,7 +28,8 @@ function inventoryAfterPurchase(profile, id) {
   if (!item) throw new Error('Skin inconnu.');
   const owned = profile.ownedSkins || DEFAULT_SKINS;
   if (owned.includes(id)) return {coins: profile.coins, ownedSkins: owned};
+  if (item.unlockLevel>0) throw new Error(`Skin du pass de combat : niveau ${item.unlockLevel} requis.`);
   if ((profile.coins || 0) < item.price) throw new Error('Pas assez de pièces.');
   return {coins: profile.coins - item.price, ownedSkins: [...owned, id]};
 }
-module.exports = {catalog, DEFAULT_SKINS, levelFor, seasonKey, distance, canCapture, rewardFor, inventoryAfterPurchase};
+module.exports = {catalog, DEFAULT_SKINS, levelFor, unlockedPassSkins, seasonKey, distance, canCapture, rewardFor, inventoryAfterPurchase};
