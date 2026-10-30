@@ -1,15 +1,14 @@
 {
-  "name": "pac-and-seek-server",
+  "name": "pac-and-seek-spark-tests",
   "private": true,
-  "main": "index.js",
   "engines": {
     "node": "22"
   },
   "scripts": {
-    "test": "node --test test/*.test.js",
-    "test:rules": "firebase emulators:exec --only firestore --project demo-pac-and-seek \"node --test test/rules/*.test.js\"",
-    "deploy": "firebase deploy --only functions,firestore",
-    "test:emulator": "firebase emulators:exec --only firestore --project demo-pac-and-seek \"node --test --test-concurrency=1 test/domain.test.js test/rules/*.test.js test/integration/*.test.js\""
+    "test": "node --test test/domain.test.js",
+    "test:rules": "firebase emulators:exec --only firestore --project demo-pac-and-seek \"node --test --test-concurrency=1 test/spark/*.test.js\"",
+    "test:emulator": "firebase emulators:exec --only firestore --project demo-pac-and-seek \"node --test --test-concurrency=1 test/domain.test.js test/spark/*.test.js\"",
+    "deploy": "firebase deploy --only firestore"
   },
   "dependencies": {
     "firebase-admin": "^13.0.0",

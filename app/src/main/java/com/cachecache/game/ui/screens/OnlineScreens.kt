@@ -65,9 +65,9 @@ fun OnlineProfileScreen(state:OnlineState,onNavigate:(Screen)->Unit,onRetry:()->
     var confirmExisting by remember { mutableStateOf(false) }
     OnlinePage("Mon profil",Screen.PROFILE,state,onNavigate,onRetry) {
         item {
-            InfoCard(if(state.guest) "Compte invité" else "Google Play Jeux connecté",
+            InfoCard(if(state.guest) "Compte invité" else "Compte Google connecté",
                 if(state.guest) "Connecte ton compte pour retrouver ta progression sur un autre téléphone." else "Ta progression est sauvegardée et liée à ton compte.") {
-                if(state.guest) Button(onClick={onConnect(false)},enabled=!state.busy && !state.loading) {Text("Connecter Google Play Jeux")}
+                if(state.guest) Button(onClick={onConnect(false)},enabled=!state.busy && !state.loading) {Text("Se connecter avec Google")}
                 if(state.existingAccount) OutlinedButton(onClick={confirmExisting=true},enabled=!state.busy) {Text("Ouvrir mon compte existant")}
                 Text("Code ami : ${state.profile["friendCode"] ?: "…"}",color=PacmanYellow)
             }
@@ -120,7 +120,7 @@ fun OnlineProfileScreen(state:OnlineState,onNavigate:(Screen)->Unit,onRetry:()->
         }
     }
     if(confirmExisting) AlertDialog(onDismissRequest={confirmExisting=false},title={Text("Ouvrir le compte existant ?")},
-        text={Text("Tu retrouveras la progression de ton compte Play Jeux. La progression de cet invité ne sera pas fusionnée. Ne change pas de compte pendant une partie.")},
+        text={Text("Tu retrouveras la progression de ton compte Google. La progression de cet invité ne sera pas fusionnée. Ne change pas de compte pendant une partie.")},
         confirmButton={TextButton(onClick={confirmExisting=false;onConnect(true)}){Text("Ouvrir ce compte")}},
         dismissButton={TextButton(onClick={confirmExisting=false}){Text("Annuler")}})
 }

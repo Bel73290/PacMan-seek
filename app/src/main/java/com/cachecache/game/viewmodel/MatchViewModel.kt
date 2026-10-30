@@ -63,8 +63,8 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         private const val BLE_PACMAN_NEARBY_RSSI = -80.0 // ≈ une dizaine de mètres
 
         // Envoi de la position à Firebase (limite le nombre d'écritures)
-        private const val UPLOAD_MIN_MOVE_METERS = 3.0
-        private const val UPLOAD_MAX_INTERVAL_MS = 15_000L
+        private const val UPLOAD_MIN_MOVE_METERS = 1.0
+        private const val UPLOAD_MAX_INTERVAL_MS = 5_000L
 
         private const val PACMAN_NEARBY_METERS = 30.0
         private const val ROUTE_REFRESH_MOVE_METERS = 40.0
@@ -136,6 +136,7 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     private var routeRequest: RouteRequest? = null
     private var currentRoute: List<GeoPoint> = emptyList()
     private var finishRequested = false
+    private var rewardJob: Job? = null
     private var foundFeedbackDone = false
     private var foundByBluetooth = false // Le fantôme a capté la balise de Pacman annonçant sa capture
     private var pacmanReading: BleReading? = null
@@ -170,10 +171,13 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                     .collect {
                         if (it == null) _state.update { state -> state.copy(phase=MatchPhase.FINISHED, endMessage="Cette partie n’existe plus.") }
                         game = it; refresh()
+                        if(it?.status in listOf(GameRepository.STATUS_FINISHED,GameRepository.STATUS_CANCELLED) && rewardJob==null) {
+                            rewardJob=launch { try { if(it?.status==GameRepository.STATUS_FINISHED) repository.claimResult(match.code) else repository.clearActive(match.code) } catch(e:Exception) {report(e);rewardJob=null} }
+                        }
                     }
             }
             launch {
-                repository.observeMatchPlayers(match.code)
+                repository.observeMatchPlayers(match.code,match.isHost)
                     .catch { report(it) }
                     .collect { players = it; refresh() }
             }
@@ -192,8 +196,12 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     /** Quitte la partie ; si Pacman part avant la fin, la partie est annulée pour tous. */
     fun leave() {
         val current = _state.value
+        val completed = game?.status == GameRepository.STATUS_FINISHED
         stopSession()
         _state.value = MatchState()
+        if(current.code.isNotEmpty() && current.phase==MatchPhase.FINISHED) {
+            viewModelScope.launch { try { if(completed) repository.claimResult(current.code) else repository.clearActive(current.code) } catch(e:Exception) { Log.w(TAG,"Reprise",e) } }
+        }
         if (current.code.isNotEmpty() && current.phase != MatchPhase.FINISHED) {
             viewModelScope.launch {
                 try {
@@ -229,6 +237,7 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         scanJob?.cancel()
         routeJob?.cancel()
         uploadJob?.cancel()
+        rewardJob?.cancel();rewardJob=null
         sessionJob = null
         unregisterNetworkCallback()
         ble.stopAdvertising()
@@ -333,7 +342,7 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         if (current.code.isEmpty() || current.phase==MatchPhase.FINISHED || current.iAmFound || current.isOffline || game?.status!=GameRepository.STATUS_STARTED) return
         if (uploadJob?.isActive==true) return
         val now=SystemClock.elapsedRealtime(); val last=lastUpload
-        if (last!=null && now-last.second<3_000L) return
+        if (last!=null && now-last.second<2_000L) return
         if (last!=null && calculateDistanceMeters(last.first,point)<UPLOAD_MIN_MOVE_METERS && now-last.second<UPLOAD_MAX_INTERVAL_MS && kotlin.math.abs(current.heading-heading)<30) return
         uploadJob=viewModelScope.launch {
             try { repository.updateMyLocation(current.code,point,accuracy,heading,measuredAt); lastUpload=point to now }
@@ -368,13 +377,14 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         val pacmanLocation = players.firstOrNull { it.id == game.hostId }?.location
 
         // Chrono commun : tous les téléphones partent de l'heure de lancement enregistrée par Firebase
-        _state.update { it.copy(pacmanSkin=players.firstOrNull { p -> p.id==game.hostId }?.pacmanSkin ?: "pacman_classic",
+        _state.update { it.copy(totalGhosts=game.activePlayerIds.count{p->p!=game.hostId}, totalFound=game.foundGhostIds.count{p->p in game.activePlayerIds}, pacmanSkin=players.firstOrNull { p -> p.id==game.hostId }?.pacmanSkin ?: "pacman_classic",
             stalePlayers=ghosts.count { g -> !g.isFound && !g.locationFresh }) }
         val now = System.currentTimeMillis()+serverOffsetMs
         val elapsed = (((now - (game.startedAtMillis ?: now)) / 1000L).toInt()).coerceAtLeast(0)
         val hidingEnd = game.hidingSeconds
         val seekingEnd = game.hidingSeconds + game.seekingSeconds
-        val allFound = ghosts.isNotEmpty() && ghosts.all { it.isFound }
+        val activeGhostIds=game.activePlayerIds.filterNot{it==game.hostId}
+        val allFound=activeGhostIds.isNotEmpty() && game.foundGhostIds.containsAll(activeGhostIds)
 
         var winner: MatchRole? = null
         var endMessage: String? = null

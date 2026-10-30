@@ -145,6 +145,7 @@ class GameViewModel : ViewModel() {
                         lobbyJob?.cancel()
                     }
                     GameRepository.STATUS_CANCELLED, null -> {
+                        viewModelScope.launch { try { gameRepository.clearActive(code) } catch (e: Exception) { showLobbyError(e) } }
                         if (_uiState.value.lobby?.isHost == false && !_uiState.value.isGameRunning) {
                             lobbyJob?.cancel()
                             _uiState.update {

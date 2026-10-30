@@ -3,13 +3,16 @@ package com.cachecache.game.data
 import android.app.Activity
 import com.cachecache.game.BuildConfig
 import com.cachecache.game.R
-import com.google.android.gms.games.PlayGames
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.CustomCredential
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
-import com.google.firebase.auth.PlayGamesAuthProvider
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.google.firebase.functions.FirebaseFunctions
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
@@ -17,11 +20,10 @@ import kotlinx.coroutines.tasks.await
 class OnlineRepository {
     val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
-    private val functions = FirebaseFunctions.getInstance("europe-west1")
+    private val spark = SparkService(auth,db)
 
     suspend fun call(name: String, data: Map<String, Any?> = emptyMap()): Map<String, Any?> {
-        @Suppress("UNCHECKED_CAST")
-        return functions.getHttpsCallable(name).call(data).await().getData() as? Map<String, Any?> ?: emptyMap()
+        return spark.execute(name,data)
     }
 
     suspend fun initialize() {
@@ -29,22 +31,24 @@ class OnlineRepository {
         call("ensureProfile")
     }
 
-    class ExistingPlayAccount : Exception("Ce compte Play Jeux possède déjà un profil. Tu peux ouvrir ce profil ; la progression invitée ne sera pas fusionnée.")
+    class ExistingGoogleAccount : Exception("Ce compte Google possède déjà un profil. Tu peux ouvrir ce profil ; la progression invitée ne sera pas fusionnée.")
 
-    suspend fun connectPlayGames(activity: Activity, openExisting: Boolean = false) {
-        check(activity.getString(R.string.play_games_project_id) != "0" && BuildConfig.PLAY_GAMES_WEB_CLIENT_ID.isNotBlank()) {
-            "La connexion Play Jeux doit être configurée pour cette version de l’application."
-        }
-        val client = PlayGames.getGamesSignInClient(activity)
-        check(client.signIn().await().isAuthenticated) { "Connexion Play Jeux annulée." }
-        val code = client.requestServerSideAccess(BuildConfig.PLAY_GAMES_WEB_CLIENT_ID, false).await()
-        val credential = PlayGamesAuthProvider.getCredential(code)
+    suspend fun connectGoogle(activity: Activity, openExisting: Boolean = false) {
+        val resource=activity.resources.getIdentifier("default_web_client_id","string",activity.packageName)
+        val clientId=BuildConfig.GOOGLE_WEB_CLIENT_ID.ifBlank{if(resource!=0)activity.getString(resource) else ""}
+        check(clientId.isNotBlank()) { "La connexion Google doit être activée dans Firebase et le fichier google-services.json actualisé." }
+        val option=GetSignInWithGoogleOption.Builder(clientId).build()
+        val request=GetCredentialRequest.Builder().addCredentialOption(option).build()
+        val result=CredentialManager.create(activity).getCredential(activity,request).credential
+        check(result is CustomCredential && result.type==GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) { "Connexion Google annulée." }
+        val token=GoogleIdTokenCredential.createFrom(result.data).idToken
+        val credential=GoogleAuthProvider.getCredential(token,null)
         try {
             val user = auth.currentUser
             if (user?.isAnonymous == true && !openExisting) user.linkWithCredential(credential).await()
             else auth.signInWithCredential(credential).await()
         } catch (e: FirebaseAuthUserCollisionException) {
-            throw ExistingPlayAccount()
+            throw ExistingGoogleAccount()
         }
         call("ensureProfile")
     }

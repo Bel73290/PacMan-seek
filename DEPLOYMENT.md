@@ -1,121 +1,74 @@
-# PAC_FINALE — installation et activation
+# PAC_FINALE : activer Firebase gratuit
 
-## État de la livraison
+## La base existe déjà
 
-Le profil, l'inventaire, les achats, les résultats, les classements et les amis utilisent Firebase. Les décisions de partie et la monnaie passent par des fonctions authentifiées. Le téléphone n'a pas le droit de modifier ses points ou son inventaire directement.
+La capture montre Cloud Firestore `(default)` et cinq anciennes parties dans `games`. Ne crée pas une Realtime Database et ne supprime pas cette base. Le projet est `pac-and-seek`.
 
-**Le bouton « Jouer sans compte » démarre immédiatement une partie de découverte solo, sans serveur ni connexion.** Les fantômes et déplacements sont simulés ; toucher la carte permet de marcher et toucher un fantôme permet de le poursuivre. Les résultats de cette session restent locaux à la partie et ne sont pas envoyés au classement.
+La nouvelle version utilise Authentication et Firestore directement : aucune Cloud Function, aucun ordonnanceur, aucun abonnement Blaze. Les transactions Android et les règles contrôlent les achats, les paliers du pass et les récompenses uniques. L'ancien backend est archivé dans `functions/archive` et n'est pas déployé.
 
-Le code doit être déployé avant d'utiliser les fonctionnalités en ligne contre Firebase réel. Aucun déploiement en production n'a été effectué depuis le poste de développement faute de session Firebase connectée. Google Play Jeux n'est pas encore créé dans la Play Console. Le bouton « Jouer en ligne » conserve l'accès aux salons ; les erreurs de serveur concernent uniquement ces fonctionnalités. Le fond cartographique peut nécessiter Internet pour télécharger les tuiles même en mode solo.
+Les anciennes parties restent intactes et lisibles par leurs participants, sans modifications ni nouvelles récompenses. Créer une nouvelle partie pour tester : elle aura `schemaVersion: 2`.
 
-## 1. Ouvrir dans Android Studio
+## 1. Publier les règles et index
 
-Ouvrir le dossier racine `PacMan-seek`, contenant `settings.gradle.kts`, et non le sous-dossier `app`.
+Firebase Console → Cloud Firestore → Règles : remplacer le contenu par **firestore.rules**, puis **Publier**. Cela modifie les autorisations de toute la base : installer la nouvelle version sur tous les téléphones de test. Aucun document ancien n'est effacé.
 
-- Installer le SDK Android 35 (le SDK minimal est 26).
-- Utiliser Java 21 pour le daemon Gradle (le projet contient ses critères JVM). Le code Android cible Java 17.
-- Vérifier `local.properties` : `sdk.dir` doit pointer vers le SDK local. Ce fichier n'est pas versionné.
-- Synchroniser Gradle puis exécuter `app` sur un appareil.
+Deux index composites de portée Collection sont fournis dans `firestore.indexes.json` : collections `players` et `scores`, champ `score` décroissant puis `__name__` croissant. Attendre qu'ils soient prêts.
 
-L'installation Android Studio du poste de Theo a été réinstallée avec l'installateur officiel pendant cette livraison. Java embarqué et `product-info.json`, auparavant absents, sont maintenant présents.
+Pour publier règles et index ensemble, depuis la racine du projet :
 
-## 2. Activer Firebase
-
-Projet prévu : `pac-and-seek`. Région des fonctions : `europe-west1`.
-
-1. Vérifier que `app/google-services.json` correspond à ce projet et au package `com.cachecache.game`.
-2. Dans Firebase Authentication, activer la connexion anonyme pour les invités. Activer ensuite le fournisseur Play Games.
-3. Créer/activer Firestore et vérifier les prérequis de facturation pour Cloud Functions et Cloud Scheduler dans la console avant de déployer.
-4. Depuis le dossier `functions`, avec Node 22 :
-
-```sh
+```powershell
+cd functions
 npm ci
 npx firebase login
-npx firebase deploy --only functions,firestore --project pac-and-seek
+npx firebase deploy --only firestore --project pac-and-seek
 ```
 
-Les règles **et** les fonctions doivent être livrées ensemble. Les anciens clients, qui écrivaient eux-mêmes l'état des parties, ne sont pas compatibles avec ces règles. Terminer les anciennes parties et mettre les appareils de test à jour avant bascule. Ne pas remplacer les règles par `allow write: if true` pour contourner une erreur.
+Ne pas déployer de Cloud Functions. Aucun déploiement réel n'a été effectué depuis ce poste : aucune session Firebase CLI n'est connectée.
 
-Les index sont dans `firestore.indexes.json`. Attendre leur construction avant de tester la clôture planifiée des parties expirées. Le déclencheur `finishExpiredGames` clôt les parties expirées chaque minute ; les clients peuvent également demander la clôture, sans choisir le vainqueur.
+Les profils `users`, fiches publiques `players`, codes `friendCodes`, amis, invitations, historiques et `seasons/{AAAA-MM}/scores` seront créés automatiquement par l'app. Rien à saisir manuellement pour les pièces, profils ou skins.
 
-## 3. Google Play Jeux
+## 2. Activer les invités
 
-La Play Console ne contient pas encore ce jeu : cette étape reste à réaliser avec le propriétaire du compte.
+Authentication → Commencer si nécessaire → Méthode de connexion → **Anonyme** → Activer → Enregistrer.
 
-1. Créer l'application et configurer Play Games Services v2 pour le même projet Google/Firebase.
-2. Créer les identifiants OAuth Android (package et empreintes SHA-1 de signature) et serveur Web ; activer le fournisseur Play Games dans Firebase Authentication selon la documentation Google.
-3. Ajouter les comptes testeurs. Pour une version Play, ajouter aussi l'empreinte du certificat Play App Signing.
-4. Définir les deux identifiants publics dans les propriétés Gradle locales ou la configuration de compilation :
+En ligne, Firebase attribue un identifiant invité au téléphone. Une progression invitée peut être perdue si l'identité locale est supprimée avant d'être liée à Google. **Jouer sans compte** reste une découverte solo indépendante de Firebase, sans scores en ligne.
 
-```properties
-playGamesProjectId=IDENTIFIANT_NUMERIQUE_PLAY_GAMES
-playGamesWebClientId=IDENTIFIANT_CLIENT_WEB.apps.googleusercontent.com
+## 3. Activer Google classique
+
+Cette version utilise Credential Manager et Firebase Authentication ; pas besoin de créer un jeu Google Play Jeux dans la Play Console.
+
+1. Authentication → Méthode de connexion → **Google** → Activer, choisir l'adresse d'assistance et enregistrer.
+2. Paramètres du projet → Général → Application Android `com.cachecache.game` → Ajouter l'empreinte SHA-1 de la signature utilisée.
+3. SHA-1 de l'APK debug de ce poste : `64:B1:A6:54:A2:26:63:A8:D1:72:57:A7:A0:59:DE:14:8F:FE:45:EB`.
+4. Télécharger à nouveau `google-services.json`, remplacer `app/google-services.json`, reconstruire l'APK. Le fichier doit fournir `default_web_client_id`. Une autre signature, notamment celle de publication, exige sa propre empreinte.
+5. Sur un téléphone avec les services Google Play, ouvrir le profil puis **Se connecter avec Google**. Un nouveau compte Google est lié à l'invité en conservant la progression. Si ce compte a déjà un profil, l'app demande de choisir explicitement son ouverture ; aucune fusion automatique.
+
+La connexion Google réelle reste à tester après cette configuration. Le fichier du dépôt ne suffit pas à activer le fournisseur dans la console.
+
+## 4. Installer et tester
+
+Ouvrir le dossier contenant `settings.gradle.kts` dans Android Studio. SDK Android 35, minimum Android 8 / API 26. Java 21 pour Gradle ; le code Android cible Java 17.
+
+```powershell
+.\gradlew.bat :app:assembleDebug -PuseFirebaseEmulators=false
 ```
 
-Ne jamais placer de secret OAuth dans l'application, le dépôt ou ces propriétés. Les identifiants ci-dessus sont publics. Recompiler après leur configuration. Tant qu'ils manquent, le bouton de connexion explique que cette version n'est pas configurée.
+Installer `app/build/outputs/apk/debug/app-debug.apk` sur deux téléphones. Accorder la localisation précise et les autorisations Bluetooth demandées. Tester dehors avec Internet :
 
-Le premier rattachement d'un invité à un nouveau compte Play Jeux conserve le même UID Firebase et sa progression. Si le compte Play Jeux possède déjà un profil, une confirmation explicite permet d'ouvrir celui-ci ; les deux progressions ne sont pas fusionnées. Le changement de compte est bloqué tant qu'un salon ou une partie est actif.
+1. Sauvegarder deux pseudos invités et vérifier leur persistance après redémarrage.
+2. Échanger les codes amis, accepter une demande, vérifier le classement entre amis.
+3. Créer une nouvelle partie, transmettre le code ou inviter l'ami, rejoindre, se déclarer prêt et lancer.
+4. Vérifier les chronos, les positions, la capture à proximité, la fin et les récompenses uniques. Vérifier les classements mondial et mensuel, puis acheter/équiper un skin une fois assez de pièces gagnées. Le pass nécessite les niveaux requis.
+5. Tester une perte de réseau, la reprise par code et l'annulation par l'hôte. Les récompenses non récupérées sont traitées au retour dans l'app.
 
-Documentation :
-- https://firebase.google.com/docs/auth/android/play-games
-- https://developer.android.com/games/pgs/android/android-signin
-- https://firebase.google.com/docs/functions/callable
+## Positions fréquentes et quotas
 
-## 4. Tester sans serveur de production
+GPS haute précision demandé chaque seconde. Position envoyée environ toutes les **2 secondes** si le joueur a bougé d'au moins un mètre, et toutes les **5 secondes** à l'arrêt. Firestore diffuse les changements par écoute temps réel. Ce sont des cadences visées : le réseau et Android peuvent retarder une mise à jour. Un GPS reste souvent imprécis de plusieurs mètres ; cette cadence ne garantit pas une position exacte.
 
-```sh
-cd functions
-npm ci
-npx firebase emulators:start --only auth,firestore,functions --project pac-and-seek
-```
+L'hôte écoute les joueurs ; chaque fantôme écoute sa propre position et celle de l'hôte pour limiter les lectures. Les positions trop anciennes ne permettent pas une capture. Les règles contrôlent les phases et une proximité GPS approximative ; elles ne peuvent pas empêcher un téléphone de falsifier son GPS. Une protection anti-triche forte demanderait un serveur de confiance.
 
-Depuis un second terminal à la racine :
+Spark est gratuit dans ses quotas, notamment 50 000 lectures et 20 000 écritures Firestore par jour et 1 Gio de stockage gratuit. Un téléphone qui envoie toutes les deux secondes représente environ 1 800 écritures par heure, plus les autres opérations. Surveiller Usage dans Firebase : de nombreuses longues parties peuvent épuiser le quota et interrompre le service jusqu'à son renouvellement. Rester sur Spark évite une facturation à l'usage automatique.
 
-```sh
-./gradlew :app:connectedDebugAndroidTest -PuseFirebaseEmulators=true
-```
+Il n'y a pas de tâche serveur en arrière-plan : une partie expirée est clôturée quand un participant connecté la traite. Chacun récupère ses propres récompenses en ligne, éventuellement à sa prochaine ouverture.
 
-L'émulateur Android accède au poste hôte via `10.0.2.2`. Ports : Auth 9099, Firestore **8188**, Functions 5001, interface de test 4000. Le port 8080 est déjà utilisé sur le poste. Pour un vrai téléphone, adapter l'adresse réseau de développement ; ne pas distribuer une compilation de test utilisant les émulateurs.
-
-```sh
-# Tests serveur et règles sur un projet démo isolé
-cd functions
-npm run test:emulator
-
-# Compilation normale et vérifications Android
-cd ..
-./gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
-```
-
-## Modèle de données et comportement
-
-- `users/{uid}` : données privées, monnaie, XP, statistiques, skins possédés et partie active.
-- `players/{uid}` : profil public du classement. Aucun solde de monnaie ou position GPS.
-- `users/{uid}/history/{gameCode}` : résultat unique par partie, écrit dans la transaction de récompense.
-- `seasons/{YYYY-MM}/scores/{uid}` : score du mois UTC, distinct du total historique.
-- `games/{code}` et `players` : salon puis partie ; seules les personnes membres lisent les positions. Les rôles, captures et fins de partie sont contrôlés par le serveur.
-- `users/{uid}/friends`, `requests`, `invites` : liens acceptés, demandes reçues, invitations.
-- `functions/catalog.json` : prix et déblocages validés par le serveur, cohérents avec les illustrations embarquées.
-
-Une partie accepte 2 à 12 joueurs. L'hôte est Pacman et les autres joueurs doivent se déclarer prêts. Il choisit le temps de cache (30 s à 10 min côté serveur) et de chasse (1 à 60 min). Le départ de l'hôte annule la partie sans récompenses ; quitter comme dernier fantôme annule aussi la partie. Une partie interrompue peut être reprise depuis le profil ou le code du salon.
-
-Les points de classement ne se dépensent pas. Une partie validée rapporte 20 points, 50 XP et 25 pièces de base ; chaque capture de Pacman ajoute 50 points, 25 XP et 10 pièces ; une victoire ajoute 100 points, 100 XP et 50 pièces. Un fantôme capturé ne reçoit pas le bonus de survie. Les paliers de niveau débloquent leurs skins sans achat.
-
-Les visuels d'origine des skins sont restaurés, y compris Néon, Pirate et Mage pour Pacman. Pacman reste horizontal et ne fait qu'un miroir gauche/droite. Les fantômes classiques disposent de six vrais sprites de perspective ; les skins thématiques conservent leur illustration originale, debout, sans accessoires redessinés ni rotation de l'image. Leur aperçu ne prétend pas proposer six vues lorsqu'elles n'existent pas. Les zones de cache restent anonymes sur la carte ; le skin s'affiche sur les marqueurs effectivement visibles.
-
-Le profil affiche le pass de combat à dix paliers, du niveau 10 au niveau 100. Les skins de ces paliers sont réservés au pass et ne peuvent pas être achetés pour sauter la progression. Ils sont attribués automatiquement en fin de partie ; `claimBattlePass` permet aussi de récupérer les récompenses déjà éligibles selon l'XP enregistré côté serveur. Le pass reste consultable en aperçu si les services en ligne sont indisponibles ; les résultats de découverte solo ne débloquent pas de récompenses en ligne.
-
-Les Pac-dots sont un **guidage piéton**, pas une monnaie à ramasser. Le chemin se raccourcit au déplacement et se recalcule périodiquement. Si le service d'itinéraire échoue, le jeu l'indique et ne trace pas de faux raccourci à travers les bâtiments. Le routage dépend du service OSM public ; prévoir un service dédié si l'usage augmente.
-
-La capture doit être confirmée en ligne, pendant la phase de recherche, avec deux positions de moins de 30 s et une précision annoncée de 25 m ou mieux, à moins de 15 m. Les écritures de positions trop anciennes sont refusées. Ces seuils devront être calibrés dehors : ni le GPS ni le RSSI Bluetooth ne garantissent une mesure de 30 cm. Le Bluetooth sert d'aide à la recherche et ne remplace pas la validation serveur. Les coordonnées remontées par un téléphone peuvent être falsifiées ; ce contrôle n'est pas un système anti-triche complet.
-
-## Validation terrain à faire avant diffusion
-
-- Deux vrais téléphones, puis plusieurs : salon, prêts, lancement commun, recherche, capture, résultat et historique identiques.
-- GPS imprécis/refusé, Bluetooth indisponible, pertes de réseau, fermeture puis reprise, départ de l'hôte.
-- Achat, équipement et visibilité des skins ; conservation après reconnexion Play Jeux.
-- Vérifier les règles et index réellement déployés, surveiller les erreurs et les coûts Firebase.
-- Les parties sont conçues pour rester au premier plan avec l'écran allumé ; le suivi continu écran verrouillé n'est pas implémenté.
-- Supprimer/archiver périodiquement les anciennes positions et parties ; définir la politique de conservation et les réglages de protection contre les abus avant ouverture publique.
-
-Les tests locaux ne remplacent pas ces essais sur appareils ni la validation des identifiants Play Jeux.
+Références : [quotas Firestore](https://firebase.google.com/docs/firestore/quotas), [connexion Google Android](https://firebase.google.com/docs/auth/android/google-signin).

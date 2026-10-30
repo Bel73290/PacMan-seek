@@ -324,7 +324,7 @@ private fun MatchHeader(state: MatchState, onBack: () -> Unit) {
                 GhostComposable(size = 18.dp, baseColor = GhostCyan, isScared = false)
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = "${state.foundCount}/${state.ghosts.size}",
+                    text = "${state.foundCount}/${state.totalGhosts}",
                     color = TextPrimary,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold
@@ -545,7 +545,7 @@ private fun MatchEndDialog(state: MatchState, onBackHome: () -> Unit) {
     val subtitle = state.endMessage ?: when (state.winner) {
         MatchRole.PACMAN -> "Pacman a trouvé tous les fantômes" +
             " avec ${GameViewModel.formatSeconds(state.remainingSeconds)} d'avance !"
-        else -> "Le temps est écoulé : ${state.ghosts.size - state.foundCount} fantôme(s) jamais trouvé(s) !"
+        else -> "Le temps est écoulé : ${state.totalGhosts - state.foundCount} fantôme(s) jamais trouvé(s) !"
     }
     val accent = if (iWon) PacmanYellow else if (state.endMessage != null) TextSecondary else GhostRed
 

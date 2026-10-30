@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
-/** Real-time reads use Firestore; all game decisions are authenticated server calls. */
+/** Firestore Spark: transactions and deployed security rules, without Cloud Functions. */
 class GameRepository(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
@@ -54,6 +54,8 @@ class GameRepository(
     suspend fun setReady(code: String, ready: Boolean) { online.call("setReady", mapOf("code" to code, "ready" to ready)) }
     suspend fun markGhostFound(code: String, ghostId: String) { online.call("captureGhost", mapOf("code" to code, "ghostId" to ghostId)) }
     suspend fun finishGame(code: String, winner: String) { online.call("finishGame", mapOf("code" to code)) }
+    suspend fun claimResult(code: String) { online.call("claimResult", mapOf("code" to code)) }
+    suspend fun clearActive(code: String) { SparkService(auth,db).clearActive(code) }
     suspend fun serverTime(): Long = (online.call("serverTime")["now"] as Number).toLong()
     suspend fun updateMyLocation(code: String, location: GeoPoint, accuracy: Float, heading: Float, measuredAt: Long) {
         val uid = auth.currentUser?.uid ?: return
@@ -108,7 +110,9 @@ class GameRepository(
         val hidingSeconds: Int,
         val seekingSeconds: Int,
         val foundGhostIds: Set<String>,
-        val winner: String?
+        val winner: String?,
+        val activePlayerIds: List<String> = emptyList(),
+        val schemaVersion: Long = 0
     )
 
     data class PlayerSnapshot(
@@ -147,53 +151,42 @@ class GameRepository(
                     seekingSeconds = snapshot.getLong("seekingSeconds")?.toInt() ?: 540,
                     foundGhostIds = (snapshot.get("foundGhostIds") as? List<*>)
                         ?.filterIsInstance<String>()?.toSet().orEmpty(),
-                    winner = snapshot.getString("winner")
+                    winner = snapshot.getString("winner"),
+                    activePlayerIds = (snapshot.get("activePlayerIds") as? List<*>)?.filterIsInstance<String>().orEmpty(),
+                    schemaVersion = snapshot.getLong("schemaVersion") ?: 0L
                 )
             )
         }
         awaitClose { registration.remove() }
     }
 
-    /** Joueurs de la partie, dans l'ordre d'arrivée (identique sur tous les téléphones). */
-    fun observeMatchPlayers(code: String): Flow<List<PlayerSnapshot>> = callbackFlow {
-        val registration = games().document(code).collection("players")
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    close(error)
-                    return@addSnapshotListener
-                }
-                val players = snapshot?.documents.orEmpty()
-                    .sortedWith(
-                        compareBy<DocumentSnapshot>(
-                            { it.getTimestamp("joinedAt")?.seconds ?: Long.MAX_VALUE },
-                            { it.getTimestamp("joinedAt")?.nanoseconds ?: 0 },
-                            { it.id }
-                        )
-                    )
-                    .map { doc ->
-                        val lat = doc.getDouble("lat")
-                        val lng = doc.getDouble("lng")
-                        PlayerSnapshot(
-                            id = doc.id,
-                            name = doc.getString("name") ?: defaultName(doc.id),
-                            isHost = doc.getBoolean("isHost") == true,
-                            location = if (lat != null && lng != null) GeoPoint(lat, lng) else null,
-                            skinId = doc.getString("ghostSkin") ?: "ghost_red_classic",
-                            pacmanSkin = doc.getString("pacmanSkin") ?: "pacman_classic",
-                            heading = (doc.getDouble("heading") ?: 0.0).toFloat(),
-                            active = doc.getBoolean("active") != false,
-                            accuracy = (doc.getDouble("accuracy") ?: 1000.0).toFloat(),
-                            locationUpdatedAt = doc.getTimestamp("locationUpdatedAt")?.toDate()?.time ?: 0L
-                        )
-                    }
-                trySend(players)
+    /** The seeker listens to the roster; each ghost listens only to itself and the seeker. */
+    fun observeMatchPlayers(code: String, isHost: Boolean): Flow<List<PlayerSnapshot>> = callbackFlow {
+        val collection=games().document(code).collection("players")
+        fun decode(doc: DocumentSnapshot): PlayerSnapshot {
+            val lat=doc.getDouble("lat");val lng=doc.getDouble("lng")
+            return PlayerSnapshot(doc.id,doc.getString("name") ?: defaultName(doc.id),doc.getBoolean("isHost")==true,
+                if(lat!=null && lng!=null)GeoPoint(lat,lng) else null,
+                doc.getString("ghostSkin") ?: "ghost_red_classic", doc.getString("pacmanSkin") ?: "pacman_classic",
+                (doc.getDouble("heading") ?: 0.0).toFloat(),doc.getBoolean("active")!=false,
+                (doc.getDouble("accuracy") ?: 1000.0).toFloat(),doc.getTimestamp("locationUpdatedAt")?.toDate()?.time ?: 0L)
+        }
+        if(isHost) {
+            val registration=collection.addSnapshotListener { snapshot,error ->
+                if(error!=null)close(error) else trySend(snapshot?.documents.orEmpty().sortedBy{it.getTimestamp("joinedAt")?.seconds ?: Long.MAX_VALUE}.map(::decode))
             }
-        awaitClose { registration.remove() }
+            awaitClose{registration.remove()}
+        } else {
+            val hostId=games().document(code).get().await().getString("hostId")
+            val ids=listOfNotNull(auth.currentUser?.uid,hostId).distinct()
+            val roster=mutableMapOf<String,PlayerSnapshot>()
+            val registrations=ids.map { id -> collection.document(id).addSnapshotListener { doc,error ->
+                if(error!=null)close(error) else {
+                    if(doc?.exists()==true)roster[id]=decode(doc) else roster.remove(id)
+                    trySend(roster.values.toList())
+                }
+            } }
+            awaitClose{registrations.forEach{it.remove()}}
+        }
     }
-
-    private fun playerData(uid: String, isHost: Boolean) = mapOf(
-        "name" to defaultName(uid),
-        "isHost" to isHost,
-        "joinedAt" to FieldValue.serverTimestamp()
-    )
 }

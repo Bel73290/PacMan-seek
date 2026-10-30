@@ -54,6 +54,8 @@ data class MatchState(
     val syncingCapture: Boolean = false,
     val isFacingRight: Boolean = true,
     val ghosts: List<MatchGhost> = emptyList(),
+    val totalGhosts: Int = 0,
+    val totalFound: Int = 0,
     val zones: List<GhostZone> = emptyList(),
     val pacDotsRoute: List<GeoPoint> = emptyList(),
     // --- Pacman ---
@@ -76,5 +78,5 @@ data class MatchState(
     val bluetoothIssue: String? = null
 ) {
     val me: MatchGhost? get() = ghosts.firstOrNull { it.isMe }
-    val foundCount: Int get() = ghosts.count { it.isFound }
+    val foundCount: Int get() = totalFound
 }

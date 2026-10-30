@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cachecache.game.data.OnlineRepository
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.functions.FirebaseFunctionsException
+import com.google.firebase.firestore.FirebaseFirestoreException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -102,11 +102,11 @@ class OnlineViewModel : ViewModel() {
         _state.update { it.copy(busy = true, error = null) }
         viewModelScope.launch {
             try {
-                repository.connectPlayGames(activity, openExisting)
-                _state.update { it.copy(guest = false, existingAccount = false, message = "Compte Play Jeux connecté.") }
+                repository.connectGoogle(activity, openExisting)
+                _state.update { it.copy(guest = false, existingAccount = false, message = "Compte Google connecté.") }
             } catch (e: Exception) {
                 report(e)
-                if (e is OnlineRepository.ExistingPlayAccount) _state.update { it.copy(existingAccount = true) }
+                if (e is OnlineRepository.ExistingGoogleAccount) _state.update { it.copy(existingAccount = true) }
             } finally { _state.update { it.copy(busy = false) } }
         }
     }
@@ -145,9 +145,10 @@ class OnlineViewModel : ViewModel() {
     private fun report(e: Throwable) {
         if (e is CancellationException) throw e
         val message = when (e) {
-            is FirebaseFunctionsException -> when (e.code) {
-                FirebaseFunctionsException.Code.NOT_FOUND -> "Le service de jeu n’est pas encore disponible pour cette version."
-                FirebaseFunctionsException.Code.UNAVAILABLE, FirebaseFunctionsException.Code.DEADLINE_EXCEEDED -> "Connexion indisponible. Réessaie quand le réseau revient."
+            is FirebaseFirestoreException -> when(e.code) {
+                FirebaseFirestoreException.Code.PERMISSION_DENIED -> "Accès à la base refusé. Vérifie que les nouvelles règles Firestore Spark ont été publiées."
+                FirebaseFirestoreException.Code.UNAVAILABLE, FirebaseFirestoreException.Code.DEADLINE_EXCEEDED -> "Connexion indisponible. Réessaie quand le réseau revient."
+                FirebaseFirestoreException.Code.RESOURCE_EXHAUSTED -> "Le quota gratuit Firebase est atteint. Réessaie plus tard."
                 else -> e.message ?: "Action impossible. Réessaie."
             }
             else -> e.message ?: "Connexion impossible. Vérifie le réseau puis réessaie."

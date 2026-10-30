@@ -32,9 +32,10 @@ class OnlineFlowTest {
             val secondAuth=com.google.firebase.auth.FirebaseAuth.getInstance(second)
             secondAuth.useEmulator("10.0.2.2",9099)
             com.google.android.gms.tasks.Tasks.await(secondAuth.signInAnonymously())
-            val functions=com.google.firebase.functions.FirebaseFunctions.getInstance(second,"europe-west1")
-            functions.useEmulator("10.0.2.2",5001)
-            fun call(name:String,data:Map<String,Any?> = emptyMap()) = com.google.android.gms.tasks.Tasks.await(functions.getHttpsCallable(name).call(data))
+            val secondDb=com.google.firebase.firestore.FirebaseFirestore.getInstance(second)
+            secondDb.useEmulator("10.0.2.2",8188)
+            val spark=com.cachecache.game.data.SparkService(secondAuth,secondDb)
+            fun call(name:String,data:Map<String,Any?> = emptyMap()) = kotlinx.coroutines.runBlocking { spark.execute(name,data) }
             call("ensureProfile")
             call("joinGame",mapOf("code" to code))
             call("setReady",mapOf("code" to code,"ready" to true))
@@ -52,7 +53,7 @@ class OnlineFlowTest {
     @Test fun profileShopLeaderboardAndFriendsUseConnectedState() {
         check(BuildConfig.USE_FIREBASE_EMULATORS) { "This test must never run against production Firebase." }
         compose.onNodeWithText("Menu").performClick()
-        compose.waitUntil(45_000) { compose.onAllNodesWithText("Connecter Google Play Jeux").fetchSemanticsNodes().isNotEmpty() }
+        compose.waitUntil(45_000) { compose.onAllNodesWithText("Se connecter avec Google").fetchSemanticsNodes().isNotEmpty() }
         compose.waitUntil(45_000) { compose.onAllNodesWithText("Enregistrer le pseudo").filter(isEnabled()).fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithText("Mon profil").assertIsDisplayed()
         compose.onNodeWithText("Pseudo").performTextReplacement("Joueur Test")

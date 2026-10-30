@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        sessions.load()?.let { viewModel.resumeMatch(it) }
+        // Resume from the online profile/code, after verifying the game still exists.
         setContent {
             CacheCacheTheme {
                 val state by viewModel.uiState.collectAsState()

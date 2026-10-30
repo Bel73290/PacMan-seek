@@ -16,7 +16,6 @@ coroutines = "1.9.0"
 firebaseBom = "33.7.0"
 googleServices = "4.4.2"
 playServicesLocation = "21.3.0"
-playGames = "21.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,8 +40,6 @@ firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.r
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
-play-games = { group = "com.google.android.gms", name = "play-services-games-v2", version.ref = "playGames" }
-firebase-functions = { group = "com.google.firebase", name = "firebase-functions" }
 kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "coroutines" }
 
 [plugins]

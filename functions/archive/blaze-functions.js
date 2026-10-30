@@ -1,10 +1,11 @@
+// Historical Blaze implementation. Not deployed or used by the Spark application.
 "use strict";
 const {onCall, HttpsError} = require('firebase-functions/v2/https');
 const {onSchedule} = require('firebase-functions/v2/scheduler');
 const {initializeApp} = require('firebase-admin/app');
 const {getFirestore, FieldValue, Timestamp} = require('firebase-admin/firestore');
 const crypto = require('node:crypto');
-const {catalog, DEFAULT_SKINS, levelFor, unlockedPassSkins, seasonKey, canCapture, rewardFor, inventoryAfterPurchase} = require('./domain');
+const {catalog, DEFAULT_SKINS, levelFor, unlockedPassSkins, seasonKey, canCapture, rewardFor, inventoryAfterPurchase} = require('../domain');
 initializeApp();
 const db = getFirestore();
 const region = 'europe-west1';

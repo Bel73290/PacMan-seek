@@ -1,40 +1,252 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    function signedIn() { return request.auth != null; }
-    function owner(uid) { return signedIn() && request.auth.uid == uid; }
+    function signed() { return request.auth != null; }
+    function own(id) { return signed() && request.auth.uid == id; }
+    function profile(id) { return get(/databases/$(database)/documents/users/$(id)).data; }
+    function profileAfter(id) { return getAfter(/databases/$(database)/documents/users/$(id)).data; }
     function game(code) { return get(/databases/$(database)/documents/games/$(code)).data; }
-    function member(code) { return signedIn() && request.auth.uid in game(code).memberIds; }
-    match /users/{uid} {
-      allow read: if owner(uid);
-      allow write: if false;
-      match /{collection}/{doc} {
-        allow read: if owner(uid) && collection in ['history', 'friends', 'requests', 'invites'];
-        allow write: if false;
+    function gameAfter(code) { return getAfter(/databases/$(database)/documents/games/$(code)).data; }
+    function modern(g) { return g.get('schemaVersion', 0) == 2; }
+    function member(g) { return signed() && request.auth.uid in g.get('memberIds', []); }
+    function month() { return string(request.time.year()) + '-' + (request.time.month() < 10 ? '0' : '') + string(request.time.month()); }
+    // Generated from functions/catalog.json; prices and pass levels cannot be supplied by a phone.
+    function catalog() { return {"ghost_red_classic":{"price":0,"level":0,"role":"ghost"},"ghost_pink_classic":{"price":150,"level":0,"role":"ghost"},"ghost_cyan_classic":{"price":200,"level":0,"role":"ghost"},"ghost_orange_classic":{"price":200,"level":0,"role":"ghost"},"ghost_purple_classic":{"price":250,"level":0,"role":"ghost"},"ghost_blue_sunglasses":{"price":350,"level":0,"role":"ghost"},"ghost_red_headphones":{"price":450,"level":10,"role":"ghost"},"ghost_pink_flower":{"price":400,"level":0,"role":"ghost"},"ghost_cyan_cap":{"price":450,"level":30,"role":"ghost"},"ghost_red_crown":{"price":600,"level":0,"role":"ghost"},"avatar_ghost_cowboy":{"price":500,"level":20,"role":"ghost"},"avatar_ghost_wizard":{"price":600,"level":50,"role":"ghost"},"avatar_ghost_pirate":{"price":600,"level":40,"role":"ghost"},"avatar_ghost_santa":{"price":550,"level":0,"role":"ghost"},"avatar_ghost_snorkel":{"price":450,"level":0,"role":"ghost"},"avatar_ghost_mustache":{"price":400,"level":0,"role":"ghost"},"ghost_blue_devil":{"price":500,"level":0,"role":"ghost"},"ghost_blue_halo":{"price":500,"level":0,"role":"ghost"},"ghost_scared":{"price":300,"level":0,"role":"ghost"},"premium_ghost_crystal_ice":{"price":2000,"level":60,"role":"ghost"},"premium_ghost_fire_flame":{"price":2200,"level":80,"role":"ghost"},"premium_ghost_gold_king":{"price":3000,"level":100,"role":"ghost"},"premium_ghost_cyberpunk":{"price":2100,"level":70,"role":"ghost"},"premium_ghost_angel_wings":{"price":2400,"level":90,"role":"ghost"},"premium_ghost_disco_synthwave":{"price":2300,"level":0,"role":"ghost"},"premium_ghost_vampire":{"price":2000,"level":0,"role":"ghost"},"premium_ghost_steampunk":{"price":2100,"level":0,"role":"ghost"},"premium_ghost_astral_mage":{"price":2500,"level":0,"role":"ghost"},"premium_ghost_divine_sun":{"price":3000,"level":0,"role":"ghost"},"premium_ghost_pirate_captain":{"price":1800,"level":0,"role":"ghost"},"premium_ghost_flower_spring":{"price":1900,"level":0,"role":"ghost"},"premium_ghost_mummy":{"price":2000,"level":0,"role":"ghost"},"premium_ghost_pharaoh":{"price":2500,"level":0,"role":"ghost"},"premium_ghost_princess":{"price":2100,"level":0,"role":"ghost"},"premium_ghost_santa_deluxe":{"price":2200,"level":0,"role":"ghost"},"pacman_classic":{"price":0,"level":0,"role":"pacman"},"pacman_neon":{"price":650,"level":0,"role":"pacman"},"pacman_pirate":{"price":800,"level":0,"role":"pacman"},"pacman_wizard":{"price":900,"level":0,"role":"pacman"}}; }
+    function item(id) { return catalog()[id]; }
+    function basicProfile(p) {
+      return p.name is string && p.name.size() >= 2 && p.name.size() <= 24
+        && p.friendCode is string && p.friendCode.matches('[A-F0-9]{12}')
+        && p.score is int && p.score >= 0 && p.coins is int && p.coins >= 0 && p.xp is int && p.xp >= 0
+        && p.games is int && p.games >= 0 && p.victories is int && p.victories >= 0 && p.captures is int && p.captures >= 0
+        && p.ownedSkins is list && p.ownedSkins.size() <= 100
+        && p.ghostSkin in p.ownedSkins && p.pacmanSkin in p.ownedSkins
+        && p.pacmanSkin.matches("pacman_.*") && !p.ghostSkin.matches("pacman_.*");
+    }
+    function publicMatches(p, private) {
+      return p.keys().hasOnly(['name','friendCode','score','level','ghostSkin','pacmanSkin'])
+        && p.name == private.name && p.friendCode == private.friendCode && p.score == private.score
+        && p.level == 1 + int(private.xp / 500) && p.ghostSkin == private.ghostSkin && p.pacmanSkin == private.pacmanSkin;
+    }
+    function purchase(a,b) {
+      let id = b.lastAction.skinId;
+      let c=catalog();
+      return b.diff(a).affectedKeys().hasOnly(['coins','ownedSkins','lastAction']) && id in c
+        && c[id].level == 0 && !(id in a.ownedSkins)
+        && b.ownedSkins == a.ownedSkins.concat([id]) && b.coins == a.coins - c[id].price;
+    }
+    function pass(a,b) {
+      let id=b.lastAction.skinId;
+      let c=catalog();
+      return b.diff(a).affectedKeys().hasOnly(['ownedSkins','lastAction']) && id in c && c[id].level > 0
+        && 1 + int(a.xp / 500) >= c[id].level && !(id in a.ownedSkins) && b.ownedSkins == a.ownedSkins.concat([id]);
+    }
+    function rewards(g,id) {
+      let host = id == g.hostId;
+      let won = host ? g.winner == 'pacman' : g.winner == 'ghosts' && !(id in g.foundGhostIds);
+      let captures = host ? g.foundGhostIds.size() : 0;
+      return {'score':20+captures*50+(won?100:0),'coins':25+captures*10+(won?50:0),'xp':50+captures*25+(won?100:0),'won':won,'captures':captures,'role':host?'pacman':'ghost'};
+    }
+    function validReceipt(r,g,id,code) {
+      let v=rewards(g,id);
+      return modern(g) && g.status == 'finished' && id in g.activePlayerIds
+        && r.keys().hasOnly(['code','score','coins','xp','won','role','at','season'])
+        && r.code == code && r.score == v.score && r.coins == v.coins && r.xp == v.xp && r.won == v.won && r.role == v.role
+        && r.at == request.time && r.season == month();
+    }
+    function rewarded(a,b,id) {
+      let code=b.lastAction.code;
+      let g=game(code);
+      let v=rewards(g,id);
+      let r=getAfter(/databases/$(database)/documents/users/$(id)/history/$(code)).data;
+      let season=/databases/$(database)/documents/seasons/$(month())/scores/$(id);
+      let previous=exists(season)?get(season).data.score:0;
+      return b.diff(a).affectedKeys().hasOnly(['score','coins','xp','games','victories','captures','activeGame','lastAction'])
+        && b.lastAction.season == month() && !exists(/databases/$(database)/documents/users/$(id)/history/$(code))
+        && validReceipt(r,g,id,code)
+        && b.score == a.score+v.score && b.coins == a.coins+v.coins && b.xp == a.xp+v.xp && b.games == a.games+1
+        && b.victories == a.victories+(v.won?1:0) && b.captures == a.captures+v.captures
+        && getAfter(season).data.score == previous+v.score
+        && publicMatches(getAfter(/databases/$(database)/documents/players/$(id)).data,b);
+    }
+    match /users/{id} {
+      allow read: if own(id);
+      allow create: if own(id) && basicProfile(request.resource.data)
+        && request.resource.data.keys().hasOnly(['name','friendCode','score','coins','xp','games','victories','captures','ownedSkins','ghostSkin','pacmanSkin','createdAt'])
+        && request.resource.data.score == 0 && request.resource.data.coins == 0 && request.resource.data.xp == 0
+        && request.resource.data.games == 0 && request.resource.data.victories == 0 && request.resource.data.captures == 0
+        && request.resource.data.ownedSkins == ['ghost_red_classic','pacman_classic']
+        && request.resource.data.ghostSkin == 'ghost_red_classic' && request.resource.data.pacmanSkin == 'pacman_classic'
+        && request.resource.data.createdAt == request.time
+        && getAfter(/databases/$(database)/documents/friendCodes/$(request.resource.data.friendCode)).data.uid == id;
+      allow update: if own(id) && basicProfile(request.resource.data) && (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name','ghostSkin','pacmanSkin','activeGame'])
+        || (request.resource.data.get('lastAction',{}).get('kind','') == 'purchase' && purchase(resource.data,request.resource.data))
+        || (request.resource.data.get('lastAction',{}).get('kind','') == 'pass' && pass(resource.data,request.resource.data))
+        || (request.resource.data.get('lastAction',{}).get('kind','') == 'reward' && rewarded(resource.data,request.resource.data,id))
+      );
+      allow delete: if false;
+      match /clock/current {
+        allow read: if own(id);
+        allow create,update: if own(id) && request.resource.data.keys().hasOnly(['at']) && request.resource.data.at == request.time;
+      }
+      match /history/{code} {
+        allow read: if own(id);
+        allow create: if own(id) && validReceipt(request.resource.data,game(code),id,code)
+          && profileAfter(id).lastAction.kind == 'reward' && profileAfter(id).lastAction.code == code
+          && profileAfter(id).games == profile(id).games+1;
+        allow update,delete: if false;
+      }
+      match /requests/{sender} {
+        allow read,delete: if own(id);
+        allow create,update: if own(sender) && id != sender && exists(/databases/$(database)/documents/players/$(id))
+          && request.resource.data.keys().hasOnly(['uid','name','at']) && request.resource.data.uid == sender
+          && request.resource.data.name == profile(sender).name && request.resource.data.at == request.time;
+      }
+      match /friends/{peer} {
+        function accepted() {
+          return (own(id) && exists(/databases/$(database)/documents/users/$(id)/requests/$(peer)))
+            || (own(peer) && exists(/databases/$(database)/documents/users/$(peer)/requests/$(id)));
+        }
+        allow read: if own(id) || own(peer);
+        allow create: if signed() && id != peer && accepted()
+          && request.resource.data.keys().hasOnly(['uid','name']) && request.resource.data.uid == peer
+          && request.resource.data.name == get(/databases/$(database)/documents/players/$(peer)).data.name
+          && getAfter(/databases/$(database)/documents/users/$(peer)/friends/$(id)).data.uid == id;
+        allow update: if false;
+        allow delete: if own(id) || own(peer);
+      }
+      match /invites/{code} {
+        allow read,delete: if own(id);
+        allow create,update: if signed() && member(game(code)) && game(code).status == 'waiting'
+          && exists(/databases/$(database)/documents/users/$(request.auth.uid)/friends/$(id))
+          && request.resource.data.keys().hasOnly(['code','from','senderId','at'])
+          && request.resource.data.code == code && request.resource.data.senderId == request.auth.uid
+          && request.resource.data.from == profile(request.auth.uid).name && request.resource.data.at == request.time;
       }
     }
-    match /players/{uid} { allow read: if signedIn(); allow write: if false; }
-    match /seasons/{season}/scores/{uid} { allow read: if signedIn(); allow write: if false; }
+    match /friendCodes/{code} {
+      allow get: if signed(); allow list: if false;
+      allow create: if signed() && code.matches('[A-F0-9]{12}') && request.resource.data.keys().hasOnly(['uid'])
+        && request.resource.data.uid == request.auth.uid && profileAfter(request.auth.uid).friendCode == code;
+      allow update,delete: if false;
+    }
+    match /players/{id} {
+      allow read: if signed();
+      allow create,update: if own(id) && publicMatches(request.resource.data,profileAfter(id));
+      allow delete: if false;
+    }
+    match /seasons/{season}/scores/{id} {
+      allow read: if signed();
+      function scoreUpdate() {
+        let p=profileAfter(id);
+        let code=p.lastAction.code;
+        let r=getAfter(/databases/$(database)/documents/users/$(id)/history/$(code)).data;
+        let previous=resource == null ? 0 : resource.data.score;
+        return season == month() && p.lastAction.kind == 'reward' && r.season == season && r.at == request.time
+          && !exists(/databases/$(database)/documents/users/$(id)/history/$(code))
+          && request.resource.data.score == previous+r.score
+          && publicMatches(request.resource.data,{'name':p.name,'friendCode':p.friendCode,'score':request.resource.data.score,'xp':p.xp,'ghostSkin':p.ghostSkin,'pacmanSkin':p.pacmanSkin});
+      }
+      allow create,update: if own(id) && scoreUpdate(); allow delete: if false;
+    }
     match /games/{code} {
-      allow read: if member(code);
-      allow write: if false;
-      match /players/{uid} {
-        allow read: if member(code);
-        allow create, delete: if false;
-        // Only the current player's sensors may be written by a phone.
-        allow update: if owner(uid) && member(code) && game(code).status == 'started'
-          && resource.data.active == true
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lat','lng','accuracy','heading','locationUpdatedAt','measuredAt'])
-          && request.resource.data.lat is number && request.resource.data.lat >= -90 && request.resource.data.lat <= 90
-          && request.resource.data.lng is number && request.resource.data.lng >= -180 && request.resource.data.lng <= 180
-          && request.resource.data.accuracy is number && request.resource.data.accuracy >= 0 && request.resource.data.accuracy <= 1000
-          && request.resource.data.heading is number && request.resource.data.heading >= 0 && request.resource.data.heading < 360
-          && request.resource.data.locationUpdatedAt == request.time
-          && request.resource.data.measuredAt is timestamp
-          && request.resource.data.measuredAt >= request.time - duration.value(15, 's')
-          && request.resource.data.measuredAt <= request.time + duration.value(5, 's');
+      function join(a,b) {
+        return a.status == 'waiting' && b.diff(a).affectedKeys().hasOnly(['memberIds','activePlayerIds'])
+          && !(request.auth.uid in a.memberIds) && a.memberIds.size()<12
+          && b.memberIds == a.memberIds.concat([request.auth.uid]) && b.activePlayerIds == a.activePlayerIds.concat([request.auth.uid])
+          && getAfter(/databases/$(database)/documents/games/$(code)/players/$(request.auth.uid)).data.active == true;
+      }
+      function ready(a,b) {
+        return member(a) && a.status == 'waiting' && b.diff(a).affectedKeys().hasOnly(['readyIds'])
+          && b.readyIds.size()==b.readyIds.toSet().size()
+          && b.readyIds.toSet().difference(a.readyIds.toSet()).hasOnly([request.auth.uid])
+          && a.readyIds.toSet().difference(b.readyIds.toSet()).hasOnly([request.auth.uid])
+          && b.readyIds.toSet().difference(a.memberIds.toSet()).size()==0
+          && getAfter(/databases/$(database)/documents/games/$(code)/players/$(request.auth.uid)).data.ready == (request.auth.uid in b.readyIds);
+      }
+      function launch(a,b) {
+        return a.hostId == request.auth.uid && a.status == 'waiting' && a.memberIds.size()>=2 && a.readyIds.toSet()==a.memberIds.toSet()
+          && b.diff(a).affectedKeys().hasOnly(['status','startedAt','hidingSeconds','seekingSeconds']) && b.status == 'started'
+          && b.startedAt == request.time && b.hidingSeconds is int && b.hidingSeconds>=30 && b.hidingSeconds<=600
+          && b.seekingSeconds is int && b.seekingSeconds>=60 && b.seekingSeconds<=3600;
+      }
+      function fresh(p) {
+        return p.active && p.accuracy>=0 && p.accuracy<=25 && p.locationUpdatedAt>=request.time-duration.value(30,'s')
+          && p.measuredAt>=request.time-duration.value(30,'s') && p.measuredAt<=request.time+duration.value(5,'s');
+      }
+      function capture(a,b) {
+        let target=b.lastCapture;
+        let host=get(/databases/$(database)/documents/games/$(code)/players/$(a.hostId)).data;
+        let ghost=get(/databases/$(database)/documents/games/$(code)/players/$(target)).data;
+        return a.hostId == request.auth.uid && a.status=='started'
+          && request.time>=a.startedAt+duration.value(a.hidingSeconds,'s')
+          && request.time<a.startedAt+duration.value(a.hidingSeconds+a.seekingSeconds,'s')
+          && b.diff(a).affectedKeys().hasOnly(['lastCapture','foundGhostIds'])
+          && target in a.activePlayerIds && target!=a.hostId && !(target in a.foundGhostIds)
+          && b.foundGhostIds == a.foundGhostIds.concat([target]) && fresh(host) && fresh(ghost)
+          && host.lat-ghost.lat<=0.00009 && ghost.lat-host.lat<=0.00009 && host.lng-ghost.lng<=0.00009 && ghost.lng-host.lng<=0.00009;
+      }
+      function complete(a,b) {
+        let ghosts=a.activePlayerIds.toSet().difference([a.hostId].toSet());
+        let all=ghosts.size()>0 && a.foundGhostIds.toSet().hasAll(ghosts);
+        return member(a) && a.status=='started' && (all || request.time>=a.startedAt+duration.value(a.hidingSeconds+a.seekingSeconds,'s'))
+          && b.diff(a).affectedKeys().hasOnly(['status','winner','finishedAt']) && b.status=='finished' && b.finishedAt==request.time
+          && b.winner==(all?'pacman':'ghosts');
+      }
+      function cancel(a,b) {
+        return member(a) && a.status in ['waiting','started'] && b.diff(a).affectedKeys().hasOnly(['status']) && b.status=='cancelled'
+          && (a.hostId==request.auth.uid || (a.status=='started' && a.activePlayerIds.size()<=2));
+      }
+      function leave(a,b) {
+        return member(a) && request.auth.uid!=a.hostId && a.status in ['waiting','started']
+          && b.diff(a).affectedKeys().hasOnly(['activePlayerIds','memberIds','readyIds'])
+          && b.activePlayerIds==a.activePlayerIds.removeAll([request.auth.uid])
+          && b.memberIds==(a.status=='waiting'?a.memberIds.removeAll([request.auth.uid]):a.memberIds)
+          && b.readyIds==(a.status=='waiting'?a.readyIds.removeAll([request.auth.uid]):a.readyIds);
+      }
+      allow get: if signed() && (!exists(/databases/$(database)/documents/games/$(code)) || resource.data.status=='waiting'
+        || member(resource.data) || resource.data.hostId==request.auth.uid
+        || exists(/databases/$(database)/documents/games/$(code)/players/$(request.auth.uid)));
+      allow list: if false;
+      allow create: if signed() && code.matches('[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}')
+        && request.resource.data.keys().hasOnly(['schemaVersion','hostId','status','memberIds','activePlayerIds','readyIds','foundGhostIds','createdAt','hidingSeconds','seekingSeconds'])
+        && request.resource.data.schemaVersion==2 && request.resource.data.hostId==request.auth.uid && request.resource.data.status=='waiting'
+        && request.resource.data.memberIds==[request.auth.uid] && request.resource.data.activePlayerIds==[request.auth.uid]
+        && request.resource.data.readyIds==[request.auth.uid] && request.resource.data.foundGhostIds==[]
+        && request.resource.data.createdAt==request.time && request.resource.data.hidingSeconds==180 && request.resource.data.seekingSeconds==540
+        && getAfter(/databases/$(database)/documents/games/$(code)/players/$(request.auth.uid)).data.isHost==true;
+      allow update: if signed() && modern(resource.data) && modern(request.resource.data) && (
+        join(resource.data,request.resource.data) || ready(resource.data,request.resource.data) || launch(resource.data,request.resource.data)
+        || capture(resource.data,request.resource.data) || complete(resource.data,request.resource.data)
+        || cancel(resource.data,request.resource.data) || leave(resource.data,request.resource.data));
+      allow delete: if false;
+      match /players/{id} {
+        function sensors(a,b) {
+          return own(id) && member(game(code)) && game(code).status=='started' && a.active==true
+            && b.diff(a).affectedKeys().hasOnly(['lat','lng','accuracy','heading','locationUpdatedAt','measuredAt'])
+            && b.lat is number && b.lat>=-90 && b.lat<=90 && b.lng is number && b.lng>=-180 && b.lng<=180
+            && b.accuracy is number && b.accuracy>=0 && b.accuracy<=1000 && b.heading is number && b.heading>=0 && b.heading<360
+            && b.locationUpdatedAt==request.time && b.measuredAt is timestamp
+            && b.measuredAt>=request.time-duration.value(15,'s') && b.measuredAt<=request.time+duration.value(5,'s');
+        }
+        function identity(p) {
+          let u=profileAfter(id);
+          return p.name==u.name && p.ghostSkin==u.ghostSkin && p.pacmanSkin==u.pacmanSkin && p.isHost==(gameAfter(code).hostId==id);
+        }
+        allow read: if signed() && (member(game(code)) || own(id));
+        allow create: if own(id) && modern(gameAfter(code)) && gameAfter(code).status=='waiting' && id in gameAfter(code).memberIds
+          && request.resource.data.keys().hasOnly(['name','ghostSkin','pacmanSkin','isHost','ready','active','joinedAt','heading'])
+          && identity(request.resource.data) && request.resource.data.ready==(id in gameAfter(code).readyIds)
+          && request.resource.data.active==true && request.resource.data.joinedAt==request.time && request.resource.data.heading==0;
+        allow update: if modern(game(code)) && (sensors(resource.data,request.resource.data)
+          || (own(id) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ready']) && game(code).status=='waiting'
+            && request.resource.data.ready==(id in gameAfter(code).readyIds))
+          || (own(id) && member(game(code)) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ghostSkin','pacmanSkin']) && identity(request.resource.data))
+          || (own(id) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['active']) && request.resource.data.active==false
+            && (!(id in gameAfter(code).activePlayerIds) || gameAfter(code).status=='cancelled')));
+        allow delete: if own(id) && game(code).status=='waiting' && (!(id in gameAfter(code).memberIds) || gameAfter(code).status=='cancelled');
       }
     }
-    match /{document=**} { allow read, write: if false; }
+    match /{document=**} { allow read,write: if false; }
   }
 }
