@@ -8,6 +8,6 @@
 
 Les parcours Android ont été adaptés et compilés, mais n'ont pas été exécutés après cette migration : le disque C: ne dispose plus d'assez d'espace pour démarrer l'AVD Pixel 9 Pro (environ 1,2 Go libres au contrôle). Les parcours réussis le 26 octobre concernaient le backend précédent et ne valident pas la migration Spark.
 
-Aucun déploiement réel de règles/index n'a été réalisé. Le compte Google réel reste à configurer et tester. Les positions toutes les deux secondes sont une cadence visée, pas une mesure de latence sur réseau mobile. GPS, Bluetooth, itinéraires, reconnexion et consommation des quotas doivent être vérifiés sur deux vrais téléphones dehors.
+Les règles/index et les fournisseurs Google/Anonyme ont été configurés manuellement par Theo selon ses confirmations ; aucun déploiement depuis le poste ni contrôle direct de la console n'a été effectué. Le nouveau google-services.json téléchargé le 30 octobre a été intégré : projet, package, empreinte debug SHA-1 et client OAuth Web vérifiés. APK reconstruit et 3 tests JVM réussis. La connexion Google réelle reste à tester sur téléphone. Les positions toutes les deux secondes sont une cadence visée, pas une mesure de latence sur réseau mobile. GPS, Bluetooth, itinéraires, reconnexion et consommation des quotas doivent être vérifiés sur deux vrais téléphones dehors.
 
 Voir DEPLOYMENT.md pour les actions nécessaires dans la console Firebase existante.

@@ -12,7 +12,20 @@
           "package_name": "com.cachecache.game"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "996318903519-hga63rrdd13pqrueg6e402g3m1350qiu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cachecache.game",
+            "certificate_hash": "64b1a654a22663a8d17257a7a059de148ffe45eb"
+          }
+        },
+        {
+          "client_id": "996318903519-hd1mpu8rc80nh0at1eq2bh0fbh2vcd07.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDjPWr0cQfANc0mEOrl-5aSvRvsvjRSx6w"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "996318903519-hd1mpu8rc80nh0at1eq2bh0fbh2vcd07.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
