@@ -121,6 +121,22 @@ class OnlineViewModel : ViewModel() {
         }
     }
 
+    fun saveProfile(name: String, ghostSkin: String, pacmanSkin: String) {
+        if(_state.value.busy || _state.value.loading) return
+        val current=_state.value
+        _state.update { it.copy(busy=true,error=null,message=null) }
+        viewModelScope.launch {
+            try {
+                // Equip first so a changed name cannot invalidate the current lobby's identity check.
+                if(ghostSkin != current.ghostSkin) repository.call("equipSkin",mapOf("skinId" to ghostSkin))
+                if(pacmanSkin != current.pacmanSkin) repository.call("equipSkin",mapOf("skinId" to pacmanSkin))
+                if(name != current.name) repository.call("saveProfile",mapOf("name" to name))
+                _state.update { it.copy(message="Profil enregistré.") }
+            } catch(e:Exception) { report(e) }
+            finally { _state.update { it.copy(busy=false) } }
+        }
+    }
+
     fun loadLeaderboard(scope: String = _state.value.scope, more: Boolean = false) {
         if (!started || _state.value.uid.isEmpty()) return
         if (more && (_state.value.boardLoading || !_state.value.hasMore)) return

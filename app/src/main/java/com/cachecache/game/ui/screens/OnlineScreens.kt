@@ -11,6 +11,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,9 +29,9 @@ import java.util.Locale
 
 @Composable
 private fun OnlinePage(title: String, screen: Screen, state: OnlineState, onNavigate: (Screen)->Unit,
-    onRetry: ()->Unit, content: androidx.compose.foundation.lazy.LazyListScope.()->Unit) {
-    Scaffold(containerColor=DeepNavy, bottomBar={ BottomNavigationBar(screen,onNavigate) }) { padding ->
-        LazyColumn(Modifier.fillMaxSize().padding(padding).padding(horizontal=20.dp),
+    onRetry: ()->Unit, bottomActions: @Composable ()->Unit = {}, content: androidx.compose.foundation.lazy.LazyListScope.()->Unit) {
+    Scaffold(modifier=Modifier.imePadding(),containerColor=DeepNavy, bottomBar={ Column { bottomActions(); BottomNavigationBar(screen,onNavigate) } }) { padding ->
+        LazyColumn(Modifier.testTag("online-page").fillMaxSize().padding(padding).padding(horizontal=20.dp),
             verticalArrangement=Arrangement.spacedBy(14.dp), contentPadding=PaddingValues(bottom=24.dp)) {
             item {
                 Row(Modifier.fillMaxWidth(), verticalAlignment=Alignment.CenterVertically) {
@@ -60,10 +62,38 @@ private fun InfoCard(title:String, text:String, content:@Composable ColumnScope.
 
 @Composable
 fun OnlineProfileScreen(state:OnlineState,onNavigate:(Screen)->Unit,onRetry:()->Unit,onConnect:(Boolean)->Unit,
-    onSave:(String)->Unit,onEquip:(String)->Unit,onResume:(String)->Unit,onClaimPass:()->Unit = {}) {
-    var name by remember(state.name) { mutableStateOf(state.name) }
+    onSave:(String)->Unit,onEquip:(String)->Unit,onResume:(String)->Unit,onClaimPass:()->Unit = {},
+    onSaveProfile:(String,String,String)->Unit = {name,_,_->onSave(name)}) {
+    val keyboard = LocalSoftwareKeyboardController.current
+    var editing by remember(state.uid) { mutableStateOf(false) }
+    var name by remember(state.uid) { mutableStateOf(state.name) }
+    var ghostSkin by remember(state.uid) { mutableStateOf(state.ghostSkin) }
+    var saving by remember { mutableStateOf(false) }
+    LaunchedEffect(state.name,state.ghostSkin,state.pacmanSkin,editing) {
+        if(!editing) { name=state.name; ghostSkin=state.ghostSkin }
+    }
+    LaunchedEffect(state.busy,state.message,state.error,saving) {
+        if(saving && !state.busy && state.message == "Profil enregistré.") { editing=false; saving=false }
+        else if(saving && !state.busy && state.error != null) saving=false
+    }
+    val selectSkin: (String)->Unit = {id ->
+        editing=true
+        ghostSkin=id
+    }
     var confirmExisting by remember { mutableStateOf(false) }
-    OnlinePage("Mon profil",Screen.PROFILE,state,onNavigate,onRetry) {
+    OnlinePage("Mon profil",Screen.PROFILE,state,onNavigate,onRetry,bottomActions={
+        if(editing) Surface(color=NavyIntermediate,shadowElevation=6.dp) {
+            Row(Modifier.fillMaxWidth().padding(horizontal=16.dp,vertical=10.dp),horizontalArrangement=Arrangement.spacedBy(10.dp)) {
+                OutlinedButton(onClick={keyboard?.hide();editing=false},enabled=!state.busy) { Text("Annuler") }
+                Button(onClick={keyboard?.hide();saving=true;onSaveProfile(name.trim(),ghostSkin,"pacman_classic")},
+                    enabled=!state.busy && !state.loading && name.trim().length in 2..24,modifier=Modifier.weight(1f)) {
+                    Text(if(state.busy) "Enregistrement…" else "Enregistrer les modifications")
+                }
+            }
+        } else if(state.message == "Profil enregistré.") {
+            Text("Profil enregistré.",color=GhostCyan,modifier=Modifier.fillMaxWidth().background(NavyIntermediate).padding(12.dp))
+        }
+    }) {
         item {
             InfoCard(if(state.guest) "Compte invité" else "Compte Google connecté",
                 if(state.guest) "Connecte ton compte pour retrouver ta progression sur un autre téléphone." else "Ta progression est sauvegardée et liée à ton compte.") {
@@ -74,31 +104,35 @@ fun OnlineProfileScreen(state:OnlineState,onNavigate:(Screen)->Unit,onRetry:()->
         }
         item {
             Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(16.dp)) {
-                SkinAvatar(state.ghostSkin,72.dp)
+                SkinAvatar(if(editing) ghostSkin else state.ghostSkin,72.dp)
                 Column {Text(state.name,color=TextPrimary,fontSize=22.sp,fontWeight=FontWeight.Bold);Text("Niveau ${state.level}",color=PacmanYellow)}
             }
             Spacer(Modifier.height(12.dp))
-            OutlinedTextField(name,{if(it.length<=24)name=it},label={Text("Pseudo")},singleLine=true,enabled=!state.loading && !state.busy,modifier=Modifier.fillMaxWidth())
-            TextButton(onClick={onSave(name)},enabled=!state.loading && !state.busy && name.trim().length>=2) {Text("Enregistrer le pseudo")}
+            if(!editing) Button(onClick={editing=true},enabled=!state.loading && !state.busy,modifier=Modifier.fillMaxWidth()) { Text("Modifier mes infos") }
+            OutlinedTextField(name,{if(it.length<=24)name=it},label={Text("Pseudo")},singleLine=true,
+                readOnly=!editing,enabled=!state.loading && !state.busy,modifier=Modifier.fillMaxWidth())
+            if(editing) Text("Choisis aussi tes skins ci-dessous, puis enregistre tes modifications.",color=TextSecondary,fontSize=13.sp)
             LinearProgressIndicator(progress={(state.number("xp")%500)/500f},modifier=Modifier.fillMaxWidth())
             Text("${state.number("xp")%500} / 500 XP",color=TextSecondary)
         }
         item {InfoCard("${state.number("score")} points • ${state.coins} pièces","${state.number("games")} parties • ${state.number("victories")} victoires • ${state.number("captures")} captures")}
         item {
-            BattlePassSection(state.level,state.number("xp"),state.owned.toSet(),state.ghostSkin,state.busy,
-                state.profile.isNotEmpty() && !state.loading,onEquip,onClaimPass)
+            BattlePassSection(state.level,state.number("xp"),state.owned.toSet(),if(editing) ghostSkin else state.ghostSkin,state.busy,
+                state.profile.isNotEmpty() && !state.loading,selectSkin,onClaimPass)
         }
         (state.profile["activeGame"] as? String)?.let {code -> item {
             Button(onClick={onResume(code)},modifier=Modifier.fillMaxWidth()) {Text("Reprendre la partie $code")}
         } }
         item {OutlinedButton(onClick={onNavigate(Screen.FRIENDS)},modifier=Modifier.fillMaxWidth()){Text("Mes amis et invitations")}}
         item {Text("Mes skins",color=TextPrimary,fontWeight=FontWeight.Bold)}
-        items(state.owned.chunked(4)) { group ->
+        items(state.owned.filterNot { it.startsWith("pacman_") }.chunked(4)) { group ->
             Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceEvenly) {
                 group.forEach { id ->
                     Column(horizontalAlignment=Alignment.CenterHorizontally) {
                         SkinAvatar(id,48.dp)
-                        TextButton(onClick={onEquip(id)},enabled=!state.busy) {Text(if(id==state.ghostSkin || id==state.pacmanSkin) "Équipé" else "Équiper",fontSize=11.sp)}
+                        TextButton(onClick={selectSkin(id)},enabled=!state.busy && !state.loading) {
+                            Text(if(id==(if(editing) ghostSkin else state.ghostSkin)) "Sélectionné" else "Choisir",fontSize=11.sp)
+                        }
                     }
                 }
             }
@@ -154,32 +188,25 @@ fun OnlineLeaderboardScreen(state:OnlineState,onNavigate:(Screen)->Unit,onLoad:(
 
 @Composable
 fun OnlineShopScreen(state:OnlineState,onNavigate:(Screen)->Unit,onRetry:()->Unit,onBuy:(String)->Unit,onEquip:(String)->Unit) {
-    var role by remember {mutableStateOf("ghost")}
     var selected by remember {mutableStateOf("ghost_red_classic")}
     var confirmation by remember {mutableStateOf<AvatarItem?>(null)}
     val passSkins=MockData.BattlePassTiers.map{it.avatarId}.toSet()
-    val catalog=MockData.AvatarItemsCatalog.filter{(it.id.startsWith("pacman_"))==(role=="pacman") && it.id !in passSkins}
+    val catalog=MockData.AvatarItemsCatalog.filter{!it.id.startsWith("pacman_") && it.id !in passSkins}
     val preview=MockData.AvatarItemsCatalog.firstOrNull{it.id==selected} ?: catalog.first()
     OnlinePage("Boutique",Screen.SHOP,state,onNavigate,onRetry) {
         item {InfoCard("${state.coins} pièces","Les skins sont cosmétiques. Tes achats et ta collection sont sauvegardés en ligne.")}
-        item {Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-            FilterChip(role=="ghost",onClick={role="ghost";selected=state.ghostSkin},label={Text("Fantômes")})
-            FilterChip(role=="pacman",onClick={role="pacman";selected=state.pacmanSkin},label={Text("Pacman")})
-        }}
         item {
             InfoCard(preview.name,preview.description) {
                 Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceEvenly) {
-                    if(preview.id.startsWith("pacman_")) {
-                        SkinAvatar(preview.id,56.dp,90f);SkinAvatar(preview.id,56.dp,270f)
-                    } else if(preview.id.endsWith("_classic")) repeat(6) {direction->SkinAvatar(preview.id,38.dp,direction*60f)}
+                    if(preview.id.endsWith("_classic")) repeat(6) {direction->SkinAvatar(preview.id,38.dp,direction*60f)}
                     else SkinAvatar(preview.id,96.dp)
                 }
-                Text(if(preview.id.startsWith("pacman_")) "Gauche et droite, sans inclinaison" else if(preview.id.endsWith("_classic")) "6 vues : face, trois-quarts, profils et dos" else "Visuel original du skin",color=TextSecondary,fontSize=12.sp)
+                Text(if(preview.id.endsWith("_classic")) "6 vues : face, trois-quarts, profils et dos" else "Visuel original du skin",color=TextSecondary,fontSize=12.sp)
             }
         }
         items(catalog,key={it.id}) {skin ->
             val owned=skin.id in state.owned
-            val equipped=skin.id==state.ghostSkin || skin.id==state.pacmanSkin
+            val equipped=skin.id==state.ghostSkin
             Card(onClick={selected=skin.id},colors=CardDefaults.cardColors(containerColor=if(selected==skin.id)SelectedSurface else CardSurface)) {
                 Row(Modifier.fillMaxWidth().padding(14.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(12.dp)) {
                     SkinAvatar(skin.id,52.dp)

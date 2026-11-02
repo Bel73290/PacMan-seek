@@ -1,12 +1,9 @@
 package com.cachecache.game.ui.components
 
 import android.graphics.BitmapFactory
-import android.graphics.ColorMatrix
-import android.graphics.ColorMatrixColorFilter
 import android.graphics.Point
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
@@ -21,9 +18,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
@@ -34,13 +29,19 @@ import com.cachecache.game.R
 import com.cachecache.game.model.*
 import com.cachecache.game.ui.theme.*
 import org.osmdroid.config.Configuration
+import org.osmdroid.events.MapEventsReceiver
+import org.osmdroid.views.overlay.MapEventsOverlay
+import org.osmdroid.util.BoundingBox
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint as OsmGeoPoint
 import org.osmdroid.views.MapView
-import kotlin.math.sin
+import java.io.File
+import com.cachecache.game.BuildConfig
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 
 @Composable
 fun OsmMapView(
@@ -56,7 +57,10 @@ fun OsmMapView(
     pacDotsRoute: List<GeoPoint>,
     isRadarScanning: Boolean = false,
     zonePolygons: List<List<GeoPoint>> = emptyList(), // Zones supplémentaires (partie multijoueur)
-    showSeeker: Boolean = true, // false sur l'écran d'un fantôme : pas de Pacman ni de radar
+    showSeeker: Boolean = true,
+    cameraLocation: GeoPoint = seekerLocation,
+    showRadar: Boolean = showSeeker,
+    framePlayers: Boolean = false,
     onMapTap: (GeoPoint) -> Unit = {},
     onPlayerTap: (HiddenPlayer) -> Unit = {}
 ) {
@@ -64,7 +68,10 @@ fun OsmMapView(
     var mapViewRef by remember { mutableStateOf<MapView?>(null) }
 
     var following by remember { mutableStateOf(true) }
-    val skinIds = hiddenPlayers.mapNotNull { it.skinId }.toSet() + seekerSkinId
+    val currentPlayers by rememberUpdatedState(hiddenPlayers)
+    val currentMapTap by rememberUpdatedState(onMapTap)
+    val currentPlayerTap by rememberUpdatedState(onPlayerTap)
+    val skinIds = hiddenPlayers.mapNotNull { it.skinId }.filterNot { it.startsWith("pacman_") }.toSet()
     val directionalSkins=rememberGhostSkins(skinIds)
     val skinBitmaps = remember(skinIds) {
         skinIds.mapNotNull { id ->
@@ -79,15 +86,12 @@ fun OsmMapView(
             BitmapFactory.decodeResource(context.resources,resource,options)?.asImageBitmap()?.let { id to it }
         }.toMap()
     }
-    DisposableEffect(mapViewRef) {
-        val map=mapViewRef
-        map?.onResume()
-        onDispose { map?.onPause(); map?.onDetach() }
+    // Release only when this composable leaves the screen. Keying this effect by
+    // mapViewRef can detach the newly created tile provider on the first recomposition.
+    DisposableEffect(Unit) {
+        onDispose { mapViewRef?.onPause(); mapViewRef?.onDetach() }
     }
-    LaunchedEffect(recenterKey) {
-        following=true
-        mapViewRef?.controller?.animateTo(OsmGeoPoint(seekerLocation.latitude,seekerLocation.longitude))
-    }
+    LaunchedEffect(recenterKey) { following=true }
 
     // Preload directional ghost bitmaps and pacman chomp frames
     val ghostBitmaps = remember {
@@ -274,34 +278,39 @@ fun OsmMapView(
         label = "waveProgress"
     )
 
-    // 5. Pac-dots Conveyor Belt Phase Animation
-    val pacDotsPhase by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 32f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(850, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "pacDotsPhase"
-    )
-
-    // Camera continuously follows seeker centered
-    LaunchedEffect(seekerLocation) {
+    // Multiplayer starts with everyone in view; panning pauses automatic framing.
+    val markerLocations = hiddenPlayers.filterNot { it.isFound }.map { it.location }
+    LaunchedEffect(mapViewRef, cameraLocation, seekerLocation, markerLocations, framePlayers, recenterKey) {
         if (!following) return@LaunchedEffect
         mapViewRef?.let { map ->
-            map.controller.setCenter(OsmGeoPoint(seekerLocation.latitude, seekerLocation.longitude))
-            redrawTrigger++
+            val points = markerLocations.map { OsmGeoPoint(it.latitude,it.longitude) } +
+                if(showSeeker) listOf(OsmGeoPoint(seekerLocation.latitude,seekerLocation.longitude)) else emptyList()
+            map.post {
+                if(framePlayers && points.size >= 2) {
+                    val padding=(128*context.resources.displayMetrics.density).toInt()
+                    map.zoomToBoundingBox(BoundingBox.fromGeoPoints(points),false,padding,18.2,null)
+                } else map.controller.setCenter(OsmGeoPoint(cameraLocation.latitude,cameraLocation.longitude))
+                redrawTrigger++
+            }
         }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // OSMDroid MapView with Minimalist No-Labels Tile Source
+        // Standard OSM tiles with an app-private cache (no external-storage permission).
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { ctx ->
-                Configuration.getInstance().userAgentValue = ctx.packageName
+                Configuration.getInstance().apply {
+                    userAgentValue = "PacAndSeek/${BuildConfig.VERSION_NAME} (Android; +https://github.com/Bel73290/PacMan-seek)"
+                    osmdroidBasePath = File(ctx.filesDir, "osmdroid").apply { mkdirs() }
+                    osmdroidTileCache = File(ctx.cacheDir, "osm-tiles").apply { mkdirs() }
+                    tileDownloadThreads = 2
+                }
                 MapView(ctx).apply {
                     setTileSource(TileSourceFactory.MAPNIK)
+                    setUseDataConnection(true)
+                    minZoomLevel = 3.0
+                    maxZoomLevel = 19.0
                     setMultiTouchControls(true)
                     setOnTouchListener { _, event ->
                         if(event.actionMasked==android.view.MotionEvent.ACTION_MOVE) following=false
@@ -309,18 +318,24 @@ fun OsmMapView(
                     }
                     isTilesScaledToDpi = true
                     controller.setZoom(18.2)
-                    controller.setCenter(OsmGeoPoint(seekerLocation.latitude, seekerLocation.longitude))
+                    controller.setCenter(OsmGeoPoint(cameraLocation.latitude, cameraLocation.longitude))
 
-                    // Dark Theme Filter (Slate blue buildings, dark navy streets, muted parks)
-                    val darkMatrix = ColorMatrix(
-                        floatArrayOf(
-                            0.28f, 0f, 0f, 0f, 12f,
-                            0f, 0.32f, 0f, 0f, 22f,
-                            0f, 0f, 0.44f, 0f, 40f,
-                            0f, 0f, 0f, 1f, 0f
-                        )
-                    )
-                    overlayManager.tilesOverlay.setColorFilter(ColorMatrixColorFilter(darkMatrix))
+                    val map = this
+                    overlays.add(MapEventsOverlay(object : MapEventsReceiver {
+                        override fun singleTapConfirmedHelper(point: OsmGeoPoint): Boolean {
+                            val tap = map.projection.toPixels(point, null)
+                            val hit = currentPlayers.firstOrNull { player ->
+                                if(player.isFound) false else {
+                                    val marker=map.projection.toPixels(OsmGeoPoint(player.location.latitude,player.location.longitude),null)
+                                    val dx=tap.x-marker.x; val dy=tap.y-marker.y
+                                    dx.toLong()*dx+dy.toLong()*dy < (44*ctx.resources.displayMetrics.density).let { it*it }
+                                }
+                            }
+                            if(hit!=null) currentPlayerTap(hit) else currentMapTap(GeoPoint(point.latitude,point.longitude))
+                            return true
+                        }
+                        override fun longPressHelper(point: OsmGeoPoint): Boolean = false
+                    }))
 
                     addMapListener(object : MapListener {
                         override fun onScroll(event: ScrollEvent?): Boolean {
@@ -334,6 +349,7 @@ fun OsmMapView(
                         }
                     })
 
+                    onResume()
                     mapViewRef = this
                 }
             },
@@ -346,34 +362,14 @@ fun OsmMapView(
         Canvas(
             modifier = Modifier
                 .fillMaxSize()
-                .pointerInput(hiddenPlayers, redrawTrigger) {
-                    detectTapGestures { tapOffset ->
-                        val map = mapViewRef ?: return@detectTapGestures
-                        val proj = map.projection ?: return@detectTapGestures
-
-                        // Ghost touch hit test
-                        val tempPoint = Point()
-                        var tappedPlayer: HiddenPlayer? = null
-                        for (player in hiddenPlayers) {
-                            if (player.isFound) continue
-                            val osmPoint = OsmGeoPoint(player.location.latitude, player.location.longitude)
-                            proj.toPixels(osmPoint, tempPoint)
-                            val dx = tapOffset.x - tempPoint.x
-                            val dy = tapOffset.y - tempPoint.y
-                            if (dx * dx + dy * dy < 2000f) {
-                                tappedPlayer = player
-                                break
-                            }
-                        }
-
-                        if (tappedPlayer != null) {
-                            onPlayerTap(tappedPlayer)
-                        } else {
-                            val geo = proj.fromPixels(tapOffset.x.toInt(), tapOffset.y.toInt())
-                            onMapTap(GeoPoint(geo.latitude, geo.longitude))
-                        }
+                .semantics {
+                    contentDescription = buildString {
+                        append("Carte OpenStreetMap")
+                        if(showSeeker) append(" • Pacman")
+                        hiddenPlayers.filterNot { it.isFound }.forEach { append(" • Fantôme : ${it.name}") }
                     }
                 }
+
         ) {
             val trigger = redrawTrigger
             val map = mapViewRef ?: return@Canvas
@@ -409,7 +405,7 @@ fun OsmMapView(
                 )
             }
 
-            // 2. Animated Pac-Dots Route (Treadmill Conveyor Effect)
+            // 2. Small, stationary, warm dots with density-independent spacing.
             if (pacDotsRoute.size >= 2) {
                 val screenPoints = pacDotsRoute.map { geo ->
                     val p = Point()
@@ -417,9 +413,9 @@ fun OsmMapView(
                     Offset(p.x.toFloat(), p.y.toFloat())
                 }
 
-                val step = 32f
+                val step = 28.dp.toPx()
                 // Espacement régulier sur tout le chemin, même quand il est fait de petits segments
-                var carry = pacDotsPhase % step
+                var carry = step / 2f
                 for (i in 0 until screenPoints.size - 1) {
                     val p1 = screenPoints[i]
                     val p2 = screenPoints[i + 1]
@@ -434,13 +430,8 @@ fun OsmMapView(
                         val dotY = p1.y + fraction * dy
 
                         drawCircle(
-                            color = PacmanYellow.copy(alpha = 0.4f),
-                            radius = 7.dp.toPx(),
-                            center = Offset(dotX, dotY)
-                        )
-                        drawCircle(
-                            color = PacmanYellow,
-                            radius = 4.5.dp.toPx(),
+                            color = Color(0xFF9D875B).copy(alpha = 0.85f),
+                            radius = 2.5.dp.toPx(),
                             center = Offset(dotX, dotY)
                         )
                         curr += step
@@ -457,7 +448,7 @@ fun OsmMapView(
             val minR = 10.dp.toPx()
             val maxR = 70.dp.toPx()
 
-            if (showSeeker) for (ring in 0 until 3) {
+            if (showRadar && isRadarScanning) for (ring in 0 until 3) {
                 val ringProgress = (waveProgress + ring * 0.33f) % 1f
                 val ringRadius = minR + (maxR - minR) * ringProgress
                 val ringAlpha = (1f - ringProgress).coerceIn(0f, 1f) * 0.4f
@@ -582,12 +573,8 @@ fun OsmMapView(
 
             val chompBmp = pacmanChompBitmaps.getOrNull(pacmanFrameIndex.coerceIn(0, pacmanChompBitmaps.size - 1))
 
-            val equippedPacman = skinBitmaps[seekerSkinId]
             scale(scaleX=if(isFacingRight) 1f else -1f,scaleY=1f,pivot=seekerCenter) {
-                if (equippedPacman != null) {
-                    drawImage(equippedPacman,dstOffset=IntOffset(pacmanTopLeft.x.toInt(),pacmanTopLeft.y.toInt()),dstSize=IntSize(pacmanSize.toInt(),pacmanSize.toInt()))
-
-                } else if (chompBmp != null) {
+                if (chompBmp != null) {
                     drawImage(chompBmp,dstOffset=IntOffset(pacmanTopLeft.x.toInt(),pacmanTopLeft.y.toInt()),dstSize=IntSize(pacmanSize.toInt(),pacmanSize.toInt()))
                 } else drawChompPacman(pacmanTopLeft,Size(pacmanSize,pacmanSize),35f,PacmanYellow)
             }

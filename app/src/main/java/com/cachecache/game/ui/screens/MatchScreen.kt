@@ -87,34 +87,31 @@ fun MatchScreen(
             .background(DeepNavy)
     ) {
         // 1. Carte OpenStreetMap centrée sur le joueur
-        val center = state.myLocation ?: MockData.SeekerStartLocation
-        val myGhostMarker = state.me
-            ?.takeIf { !isPacman && state.myLocation != null && !state.iAmFound }
-            ?.let { ghost ->
-                HiddenPlayer(
-                    id = ghost.id.hashCode(),
-                    name = ghost.character,
-                    locationName = "",
-                    location = center,
-                    color = resolveGhostColor(ghost.character),
-                    isScared = state.isPacmanNearby,
-                    skinId = ghost.skinId,
-                    heading = state.heading
-                )
-            }
+        val center = state.myLocation ?: state.pacmanLocation
+            ?: state.ghosts.firstNotNullOfOrNull { it.location } ?: MockData.SeekerStartLocation
+        val ghostMarkers = state.ghosts.filter { !it.isFound && it.location != null }.map { ghost ->
+            HiddenPlayer(
+                id=ghost.id.hashCode(), name=ghost.playerName, locationName="",
+                location=if(ghost.isMe) state.myLocation ?: ghost.location!! else ghost.location!!,
+                color=resolveGhostColor(ghost.character), isScared=ghost.isMe && state.isPacmanNearby,
+                skinId=ghost.skinId, heading=if(ghost.isMe) state.heading else ghost.heading
+            )
+        }
         OsmMapView(
-            seekerLocation = center,
-            seekerHeading = state.heading,
+            seekerLocation = if(isPacman) center else state.pacmanLocation ?: center,
+            cameraLocation = center,
+            seekerHeading = if(isPacman) state.heading else state.pacmanHeading,
             seekerSkinId = state.pacmanSkin,
             recenterKey = recenterKey,
-            isFacingRight = state.isFacingRight,
+            isFacingRight = if(isPacman) state.isFacingRight else state.pacmanFacingRight,
             isFrozen = isPacman && state.phase == MatchPhase.HIDING,
-            hiddenPlayers = listOfNotNull(myGhostMarker),
+            hiddenPlayers = ghostMarkers,
             suspectZone = null,
             pacDotsRoute = state.pacDotsRoute,
             isRadarScanning = state.isInZone,
             zonePolygons = state.zones.map { it.polygon },
-            showSeeker = isPacman
+            showSeeker = isPacman || state.pacmanLocation != null,
+            showRadar = isPacman, framePlayers = true
         )
 
         // 2. En-tête : retour, chrono, compteur de fantômes
@@ -210,7 +207,7 @@ fun MatchScreen(
             }
         }
 
-        TextButton(onClick={recenterKey++},modifier=Modifier.align(Alignment.CenterEnd).background(NavyIntermediate)) { Text("Recentrer GPS") }
+        TextButton(onClick={recenterKey++},modifier=Modifier.align(Alignment.CenterEnd).background(NavyIntermediate,RoundedCornerShape(12.dp))) { Text("Recentrer GPS") }
         Text("© OpenStreetMap contributors",color=TextSecondary,fontSize=10.sp,modifier=Modifier.align(Alignment.BottomStart).navigationBarsPadding())
         // 4. Animation de capture, écran "trouvé", fin de partie
         GhostCaptureOverlay(capturingGhost = state.capturingGhost)
@@ -356,7 +353,7 @@ private fun InstructionCard(state: MatchState) {
         state.isPacmanNearby ->
             "Pacman approche !" to "Il est tout près… Reste immobile et silencieux."
         else ->
-            "Ne bouge plus !" to "Pacman te cherche. Il voit seulement la zone autour de ta cachette."
+            "Ne bouge plus !" to "Pacman te cherche. Vos positions sont visibles sur la carte."
     }
     val accent = when {
         !isPacman && state.isPacmanNearby -> GhostRed

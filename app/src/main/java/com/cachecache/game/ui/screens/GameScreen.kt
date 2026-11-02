@@ -148,7 +148,7 @@ fun GameScreen(
                                 size = 22.dp,
                                 color = PacmanYellow,
                                 isAnimated = true,
-                                rotationAngle = 0f
+                                isFacingRight = true
                             )
                             Spacer(modifier = Modifier.width(10.dp))
                             Text(

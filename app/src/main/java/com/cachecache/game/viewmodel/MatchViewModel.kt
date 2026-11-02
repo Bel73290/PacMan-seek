@@ -375,9 +375,10 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                 )
             }
         val pacmanLocation = players.firstOrNull { it.id == game.hostId }?.location
+        val pacmanHeading = players.firstOrNull { it.id == game.hostId }?.heading ?: 0f
 
         // Chrono commun : tous les téléphones partent de l'heure de lancement enregistrée par Firebase
-        _state.update { it.copy(totalGhosts=game.activePlayerIds.count{p->p!=game.hostId}, totalFound=game.foundGhostIds.count{p->p in game.activePlayerIds}, pacmanSkin=players.firstOrNull { p -> p.id==game.hostId }?.pacmanSkin ?: "pacman_classic",
+        _state.update { it.copy(pacmanLocation=pacmanLocation, pacmanHeading=pacmanHeading, pacmanFacingRight=Direction.facesRight(pacmanHeading,it.pacmanFacingRight), totalGhosts=game.activePlayerIds.count{p->p!=game.hostId}, totalFound=game.foundGhostIds.count{p->p in game.activePlayerIds}, pacmanSkin=players.firstOrNull { p -> p.id==game.hostId }?.pacmanSkin ?: "pacman_classic",
             stalePlayers=ghosts.count { g -> !g.isFound && !g.locationFresh }) }
         val now = System.currentTimeMillis()+serverOffsetMs
         val elapsed = (((now - (game.startedAtMillis ?: now)) / 1000L).toInt()).coerceAtLeast(0)

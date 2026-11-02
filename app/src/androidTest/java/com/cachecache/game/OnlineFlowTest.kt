@@ -54,17 +54,18 @@ class OnlineFlowTest {
         check(BuildConfig.USE_FIREBASE_EMULATORS) { "This test must never run against production Firebase." }
         compose.onNodeWithText("Menu").performClick()
         compose.waitUntil(45_000) { compose.onAllNodesWithText("Se connecter avec Google").fetchSemanticsNodes().isNotEmpty() }
-        compose.waitUntil(45_000) { compose.onAllNodesWithText("Enregistrer le pseudo").filter(isEnabled()).fetchSemanticsNodes().isNotEmpty() }
+        compose.waitUntil(45_000) { compose.onAllNodesWithText("Modifier mes infos").filter(isEnabled()).fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithText("Mon profil").assertIsDisplayed()
+        compose.onNodeWithText("Modifier mes infos").performClick()
         compose.onNodeWithText("Pseudo").performTextReplacement("Joueur Test")
         androidx.test.espresso.Espresso.closeSoftKeyboard()
-        compose.onNodeWithText("Enregistrer le pseudo").performClick()
-        compose.waitUntil(30_000) { compose.onAllNodesWithText("Enregistré.").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithText("Enregistrer les modifications").performClick()
+        compose.waitUntil(30_000) { compose.onAllNodesWithText("Profil enregistré.").fetchSemanticsNodes().isNotEmpty() }
         screenshot("profile")
         compose.onNodeWithContentDescription("Boutique").performClick()
         compose.onNodeWithText("0 pièces").assertIsDisplayed()
-        compose.onNodeWithText("Pacman", useUnmergedTree=false).performClick()
-        compose.onAllNodesWithText("Pacman Classique").onFirst().assertIsDisplayed()
+        compose.onNodeWithText("Pacman", useUnmergedTree=false).assertDoesNotExist()
+        compose.onAllNodesWithText("Blinky L'Ombre").onFirst().assertExists()
         screenshot("shop")
         compose.onNodeWithContentDescription("Classement").performClick()
         compose.waitUntil(30_000) { compose.onAllNodesWithText("Joueur Test (toi)").fetchSemanticsNodes().isNotEmpty() }

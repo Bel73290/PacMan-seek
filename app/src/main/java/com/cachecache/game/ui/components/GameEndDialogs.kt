@@ -134,7 +134,7 @@ fun DancingPacman(
                 size = size,
                 color = PacmanYellow,
                 isAnimated = true,
-                rotationAngle = 0f
+                isFacingRight = true
             )
         }
     }

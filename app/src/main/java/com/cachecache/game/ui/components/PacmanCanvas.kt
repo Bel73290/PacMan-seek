@@ -32,7 +32,7 @@ fun PacmanComposable(
     size: Dp = 48.dp,
     color: Color = PacmanYellow,
     isAnimated: Boolean = true,
-    rotationAngle: Float = 0f
+    isFacingRight: Boolean = true
 ) {
     val chompFrames = remember {
         listOf(
@@ -76,7 +76,7 @@ fun PacmanComposable(
         contentDescription = "Pacman",
         modifier = modifier
             .size(size)
-            .graphicsLayer { scaleX = if(cos(Math.toRadians(rotationAngle.toDouble())) < 0) -1f else 1f },
+            .graphicsLayer { scaleX = if(isFacingRight) 1f else -1f; rotationZ = 0f },
         contentScale = ContentScale.Fit
     )
 }
@@ -139,7 +139,7 @@ fun ResearcherMarker(
             size = size,
             color = PacmanYellow,
             isAnimated = true,
-            rotationAngle = 0f
+            isFacingRight = true
         )
     }
 }
@@ -196,18 +196,6 @@ fun FestivePacmanComposable(
     modifier: Modifier = Modifier,
     size: Dp = 150.dp
 ) {
-    val infiniteTransition = rememberInfiniteTransition(label = "festiveTransition")
-
-    val rotationAngle by infiniteTransition.animateFloat(
-        initialValue = -5f,
-        targetValue = 5f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(400, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "festiveRot"
-    )
-
     Canvas(modifier = modifier.size(size)) {
         val w = this.size.width
         val h = this.size.height
@@ -252,7 +240,7 @@ fun FestivePacmanComposable(
         val pacmanRadius = w * 0.24f
         val pacCenter = Offset(center.x, center.y)
 
-        rotate(degrees = -18f + rotationAngle, pivot = pacCenter) {
+        run {
             // Soft glow
             drawCircle(
                 color = PacmanYellow.copy(alpha = 0.35f),

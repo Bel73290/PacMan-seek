@@ -14,21 +14,22 @@ import org.junit.Test
 
 class CharacterPreviewTest {
     @get:Rule val compose=createComposeRule()
-    @Test fun previewUprightViewsAndHorizontalPacmanSkins() {
+    @Test fun previewUprightGhostsAndClassicPacmanLeftRight() {
         compose.setContent { CacheCacheTheme { Surface {
             Column(Modifier.fillMaxSize().padding(horizontal=16.dp,vertical=40.dp),verticalArrangement=Arrangement.spacedBy(20.dp)) {
                 Text("Vues des fantômes",style=MaterialTheme.typography.titleLarge)
                 GhostRow("ghost_red_classic")
                 GhostRow("ghost_red_headphones")
                 Text("Pacman d’origine · droite / gauche",style=MaterialTheme.typography.titleLarge)
-                listOf("pacman_neon" to "Pacman Néon","pacman_pirate" to "Pacman Pirate","pacman_wizard" to "Pacman Mage").forEach{(id,name)->
-                    Text(name)
-                    Row(horizontalArrangement=Arrangement.spacedBy(32.dp)){SkinAvatar(id,76.dp,90f);SkinAvatar(id,76.dp,270f)}
+                Text("Pacman Classique")
+                Row(horizontalArrangement=Arrangement.spacedBy(32.dp)) {
+                    SkinAvatar("pacman_classic",76.dp,90f)
+                    SkinAvatar("pacman_classic",76.dp,270f)
                 }
             }
         } } }
-        compose.onNodeWithText("Pacman Pirate").assertIsDisplayed()
-        compose.onNodeWithText("Pacman Mage").assertIsDisplayed()
+        compose.onNodeWithText("Pacman Classique").assertIsDisplayed()
+        compose.onAllNodesWithContentDescription("Pacman").assertCountEquals(2)
         val instrumentation=androidx.test.platform.app.InstrumentationRegistry.getInstrumentation()
         val resolver=instrumentation.targetContext.contentResolver
         val values=android.content.ContentValues().apply {
